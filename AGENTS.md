@@ -1,7 +1,7 @@
-# Taneh — agent rules
+# Tankhor — agent rules
 
 ## Read first
-- Product: docs/taneh-prd.md · Behaviour detail: docs/taneh-technical-spec.md · Decisions (final): docs/taneh-decisions-qa.md · Stack and architecture: docs/taneh-rust-implementation-pack.md
+- Product: docs/tankhor-prd.md · Behaviour detail: docs/tankhor-technical-spec.md · Decisions (final): docs/tankhor-decisions-qa.md · Stack and architecture: docs/tankhor-rust-implementation-pack.md
 - Active feature: .specify/feature.json → specs/<feature>/spec.md, plan.md, tasks.md
 
 ## How you work

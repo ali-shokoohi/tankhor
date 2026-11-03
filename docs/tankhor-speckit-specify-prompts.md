@@ -1,13 +1,13 @@
-# Taneh — `/speckit.specify` Prompt Pack
+# Tankhor — `/speckit.specify` Prompt Pack
 
 **15 features · 3 November 2026 · for Spec Kit + OpenCode**
 
 ## How to use
 
 1. Put the source documents in the repo:
-   - `docs/taneh-prd.md`
-   - `docs/taneh-technical-spec.md`
-   - `docs/taneh-decisions-qa.md`
+   - `docs/tankhor-prd.md`
+   - `docs/tankhor-technical-spec.md`
+   - `docs/tankhor-decisions-qa.md`
 2. Save each prompt below as its own file in `docs/prompts/` (e.g. `docs/prompts/003-wallet.md`) so you can version and tweak it.
 3. In OpenCode, run either form:
    - paste the prompt block after `/speckit.specify`, or
@@ -49,12 +49,12 @@
 
 ```text
 /speckit.specify
-Feature 001 — Taneh admin foundation: secure Owner Console access, versioned settings, feature flags, audit log, and the bilingual/theme shell every later feature builds on.
+Feature 001 — Tankhor admin foundation: secure Owner Console access, versioned settings, feature flags, audit log, and the bilingual/theme shell every later feature builds on.
 
 SOURCES (read before writing):
-@docs/taneh-prd.md — §0.4, §3.3, §7, E14 cross-cutting rules FR-CON-01..11, FR-CON-32, FR-CON-37, E17 FR-UX-01..09, FR-UX-14, §10, §12.4
-@docs/taneh-technical-spec.md — §8 (P30, P41, P42, P44), §12.1–12.6
-@docs/taneh-decisions-qa.md — Q01, Q02, Q03, Q23
+@docs/tankhor-prd.md — §0.4, §3.3, §7, E14 cross-cutting rules FR-CON-01..11, FR-CON-32, FR-CON-37, E17 FR-UX-01..09, FR-UX-14, §10, §12.4
+@docs/tankhor-technical-spec.md — §8 (P30, P41, P42, P44), §12.1–12.6
+@docs/tankhor-decisions-qa.md — Q01, Q02, Q03, Q23
 
 RULES FOR THIS SPEC:
 - Describe WHAT and WHY only. No technology, frameworks, APIs, schemas or code structure.
@@ -69,7 +69,7 @@ ACTORS: Admin (all admins have equal full permissions at launch), System (schedu
 
 IN SCOPE:
 1. Console access (FR-CON-01..04, Q23)
-   - Console is a separate app at its own path on the single Taneh domain (Q01), reachable only by admin accounts.
+   - Console is a separate app at its own path on the single Tankhor domain (Q01), reachable only by admin accounts.
    - Admin sign-in requires a second factor: passkey preferred, authenticator-app code (TOTP) as fallback. Without a completed second factor the console never opens.
    - Adding an admin and recovering a locked-out admin are done by another admin; both are audited.
    - Admin sessions are separate from end-user sessions.
@@ -94,7 +94,8 @@ IN SCOPE:
    - Every screen (console and, by extension, all future surfaces) supports Persian (RTL) and English (LTR), and light, dark and system themes.
    - Switching language or theme never alters data or unsaved input.
    - RTL rules: reading/focus order mirrors; IDs, URLs and hex codes keep their own direction; logos and photos never mirror; only directional icons flip. Persian digits in Persian prose; Latin digits in codes and IDs.
-   - Typeface Vazirmatn with its Latin; palette per approved tokens (dark velvet brown + sky blue).
+   - Typeface Vazirmatn with its Latin; palette per approved tokens (dark velvet brown + sky blue), including `borderStrong` for meaningful control boundaries and `onCurtain` for text on the curtain; the base `border` token is never a control's only boundary (Technical Spec §12.2).
+   - One parent brand, Tankhor (تنخور), on every surface including the console; no separate logos per surface (FR-UX-17).
    - Accessibility baseline WCAG 2.2 AA: contrast, 44×44 touch targets, keyboard operation, visible focus, named controls, errors tied to fields and not colour-only, reduced motion.
    - All UI strings come from a managed string table keyed by surface and situation, never hard-coded.
 
@@ -127,12 +128,12 @@ SUCCESS CRITERIA:
 
 ```text
 /speckit.specify
-Feature 002 — Taneh identity: mobile number + SMS one-time code sign-in, one shared session across Try It On and Studio, origin-preserving sign-in at the moment of a personal action, account settings, and the 30-day deletion/restore lifecycle with token forfeiture.
+Feature 002 — Tankhor identity: mobile number + SMS one-time code sign-in, one shared session across Try It On and Studio, origin-preserving sign-in at the moment of a personal action, account settings, and the 30-day deletion/restore lifecycle with token forfeiture.
 
 SOURCES (read before writing):
-@docs/taneh-prd.md — E2 (FR-IDN-01..15, AC-IDN-1..6), §10.4, §11.5, §12.4 NFR-SEC-04, §13 auth/account events, RK3, RK5
-@docs/taneh-technical-spec.md — §3 (P02, P14), F13, F14, U09, U10, U29
-@docs/taneh-decisions-qa.md — Q08, Q09, Q10, Q11
+@docs/tankhor-prd.md — E2 (FR-IDN-01..15, AC-IDN-1..6), §10.4, §11.5, §12.4 NFR-SEC-04, §13 auth/account events, RK3, RK5
+@docs/tankhor-technical-spec.md — §3 (P02, P14), F13, F14, U09, U10, U29
+@docs/tankhor-decisions-qa.md — Q08, Q09, Q10, Q11
 
 RULES FOR THIS SPEC:
 - WHAT and WHY only; no technology, APIs or schemas.
@@ -206,12 +207,12 @@ SUCCESS CRITERIA:
 
 ```text
 /speckit.specify
-Feature 003 — Taneh wallet: one token wallet per account, IRR top-up through a domestic gateway, an immutable token ledger that makes double charges and double refunds impossible, price snapshots for confirmed units, history for users, and finance tools for admins.
+Feature 003 — Tankhor wallet: one token wallet per account, IRR top-up through a domestic gateway, an immutable token ledger that makes double charges and double refunds impossible, price snapshots for confirmed units, history for users, and finance tools for admins.
 
 SOURCES (read before writing):
-@docs/taneh-prd.md — E12 (FR-WAL-01..14, AC-WAL-1..3), FR-CON-22, FR-CON-27, §5.3 guardrails GR1–GR4, §5.5, §10.3, §11.2, §12.6, RK4, RK5, RK6
-@docs/taneh-technical-spec.md — §6 (P25, P26, ledger invariants L1–L9, quote snapshot), P36, U20, U24
-@docs/taneh-decisions-qa.md — Q11, Q13, Q24, Q29, Q36
+@docs/tankhor-prd.md — E12 (FR-WAL-01..14, AC-WAL-1..3), FR-CON-22, FR-CON-27, §5.3 guardrails GR1–GR4, §5.5, §10.3, §11.2, §12.6, RK4, RK5, RK6
+@docs/tankhor-technical-spec.md — §6 (P25, P26, ledger invariants L1–L9, quote snapshot), P36, U20, U24
+@docs/tankhor-decisions-qa.md — Q11, Q13, Q24, Q29, Q36
 
 RULES FOR THIS SPEC:
 - WHAT and WHY only; no technology, tables or APIs. Express the ledger as business rules and invariants, not data structures.
@@ -288,12 +289,12 @@ SUCCESS CRITERIA:
 
 ```text
 /speckit.specify
-Feature 004 — Taneh media: validating uploads for both surfaces, consent for permanent personal photos, buyer photo gallery limits, Studio "save all uploads" retention, automatic expiry, private-by-default access, ticket-gated admin viewing, and the rule that outputs never depend on inputs.
+Feature 004 — Tankhor media: validating uploads for both surfaces, consent for permanent personal photos, buyer photo gallery limits, Studio "save all uploads" retention, automatic expiry, private-by-default access, ticket-gated admin viewing, and the rule that outputs never depend on inputs.
 
 SOURCES (read before writing):
-@docs/taneh-prd.md — FR-TRY-09..12, FR-LIB-09..11, FR-STO-01..04, FR-CON-23, FR-CON-25, §10.1, §10.4, §11.6, §12.4 NFR-SEC-02, 06, §12.5, GR5, GR6, RK9
-@docs/taneh-technical-spec.md — §4.4 (P06), §4.11 (P13), §5.6 (P18), §5.11 (P22), §10, U07, U14, U25, U34, U46
-@docs/taneh-decisions-qa.md — Q05, Q06, Q12, Q40
+@docs/tankhor-prd.md — FR-TRY-09..12, FR-LIB-09..11, FR-STO-01..04, FR-CON-23, FR-CON-25, §10.1, §10.4, §11.6, §12.4 NFR-SEC-02, 06, §12.5, GR5, GR6, RK9
+@docs/tankhor-technical-spec.md — §4.4 (P06), §4.11 (P13), §5.6 (P18), §5.11 (P22), §10, U07, U14, U25, U34, U46
+@docs/tankhor-decisions-qa.md — Q05, Q06, Q12, Q40
 
 RULES FOR THIS SPEC:
 - WHAT and WHY only; no storage technology, URLs or APIs.
@@ -302,7 +303,7 @@ RULES FOR THIS SPEC:
 - Respect OUT OF SCOPE strictly.
 
 WHY:
-Personal photos are the most sensitive data Taneh holds. Users must control them, admins must not browse them, and nothing must leak publicly. Clear upload limits rejected before payment avoid paying for unusable input. Sellers need a reusable library; buyers need instant photo reuse. Outputs must survive input expiry so results are never lost.
+Personal photos are the most sensitive data Tankhor holds. Users must control them, admins must not browse them, and nothing must leak publicly. Clear upload limits rejected before payment avoid paying for unusable input. Sellers need a reusable library; buyers need instant photo reuse. Outputs must survive input expiry so results are never lost.
 
 ACTORS: Buyer, Seller, Admin, System (expiry sweeps).
 
@@ -367,12 +368,12 @@ SUCCESS CRITERIA:
 
 ```text
 /speckit.specify
-Feature 005 — Taneh generation engine: the shared way every try-on request and Studio card is queued, processed by an external AI provider, retried, failed over, cost-capped, finalised, refunded on failure, and stopped in emergencies — plus the admin AI management that controls it.
+Feature 005 — Tankhor generation engine: the shared way every try-on request and Studio card is queued, processed by an external AI provider, retried, failed over, cost-capped, finalised, refunded on failure, and stopped in emergencies — plus the admin AI management that controls it.
 
 SOURCES (read before writing):
-@docs/taneh-prd.md — FR-RES-02, 04, 07, 08, FR-GEN-02, 04..07, 12, FR-CON-28, FR-CON-36, FR-NTF-06, §10.1, §10.2, §11.1, §12.1 NFR-PERF-04, 06, §12.2, §12.3 NFR-AV-05, GR3, GR7, GR8, RK1, RK2, RK10, RK14
-@docs/taneh-technical-spec.md — §7 (lifecycle, state diagram), P37, P43, R45, R79–R82, R89
-@docs/taneh-decisions-qa.md — Q17, Q18, Q20, Q25, Q28, Q29, Q39
+@docs/tankhor-prd.md — FR-RES-02, 04, 07, 08, FR-GEN-02, 04..07, 12, FR-CON-28, FR-CON-36, FR-NTF-06, §10.1, §10.2, §11.1, §12.1 NFR-PERF-04, 06, §12.2, §12.3 NFR-AV-05, GR3, GR7, GR8, RK1, RK2, RK10, RK14
+@docs/tankhor-technical-spec.md — §7 (lifecycle, state diagram), P37, P43, R45, R79–R82, R89
+@docs/tankhor-decisions-qa.md — Q17, Q18, Q20, Q25, Q28, Q29, Q39
 
 RULES FOR THIS SPEC:
 - WHAT and WHY only; describe behaviour and states, not queues, workers or vendors' APIs.
@@ -448,12 +449,12 @@ SUCCESS CRITERIA:
 
 ```text
 /speckit.specify
-Feature 006 — Taneh content and catalogue: how the owner creates, imports, licenses, previews and publishes everything users see — garments and outfits for Try It On, models/styles/sample projects for Studio, page media and bilingual copy — plus the store allowlist and brand licences.
+Feature 006 — Tankhor content and catalogue: how the owner creates, imports, licenses, previews and publishes everything users see — garments and outfits for Try It On, models/styles/sample projects for Studio, page media and bilingual copy — plus the store allowlist and brand licences.
 
 SOURCES (read before writing):
-@docs/taneh-prd.md — FR-CON-05..10, FR-CON-24, FR-CON-29..31, FR-DSC-13, FR-DSC-14, FR-LOB-05, FR-UX-14, §10.4, RK7, RK12
-@docs/taneh-technical-spec.md — P33, P38, P39, P40, P42, §9 data model (Style, Model, Campaign, AllowedHost, ContentVersion), U21, U22
-@docs/taneh-decisions-qa.md — Q07, Q19, Q26, Q31, Q34
+@docs/tankhor-prd.md — FR-CON-05..10, FR-CON-24, FR-CON-29..31, FR-DSC-13, FR-DSC-14, FR-LOB-05, FR-UX-14, §10.4, RK7, RK12
+@docs/tankhor-technical-spec.md — P33, P38, P39, P40, P42, §9 data model (Style, Model, Campaign, AllowedHost, ContentVersion), U21, U22
+@docs/tankhor-decisions-qa.md — Q07, Q19, Q26, Q31, Q34
 
 RULES FOR THIS SPEC:
 - WHAT and WHY only; no CMS product, storage or schema choices.
@@ -484,7 +485,7 @@ IN SCOPE:
    - Items without a valid licence cannot be published; items whose licence expires are withdrawn from public view automatically. Existing user results that used them remain.
    - Brand names used as quality references in Studio never imply partnership.
 4. Catalogue sourcing (Q07)
-   - At launch: curated set entered by the Taneh team.
+   - At launch: curated set entered by the Tankhor team.
    - Later: brand self-service via console and import (enable path designed, details can be minimal now).
 5. Bulk import (Q26, FR-CON-30)
    - CSV files, one per entity (styles, models, garments, relations) plus a media archive.
@@ -526,12 +527,12 @@ SUCCESS CRITERIA:
 
 ```text
 /speckit.specify
-Feature 007 — Taneh Try It On core journey: public gallery and style detail, choosing exactly one garment, adding one personal photo, reviewing and confirming the price, waiting in the fitting room, and using the result.
+Feature 007 — Tankhor Try It On core journey: public gallery and style detail, choosing exactly one garment, adding one personal photo, reviewing and confirming the price, waiting in the fitting room, and using the result.
 
 SOURCES (read before writing):
-@docs/taneh-prd.md — §3.3 principles, §4 personas PS1–PS3, E3 (FR-DSC-01..14, AC-DSC-1..4), E4 (FR-TRY-01..20, AC-TRY-1..6), E5 (FR-RES-01..16, AC-RES-1..4), §9 J1, J2, §13 events for E3–E5, FR-UX-10, FR-UX-13
-@docs/taneh-technical-spec.md — §4.1–4.7 (P03–P09), §12.7 copy keys, F02, F03, F05, F18, F20, F21, U01–U07, U32, U35–U38
-@docs/taneh-decisions-qa.md — Q05, Q12, Q13, Q14, Q22, Q29, Q31, Q39
+@docs/tankhor-prd.md — §3.3 principles, §4 personas PS1–PS3, E3 (FR-DSC-01..14, AC-DSC-1..4), E4 (FR-TRY-01..20, AC-TRY-1..6), E5 (FR-RES-01..16, AC-RES-1..4), §9 J1, J2, §13 events for E3–E5, FR-UX-10, FR-UX-13
+@docs/tankhor-technical-spec.md — §4.1–4.7 (P03–P09), §12.7 copy keys, F02, F03, F05, F18, F20, F21, U01–U07, U32, U35–U38
+@docs/tankhor-decisions-qa.md — Q05, Q12, Q13, Q14, Q22, Q29, Q31, Q39
 
 RULES FOR THIS SPEC:
 - WHAT and WHY only; no frameworks, endpoints or component libraries.
@@ -582,7 +583,7 @@ IN SCOPE:
    - Share is file-only via the device share sheet or download; never a link (Q14).
    - Deleting a result never deletes the photo or set-aside item.
    - Unwanted-but-successful results: no automatic refund; help explains support review (Q13).
-7. Voice (FR-UX-10, FR-UX-13): warm old-bazaar seller, informal «تو», short sentences, no purchase pressure or fit promise; money and consent copy explicit.
+7. Voice (FR-UX-10, FR-UX-13, FR-UX-16, FR-UX-18): warm old-bazaar seller, informal «تو», short sentences, no purchase pressure or fit promise; money and consent copy explicit. AI notice uses the fixed `ai_notice` text; Persian copy never uses «تن‌خور» for "fit" because it reads as the brand name; no claim from PRD §2.4.
 
 KEY ACCEPTANCE SCENARIOS: include AC-DSC-1..4, AC-TRY-1..6, AC-RES-1..4 from the PRD verbatim in intent, plus:
 - Guest presses «یه تن بزن» → signs in → returns to same style with same target.
@@ -606,12 +607,12 @@ SUCCESS CRITERIA:
 
 ```text
 /speckit.specify
-Feature 008 — Taneh buyer library: the Try-ons gallery, visual comparison of up to three results, the Set aside list «نشون‌کرده‌ها», My Photos (up to 5, one default), the optional height/weight profile, and buyer navigation.
+Feature 008 — Tankhor buyer library: the Try-ons gallery, visual comparison of up to three results, the Set aside list «نشون‌کرده‌ها», My Photos (up to 5, one default), the optional height/weight profile, and buyer navigation.
 
 SOURCES (read before writing):
-@docs/taneh-prd.md — E6 (FR-LIB-01..14, AC-LIB-1..4), FR-DSC-03, §10.1, §13 library events, FR-UX-10
-@docs/taneh-technical-spec.md — §4.8–4.13 (P10–P13, P45, P46), F06, F15, F17, F19, U08, U31, U33, U34
-@docs/taneh-decisions-qa.md — Q30, Q40, Q41
+@docs/tankhor-prd.md — E6 (FR-LIB-01..14, AC-LIB-1..4), FR-DSC-03, §10.1, §13 library events, FR-UX-10
+@docs/tankhor-technical-spec.md — §4.8–4.13 (P10–P13, P45, P46), F06, F15, F17, F19, U08, U31, U33, U34
+@docs/tankhor-decisions-qa.md — Q30, Q40, Q41
 
 RULES FOR THIS SPEC:
 - WHAT and WHY only. Q01–Q41 final. [NEEDS CLARIFICATION: …] only for genuine gaps. Cite FR-LIB-* / AC-LIB-*. Respect OUT OF SCOPE.
@@ -670,12 +671,12 @@ SUCCESS CRITERIA:
 
 ```text
 /speckit.specify
-Feature 009 — Taneh Studio lobby and build step 1: the cinematic public lobby (poster, model ring, sample showcase), the three build entries with sign-in at build start, and step 1 where sellers select styles and models in one shared selection with live pricing.
+Feature 009 — Tankhor Studio lobby and build step 1: the cinematic public lobby (poster, model ring, sample showcase), the three build entries with sign-in at build start, and step 1 where sellers select styles and models in one shared selection with live pricing.
 
 SOURCES (read before writing):
-@docs/taneh-prd.md — §4 personas PS4, PS5, E7 (FR-LOB-01..11, AC-LOB-1..3), E8 (FR-SEL-01..13, AC-SEL-1..3), §9 J3, §10.1, §10.3, FR-UX-09, FR-UX-11
-@docs/taneh-technical-spec.md — §5.1–5.4 (P15, P16, P47, P48), F07, F08, F22–F24, F26, U11, U12, U41–U43, U52
-@docs/taneh-decisions-qa.md — Q08, Q15, Q34, Q36
+@docs/tankhor-prd.md — §4 personas PS4, PS5, E7 (FR-LOB-01..11, AC-LOB-1..3), E8 (FR-SEL-01..13, AC-SEL-1..3), §9 J3, §10.1, §10.3, FR-UX-09, FR-UX-11
+@docs/tankhor-technical-spec.md — §5.1–5.4 (P15, P16, P47, P48), F07, F08, F22–F24, F26, U11, U12, U41–U43, U52
+@docs/tankhor-decisions-qa.md — Q08, Q15, Q34, Q36
 
 RULES FOR THIS SPEC:
 - WHAT and WHY only. Q01–Q41 final. [NEEDS CLARIFICATION: …] only for genuine gaps. Cite FR-LOB-* / FR-SEL-* / AC-* IDs. User stories with P1/P2 priorities and Given/When/Then scenarios. Respect OUT OF SCOPE.
@@ -735,12 +736,12 @@ SUCCESS CRITERIA:
 
 ```text
 /speckit.specify
-Feature 010 — Taneh Studio build step 2: assigning product images to style cards, duplicating cards for more products or colours, choosing image or video and recolour per card, Back/Undo/auto-draft, and the Create confirmation that debits tokens and starts generation.
+Feature 010 — Tankhor Studio build step 2: assigning product images to style cards, duplicating cards for more products or colours, choosing image or video and recolour per card, Back/Undo/auto-draft, and the Create confirmation that debits tokens and starts generation.
 
 SOURCES (read before writing):
-@docs/taneh-prd.md — E9 (FR-ASM-01..19, AC-ASM-1..5), §9 J3, J4, §10.1, §10.3, §11.3, FR-UX-11, FR-UX-13
-@docs/taneh-technical-spec.md — §5.5, §5.6 (P17, P18), F09, F10, F25, F29, U13–U16, U44, U45, U48
-@docs/taneh-decisions-qa.md — Q05, Q06, Q15, Q18, Q32, Q33, Q36
+@docs/tankhor-prd.md — E9 (FR-ASM-01..19, AC-ASM-1..5), §9 J3, J4, §10.1, §10.3, §11.3, FR-UX-11, FR-UX-13
+@docs/tankhor-technical-spec.md — §5.5, §5.6 (P17, P18), F09, F10, F25, F29, U13–U16, U44, U45, U48
+@docs/tankhor-decisions-qa.md — Q05, Q06, Q15, Q18, Q32, Q33, Q36
 
 RULES FOR THIS SPEC:
 - WHAT and WHY only. Q01–Q41 final. [NEEDS CLARIFICATION: …] only for genuine gaps. Cite FR-ASM-* / AC-ASM-*. User stories with priorities. Respect OUT OF SCOPE.
@@ -780,7 +781,7 @@ IN SCOPE:
    - Shortfall → top-up → back to the exact assembly; confirm still required. No direct project payment.
    - Price change since display → reconfirm.
 6. Uploads (FR-ASM-19): same limits as buyers; retention per the seller's setting (004), stated at upload.
-7. Voice: professional («شما»), precise verbs, itemised money copy.
+7. Voice: professional («شما»), precise verbs, itemised money copy. Studio `ai_notice` (review before use; no fidelity or sales guarantee); no claim from PRD §2.4 (FR-UX-16).
 
 KEY ACCEPTANCE SCENARIOS: AC-ASM-1..5 plus:
 - Card with video + recolour on a premium style shows base(video) + premium + recolour.
@@ -804,12 +805,12 @@ SUCCESS CRITERIA:
 
 ```text
 /speckit.specify
-Feature 011 — Taneh Studio generation and Projects: the per-card reveal page after Create, honest progress, per-output and final notifications, and the two-group Projects area (In Production, Completed) with outputs browsable by project, model or style.
+Feature 011 — Tankhor Studio generation and Projects: the per-card reveal page after Create, honest progress, per-output and final notifications, and the two-group Projects area (In Production, Completed) with outputs browsable by project, model or style.
 
 SOURCES (read before writing):
-@docs/taneh-prd.md — E10 (FR-GEN-01..13, AC-GEN-1..3), §11.3, §10.2, FR-UX-11
-@docs/taneh-technical-spec.md — §5.7, §5.9 (P19, P20), F11, F27, U17, U49
-@docs/taneh-decisions-qa.md — Q16, Q17, Q22, Q29
+@docs/tankhor-prd.md — E10 (FR-GEN-01..13, AC-GEN-1..3), §11.3, §10.2, FR-UX-11
+@docs/tankhor-technical-spec.md — §5.7, §5.9 (P19, P20), F11, F27, U17, U49
+@docs/tankhor-decisions-qa.md — Q16, Q17, Q22, Q29
 
 RULES FOR THIS SPEC:
 - WHAT and WHY only. Q01–Q41 final. [NEEDS CLARIFICATION: …] only for genuine gaps. Cite FR-GEN-* / AC-GEN-*. Respect OUT OF SCOPE.
@@ -825,7 +826,7 @@ IN SCOPE:
 1. Generation page (FR-GEN-01..07)
    - Separate page after confirm (not a build step); curtain covers each output in production.
    - Per-card state: queued, processing, ready, failed.
-   - Tapping an unfinished curtain: opens slightly, Taneh logo flashes, hand closes it; optional text "Generating output"; no fake outputs; screen-reader status; reduced motion.
+   - Tapping an unfinished curtain: opens slightly, Tankhor logo flashes, hand closes it; optional text "Generating output"; no fake outputs; screen-reader status; reduced motion.
    - Ready outputs revealed and downloadable immediately; real counter "N of M outputs ready".
    - Leaving never stops generation; project reachable from Projects.
    - Failed card: its own tokens returned (rule from 003/005); others unaffected.
@@ -859,12 +860,12 @@ SUCCESS CRITERIA:
 
 ```text
 /speckit.specify
-Feature 012 — Taneh Studio assets and publishing: product library management, the Saved area (models, styles, assembled projects), the Studio dashboard/sidebar, the store profile, Share to Taneh with admin review and immediate withdrawal, and paid Share billing built but OFF.
+Feature 012 — Tankhor Studio assets and publishing: product library management, the Saved area (models, styles, assembled projects), the Studio dashboard/sidebar, the store profile, Share to Tankhor with admin review and immediate withdrawal, and paid Share billing built but OFF.
 
 SOURCES (read before writing):
-@docs/taneh-prd.md — E11 (FR-STO-01..13, AC-STO-1..4), FR-CON-26, §11.4, §10.4, K9
-@docs/taneh-technical-spec.md — §5.8, §5.10–5.13 (P21–P24, P49), P35, F12, F28, F29, U18, U19, U46, U47, U50, U51
-@docs/taneh-decisions-qa.md — Q06, Q19, Q35
+@docs/tankhor-prd.md — E11 (FR-STO-01..13, AC-STO-1..4), FR-CON-26, §11.4, §10.4, K9
+@docs/tankhor-technical-spec.md — §5.8, §5.10–5.13 (P21–P24, P49), P35, F12, F28, F29, U18, U19, U46, U47, U50, U51
+@docs/tankhor-decisions-qa.md — Q06, Q19, Q35
 
 RULES FOR THIS SPEC:
 - WHAT and WHY only. Q01–Q41 final. [NEEDS CLARIFICATION: …] only for genuine gaps. Cite FR-STO-* / AC-STO-* / FR-CON-26. Respect OUT OF SCOPE.
@@ -881,7 +882,7 @@ IN SCOPE:
 2. Saved (FR-STO-05, 06): three independent tabs — Models, Styles, Assembled projects. Saved assemblies resume in step 2; saved models/styles open selection or detail. Removing a save never deletes projects or library files. Invalid references show a clear state and replacement option; generation can never start with an invalid reference.
 3. Studio dashboard (FR-STO-07): one sidebar — Projects (In Production, Completed), Saved, Library, Wallet, Account; subtle on lobby, explicit in workspace; mobile collapsible with same destinations; navigation preserves work.
 4. Store profile (FR-STO-08, Q19): store name, store link, related info; one store per account; never required to create projects; small completion badge.
-5. Share to Taneh (FR-STO-09..13, Q35)
+5. Share to Tankhor (FR-STO-09..13, Q35)
    - Submit one specific image or video from the generation page or a completed project; one output never publishes the whole project.
    - Requires store name + valid link, checked at review; seller warned if missing.
    - States: not submitted → pending review → approved (public) / rejected (with reason) → withdrawn.
@@ -914,12 +915,12 @@ SUCCESS CRITERIA:
 
 ```text
 /speckit.specify
-Feature 013 — Taneh operations and communication: in-app notification centre, help content, maintenance banners, owner reports and dashboards, user management (block, deactivate), backups and restore, and mandatory operational alerts.
+Feature 013 — Tankhor operations and communication: in-app notification centre, help content, maintenance banners, owner reports and dashboards, user management (block, deactivate), backups and restore, and mandatory operational alerts.
 
 SOURCES (read before writing):
-@docs/taneh-prd.md — E13 (FR-NTF-01, 03, 05, 06), FR-CON-20, FR-CON-21, FR-CON-35, FR-CON-38, §5 (north star, K1–K10, GR1–GR9, §5.4, §5.5), §12.3, §12.9, §13.3 dashboards, §16.4
-@docs/taneh-technical-spec.md — P27, P29, P31, P32, P43, P44, §13, U24, U26
-@docs/taneh-decisions-qa.md — Q20, Q22, Q24, Q27
+@docs/tankhor-prd.md — E13 (FR-NTF-01, 03, 05, 06), FR-CON-20, FR-CON-21, FR-CON-35, FR-CON-38, §5 (north star, K1–K10, GR1–GR9, §5.4, §5.5), §12.3, §12.9, §13.3 dashboards, §16.4
+@docs/tankhor-technical-spec.md — P27, P29, P31, P32, P43, P44, §13, U24, U26
+@docs/tankhor-decisions-qa.md — Q20, Q22, Q24, Q27
 
 RULES FOR THIS SPEC:
 - WHAT and WHY only. Q01–Q41 final. [NEEDS CLARIFICATION: …] only for genuine gaps. Cite FR-* / K* / GR* IDs. Respect OUT OF SCOPE.
@@ -973,18 +974,18 @@ SUCCESS CRITERIA:
 
 ```text
 /speckit.specify
-Feature 014 — Taneh landing page and installable app: the curtain intro and two-surface choice on the single domain, and PWA installation and offline behaviour on the target platforms.
+Feature 014 — Tankhor landing page and installable app: the curtain intro and two-surface choice on the single domain, and PWA installation and offline behaviour on the target platforms.
 
 SOURCES (read before writing):
-@docs/taneh-prd.md — E1 (FR-LND-01..12, AC-LND-1..4), E16 (FR-PWA-01..05), FR-UX-09, FR-UX-15, §12.1 NFR-PERF-01, 02, §12.7
-@docs/taneh-technical-spec.md — §2, §2.1 (P01), §11.3, F01, F13, F30, U30, U53
-@docs/taneh-decisions-qa.md — Q01, Q02, Q04, Q37, Q38
+@docs/tankhor-prd.md — E1 (FR-LND-01..12, AC-LND-1..4), E16 (FR-PWA-01..05), FR-UX-09, FR-UX-15..18, §12.1 NFR-PERF-01, 02, §12.7
+@docs/tankhor-technical-spec.md — §2, §2.1 (P01), §11.3, F01, F13, F30, U30, U53
+@docs/tankhor-decisions-qa.md — Q01, Q02, Q04, Q37, Q38
 
 RULES FOR THIS SPEC:
 - WHAT and WHY only. Q01–Q41 final. [NEEDS CLARIFICATION: …] only for genuine gaps. Cite FR-LND-* / FR-PWA-* / AC-LND-*. Respect OUT OF SCOPE.
 
 WHY:
-The landing page is the brand's first impression and the only switch between the two experiences. Installation makes Taneh feel like an app on phones, without promising what the web can't do.
+The landing page is the brand's first impression and the only switch between the two experiences. Installation makes Tankhor feel like an app on phones, without promising what the web can't do.
 
 ACTORS: Visitor, Signed-in user.
 
@@ -992,14 +993,15 @@ DEPENDS ON: 006 (editable hero content), 007 and 009 (destinations).
 
 IN SCOPE:
 1. Landing (FR-LND-01..12)
-   - Logo, dark velvet-brown curtain, sky or owner-chosen media behind it; scrolling draws the curtain aside, reveals the name Taneh, slogan above.
+   - Logo, dark velvet-brown curtain, sky or owner-chosen media behind it; scrolling draws the curtain aside, reveals the name Tankhor, slogan above.
    - Two large tiles below: «یه تن بزن» → gallery with matching transition; «استودیو» → Studio lobby.
    - Optional animated preview per tile on hover/focus; explicit tap equivalent on touch.
    - Short visual intro of both services; footer with contact channel and legal links.
    - Never wait for animation or video to navigate; reduced-motion version; deep links skip the intro.
    - All surfaces on one domain with paths (Q01); Try It On never links to Studio.
    - Brand and motion assets from the in-house designer (Q04) with reduced-motion stills.
-   - Hero, slogan, intro and footer editable via 006.
+   - Hero, slogan, intro and footer editable via 006. The slogan is not approved yet: it comes only from the content panel, never hard-coded; the shared landing keys and `landing_ai_notice` are in Technical Spec §12.7.
+   - Logo brief starts from direction A (curtain gap); until the designer delivers, the name is rendered as text, never as a stand-in logo.
 2. PWA (FR-PWA-01..05, Q37)
    - Installable on Android Chrome, iOS Safari (Add to Home Screen) and desktop Chromium; Firefox works as a website.
    - Install is never required; installed app opens signed-in and restores work.
@@ -1027,12 +1029,12 @@ SUCCESS CRITERIA:
 
 ```text
 /speckit.specify
-Feature 015 — Taneh capabilities that must be fully built, integrated and tested at launch but shipped disabled: partner store try-on widget and API, percentage rollout, per-user usage limits, ticketing, and external notification channels (push, SMS, email).
+Feature 015 — Tankhor capabilities that must be fully built, integrated and tested at launch but shipped disabled: partner store try-on widget and API, percentage rollout, per-user usage limits, ticketing, and external notification channels (push, SMS, email).
 
 SOURCES (read before writing):
-@docs/taneh-prd.md — §0.4 (definition of P0-OFF), §6.2, E15 (FR-WID-01..07, AC-WID-1..2), FR-CON-33, FR-CON-34, FR-NTF-02, FR-NTF-04, RK8, RK11, RK13, AS5
-@docs/taneh-technical-spec.md — §11.1 (P28), P41, P42, §7.2, F31, U27, U55
-@docs/taneh-decisions-qa.md — Q21, Q22
+@docs/tankhor-prd.md — §0.4 (definition of P0-OFF), §6.2, E15 (FR-WID-01..07, AC-WID-1..2), FR-CON-33, FR-CON-34, FR-NTF-02, FR-NTF-04, RK8, RK11, RK13, AS5
+@docs/tankhor-technical-spec.md — §11.1 (P28), P41, P42, §7.2, F31, U27, U55
+@docs/tankhor-decisions-qa.md — Q21, Q22
 
 RULES FOR THIS SPEC:
 - WHAT and WHY only. Q01–Q41 final. [NEEDS CLARIFICATION: …] only for genuine gaps. Cite FR-* / AC-* IDs. Respect OUT OF SCOPE.
@@ -1048,12 +1050,12 @@ DEPENDS ON: all previous features.
 IN SCOPE:
 1. Partner widget and API (FR-WID-01..07, Q21)
    - A partner embeds Try It On on its product pages for its own garments.
-   - Shopper signs in to Taneh with SMS OTP and pays from their own Taneh wallet, including top-up, within the partner flow.
+   - Shopper signs in to Tankhor with SMS OTP and pays from their own Tankhor wallet, including top-up, within the partner flow.
    - Sign-in and top-up must work when browsers block third-party cookies (use a separate window or full redirect, not an embedded-only session).
    - Partner configuration: credentials, allowed domains, garment reference; stores pay nothing per try-on.
    - Results also appear in the shopper's Try-ons.
    - A sample partner store passes the full flow and the OFF state.
-   - Not white-label Taneh; no Studio API.
+   - Not white-label Tankhor; no Studio API.
 2. Percentage rollout (FR-CON-33)
    - Admin releases a change to a percentage of accounts; assignment is stable per account; rollback tested.
 3. Per-user usage limits (FR-CON-34)

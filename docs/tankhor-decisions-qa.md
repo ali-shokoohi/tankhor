@@ -1,8 +1,10 @@
-# Taneh — Decision Questions and Answers
+# Tankhor — Decision Questions and Answers
 
 **3 November 2026 · Ali Shokoohi**
 
-All 41 open items from the Taneh specification (Q01–Q41). 39 were asked as multiple-choice questions on 3 Nov 2026; Q08 and Q34 were already settled by the Word spec.
+All 41 open items from the Tankhor specification (Q01–Q41). 39 were asked as multiple-choice questions on 3 Nov 2026; Q08 and Q34 were already settled by the Word spec.
+
+**Revision 3 Nov 2026 (after the brand review, `brand-review.html`):** Q38 changed from تنه / Taneh to **تنخور / Tankhor**, approved by the owner. No other decision changed. Where the brand review still shows Q02, Q03, Q04 or Q30 as open, the answers below win.
 
 **Legend:** ✅ = chosen · ☆ = option recommended at the time of asking · ⚖️ = needs legal or accounting sign-off before launch
 
@@ -30,7 +32,7 @@ All 41 open items from the Taneh specification (Q01–Q41). 39 were asked as mul
 | Q18 | Output type and recolour | Per card in step 2; recolour add-on | Yes |
 | Q19 | Store requirements for Share | Store name + valid link | Yes |
 | Q20 | Emergency stop | Finish running, block new | Yes |
-| Q21 | Widget payment | Shopper's own Taneh wallet | No |
+| Q21 | Widget payment | Shopper's own Tankhor wallet | No |
 | Q22 | Notification channels | In-app only | Yes |
 | Q23 | Admin second factor | Passkey + TOTP fallback | Yes |
 | Q24 ⚖️ | Revenue basis | Recognise at token spend | Yes |
@@ -47,7 +49,7 @@ All 41 open items from the Taneh specification (Q01–Q41). 39 were asked as mul
 | Q35 | Share withdrawal | Hidden immediately | Yes |
 | Q36 | Studio pricing | Flat base + style premium | No |
 | Q37 | PWA targets | Android Chrome, iOS Safari, desktop Chromium | Yes |
-| Q38 | Product name | تنه / Taneh | — |
+| Q38 | Product name | تنخور / Tankhor (revised 3 Nov, was تنه / Taneh) | — |
 | Q39 | Garments per try-on | One garment per request | Yes |
 | Q40 | Buyer personal photos | Gallery up to 5, one default | Yes |
 | Q41 | Optional profile fields | Height and weight | — |
@@ -141,9 +143,12 @@ All 41 open items from the Taneh specification (Q01–Q41). 39 were asked as mul
 
 ### Q38 — Final product name?
 
-- [x] ✅ **تنه / Taneh** — Keep the current working name
+- [x] ✅ **تنخور / Tankhor** — Chosen by the owner after the brand review (revision, 3 Nov 2026). Studio is «استودیو تنخور» / Tankhor Studio; the buyer surface stays «یه تن بزن» / Try It On.
+- [ ] تنه / Taneh — The previous working name; chosen in round 4, then replaced
 - [ ] تن / Tan — The Word spec's provisional name
 - [ ] Not decided yet — Keep open; working name stays
+
+> Name clearance (trademark search in the target classes and jurisdictions, app-store and social handles; no domain check needed) for تنخور / Tankhor has not been done yet; it is a launch dependency (PRD §6.6). The brand review's checks covered the old name, not Tankhor. In UI copy, don't use the common noun «تن‌خور» ("fit") anywhere it could be read as the brand name (Technical Specification §12.7).
 
 ### Q30 — Persian name for the buyer's Liked list?
 
@@ -252,8 +257,8 @@ All 41 open items from the Taneh specification (Q01–Q41). 39 were asked as mul
 
 ### Q21 — Who pays for try-ons through the store widget?
 
-- [ ] Store's wallet ☆ — B2B model; shopper needs no Taneh tokens
-- [x] ✅ **Shopper's own Taneh wallet** — Shopper must sign in and top up
+- [ ] Store's wallet ☆ — B2B model; shopper needs no Tankhor tokens
+- [x] ✅ **Shopper's own Tankhor wallet** — Shopper must sign in and top up
 - [ ] Free quota, then store pays — N free per shopper, rest billed to store
 
 ### Q31 — Which links can buyers paste for garment images?
@@ -273,7 +278,7 @@ All 41 open items from the Taneh specification (Q01–Q41). 39 were asked as mul
 ### Q07 — How do garments get into the buyer catalogue?
 
 - [ ] Brands submit with licence ☆ — Via console or Excel import; signed image-use agreement
-- [ ] Taneh team curates — Team sources and licenses each item
+- [ ] Tankhor team curates — Team sources and licenses each item
 - [x] ✅ **Both** — Curated launch set, then brand self-serve
 
 ### Q24 ⚖️ — Revenue and profit basis for reports?

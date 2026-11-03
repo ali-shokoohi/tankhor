@@ -1,16 +1,17 @@
-# Taneh — Technical Specification
+# Tankhor — Technical Specification
 
-**Version 4.0 (final) · 3 November 2026 · Ali Shokoohi**
+**Version 4.1 (final) · 3 November 2026 · Ali Shokoohi**
 
 ## 0. Document control
 
-This is the final English engineering specification for **Taneh** (تنه). It translates the Persian *Taneh Comprehensive Product Specification v3.0* (2 Nov 2026), itself reconciled with `Tan_Full_Design_Specification_v3(1).docx`, and merges all 41 product decisions taken on 3 Nov 2026. No decision is left open; every former "open" item now states its approved rule and points to its Q ID.
+This is the final English engineering specification for **Tankhor** (تنخور). It translates the Persian *Tankhor Comprehensive Product Specification v3.0* (2 Nov 2026), itself reconciled with `Tan_Full_Design_Specification_v3(1).docx`, and merges all 41 product decisions taken on 3 Nov 2026. No decision is left open; every former "open" item now states its approved rule and points to its Q ID.
 
 | Item | Value |
 | --- | --- |
-| Source | Taneh Comprehensive Product Specification v3.0 (Persian), 2 Nov 2026 |
+| Source | Tankhor Comprehensive Product Specification v3.0 (Persian), 2 Nov 2026 |
 | Upstream authority | Word spec v3; owner decisions of 3 Nov 2026 (§16) override earlier open items |
-| Product name | **Taneh** (تنه), final (Q38). Buyer surface: **Try It On** («یه تن بزن»). Seller surface: **Taneh Studio** |
+| Product name | **Tankhor** (تنخور), final (Q38, revised 3 Nov 2026 after the brand review; previously تنه / Taneh). Buyer surface: **Try It On** («یه تن بزن»). Seller surface: **Tankhor Studio** («استودیو تنخور») |
+| Brand reference | `brand-review.html` (2 Nov 2026 draft, written under the working name تنه). Its strategy, voice, messaging, logo and contrast findings are applied in §12; where it shows Q02, Q03, Q04, Q30 or Q38 as open, §16 wins |
 | Primary market | Iran; IRR payments via domestic gateways |
 | Audience | Backend, frontend, AI/ML, QA, DevOps, design and product |
 
@@ -28,13 +29,15 @@ This is the final English engineering specification for **Taneh** (تنه). It t
 | W | Mapping to Word source sections | W01–W60 |
 | L | Ledger invariant | L1–L9 |
 
-**Section 18 is non-normative.** It holds the Rust implementation recommendations (detailed in `taneh-rust-implementation-pack.md`); anything there that conflicts with §0–§17 loses.
+**Section 18 is non-normative.** It holds the Rust implementation recommendations (detailed in `tankhor-rust-implementation-pack.md`); anything there that conflicts with §0–§17 loses.
+
+**Revision 4.1 (3 Nov 2026).** Product renamed تنخور / Tankhor (Q38). Brand review applied: brand architecture and logo brief (§12.1), `borderStrong` and `onCurtain` tokens with measured contrast (§12.2), curtain states (§12.4), non-text contrast (§12.6), naming, claim and AI-notice rules plus new copy keys (§12.7).
 
 **Sign-off still required outside engineering:** Q11 (token forfeiture at account deletion) needs legal review; Q24 (revenue recognition) needs accounting review. Both are decided by the owner and implemented as stated unless those reviews change them.
 
 ## 1. Product overview
 
-Taneh is an AI fashion platform with two surfaces on one account and one token wallet: **Try It On** renders real brand garments onto a buyer's own photo, and **Taneh Studio** turns a seller's product photos into ad images and videos using curated models and styles. An **Owner Console** controls content, quality, cost, publishing and operations for both.
+Tankhor is an AI fashion platform with two surfaces on one account and one token wallet: **Try It On** renders real brand garments onto a buyer's own photo, and **Tankhor Studio** turns a seller's product photos into ad images and videos using curated models and styles. An **Owner Console** controls content, quality, cost, publishing and operations for both.
 
 ### 1.1 Goals
 
@@ -44,7 +47,7 @@ Taneh is an AI fashion platform with two surfaces on one account and one token w
 
 ### 1.2 Non-goals and hard constraints
 
-- Taneh is **not a store**. No product price, fabric, commercial ranking, or price/quality comparison is shown.
+- Tankhor is **not a store**. No product price, fabric, commercial ranking, or price/quality comparison is shown.
 - A try-on result is an AI-generated image. It MUST NOT be presented as a size or fit guarantee.
 - A purchase click is not proof of purchase; generating content is not proof of increased sales. Success metrics MUST rely on flow completion, reuse and real behaviour.
 - Each account has at most **one** store profile. Studio does not need a second account.
@@ -58,7 +61,7 @@ Taneh is an AI fashion platform with two surfaces on one account and one token w
 | Discovery before sign-up | Public image-first gallery before registration | Gallery → detail → try-on start |
 | Simple try-on start | One personal photo, no body measurements | Request completion after garment selection |
 | Visual comparison | 1–3 results side by side, each with its own store link | Compare usage and store referrals |
-| Two-sided link | Approved Studio output can be published in Taneh | Approved content usable in gallery |
+| Two-sided link | Approved Studio output can be published in Tankhor | Approved content usable in gallery |
 | Shared identity and economy | One account and balance for buyer and Studio | Same account using both surfaces |
 | Visual Studio assembly | Two-step build, card duplication, per-card product or colour | Prep time, project reuse |
 | Work continuity | Generation continues after exit; inputs survive login or top-up | Correct recovery of result or assembly |
@@ -78,7 +81,7 @@ Taneh is an AI fashion platform with two surfaces on one account and one token w
 | Studio Saved | Three independent buckets: models, styles, assembled projects |
 | Studio Projects | Projects whose generation started: In Production or Completed |
 | Auto-draft | Transient unfinished-work state, kept 30 days, separate from manual save and library |
-| Share to Taneh | Request to review and publish one Studio output inside Taneh |
+| Share to Tankhor | Request to review and publish one Studio output inside Tankhor |
 | Token return | Refunding tokens of a failed operation to the wallet. Not an IRR refund |
 
 ### 1.5 Scope status
@@ -91,7 +94,7 @@ Taneh is an AI fashion platform with two surfaces on one account and one token w
 | Built, tested, shipped OFF | Try-on widget and API, percentage rollout, per-user usage limits, ticketing, external notifications (push, SMS, email), paid Share billing |
 | Future (buyer) | Multi-store outfit builder; gallery with auto-rotating images |
 | Out of current experience | Visual search and similar-image matching, before/after slider, internal messaging or social network, long mandatory photo flow, multi-garment try-on |
-| Outside approved commitment | White-label Taneh, public Studio API, device-management UI, user-selectable AI engine, URL input in Studio assembly, public share links |
+| Outside approved commitment | White-label Tankhor, public Studio API, device-management UI, user-selectable AI engine, URL input in Studio assembly, public share links |
 
 Persistent avatar and a three-tab wardrobe were early ideas and are **not** approved. Playing a short per-card video differs from an auto-rotating gallery. Current comparison is not a multi-garment outfit builder. The "built but off" rule does not cover the two items explicitly deferred to the future.
 
@@ -103,7 +106,7 @@ Three client surfaces share one identity, one wallet and one generation backend 
 | --- | --- | --- | --- | --- |
 | Landing (P01) | `/` | Anonymous and signed-in | Two entry tiles: Try It On, Studio | Neutral, image-led |
 | Try It On (P03–P13, P45, P46) | `/tryon` | Buyers | Buyer dashboard (P12) | Warm, informal "tu" |
-| Taneh Studio (P15–P24, P47–P49) | `/studio` | Sellers | One shared Studio sidebar (P49) | Professional "shoma" |
+| Tankhor Studio (P15–P24, P47–P49) | `/studio` | Sellers | One shared Studio sidebar (P49) | Professional "shoma" |
 | Shared (P02, P14, P25, P26, P27, P29) | `/account`, `/wallet` | All | Reached from either surface | Neutral; hints follow origin surface |
 | Owner Console (P30–P44) | `/console` | Admins | Separate secure app | Plain administrative |
 
@@ -118,7 +121,7 @@ Exact path names are an implementation choice; the one-host rule is fixed.
 
 ### 2.1 P01 — Landing and path selection
 
-- Hero: logo, fitting-room curtain in **dark velvet brown** (Q02), sky or selected media behind it. Scrolling down draws the curtain aside, reveals the name **Taneh**, slogan sits above the image. Motion evokes dressing behind a curtain and reopening it. Hero media is chosen in the content panel.
+- Hero: logo, fitting-room curtain in **dark velvet brown** (Q02), sky or selected media behind it. Scrolling down draws the curtain aside, reveals the name **Tankhor**, slogan sits above the image. Motion evokes dressing behind a curtain and reopening it. Hero media is chosen in the content panel.
 - Below the image: two large rectangular entry tiles, **«یه تن بزن»** (Try It On) and **«استودیو»** (Studio). The first opens the public gallery with a matching transition; the second opens the Studio lobby.
 - Then a short scroll: visual intro of both services, footer with contact, email or chosen channel, and mandatory links. Page stays short, image-led, low-text.
 - Browsing and path choice need no account. Desktop MAY preview each tile on hover and focus; mobile MUST have an explicit touch control.
@@ -169,7 +172,7 @@ Every try-on request has exactly one target item and one personal photo, is pric
 ### 4.1 P03 — Public gallery and discovery
 
 - Pinterest/fashion-show style gallery of Iranian models and real Iranian brand garments. Brand intro is secondary; the core action is virtual try-on. Guests can browse, filter, open details.
-- **Catalogue sourcing (Q07):** a curated launch set sourced and licensed by the Taneh team, plus brand self-service through the console and CSV import later. Every garment requires a signed image-use licence before it is public.
+- **Catalogue sourcing (Q07):** a curated launch set sourced and licensed by the Tankhor team, plus brand self-service through the console and CSV import later. Every garment requires a signed image-use licence before it is public.
 - Each style carries structured tags: garment type (shoes, shirt…), style category, model, women/men. Text search plus filters on type, colour, brand, model and style mood. Filters are visible but compact; data managed in the content panel. **No price or fabric filters.**
 - Card: main image = full outfit; thumbnail = the try-on-able item. Independent actions: open detail, set aside for later, try on, go to store.
 - Primary CTA «یه تن بزن» stays within thumb reach on mobile and desktop throughout browsing without covering the gallery. Upload of an external garment goes through the same CTA into P05.
@@ -220,7 +223,7 @@ Opened from "+ یه تن بزن". Two required inputs:
 
 ### 4.7 P09 — Result view
 
-- Large image with target item, brand, date, available purchase info. AI-generated notice and no-fit-guarantee disclosure, proportionate and not covering the image.
+- Large image with target item, brand, date, available purchase info. AI-generated notice and no-fit-guarantee disclosure (copy key `ai_notice`, §12.7), proportionate and not covering the image.
 - Actions: zoom, Download, Regenerate, Change Outfit, Compare, Share, Delete, back to Explore, and Go to store when a valid destination exists.
     - Regenerate keeps the inputs for a new cost confirmation.
     - Change Outfit keeps a valid personal photo and opens garment selection; an expired photo requires a new pick. Prior output is not deleted.
@@ -328,7 +331,7 @@ Entered from manual selection, from ring selections after P16, or from a sample 
 ### 5.7 P19 — Generation and reveal
 
 - After confirm, the same cards continue on a page outside the two build steps. The curtain now covers the output in production. Each card has its own queued, processing, ready or final-error state.
-- Clicking an unfinished curtain opens it slightly, flashes the Taneh logo/animation, then a hand closes it. Optional text: "Generating output" (professional voice). Accessible status always present. No fake outputs.
+- Clicking an unfinished curtain opens it slightly, flashes the Tankhor logo/animation, then a hand closes it. Optional text: "Generating output" (professional voice). Accessible status always present. No fake outputs.
 - Each ready image or video is revealed and downloadable immediately, not waiting for siblings. Real counter: "3 of 8 outputs ready". User may leave and return via Projects; server work continues. A failed card returns **only its own** tokens immediately after its last retry (Q29); successes stay.
 - **Notifications (Q22):** in-app only at launch — one event per ready output and one final event when all cards are final. If any card failed, the final event reports the split ("6 ready, 2 failed, tokens returned"), never "all ready". Download and Share are available here.
 
@@ -356,11 +359,11 @@ Independent section with three tabs: **Models**, **Styles**, **Assembled project
 
 Identity, store and settings from the same dashboard. Professional profile: store name, store link, related info. Token balance visible. One store per account; no second account for Studio. Store details are **not** required to start a project; completion badge is small and unobtrusive. **Publishing a Share requires store name + a valid store link (Q19)**, checked at review; ownership proof is not required at launch.
 
-### 5.13 P24 — Share to Taneh
+### 5.13 P24 — Share to Tankhor
 
 - Submit one specific image or video for review and publication on the platform, either immediately from a ready output or later from a completed project. Selecting one output never publishes the whole project. Publication only after admin approval.
 - Active and **free** at launch; paid infrastructure built and OFF. States: not submitted, pending review, approved, rejected, withdrawn — not added to Projects groups. Distinct from buyer external share.
-- Cancel before publication MUST prevent publication of that request. **Withdrawal after publication hides the output from all public display immediately** (Q35). Copies already downloaded by others are outside Taneh's control; the withdrawal UI MUST say so. Target item, store and image licence are checked before public display.
+- Cancel before publication MUST prevent publication of that request. **Withdrawal after publication hides the output from all public display immediately** (Q35). Copies already downloaded by others are outside Tankhor's control; the withdrawal UI MUST say so. Target item, store and image licence are checked before public display.
 
 ## 6. Wallet, payments and token ledger
 
@@ -545,9 +548,9 @@ The try-on widget and API ship fully built but disabled; the PWA is required but
 ### 11.1 P28 — Try-on widget and API for stores
 
 - After activation, an external store can embed Try It On on a product page so a shopper tries that garment on their own photo. Built, wired and tested from the start; OFF at launch.
-- **The shopper pays from their own Taneh wallet (Q21)** and therefore signs in to Taneh with SMS OTP. Because third-party cookies inside iframes are unreliable (Safari ITP, Chrome storage partitioning), sign-in MUST use a popup or top-level redirect flow, never an iframe-only session.
+- **The shopper pays from their own Tankhor wallet (Q21)** and therefore signs in to Tankhor with SMS OTP. Because third-party cookies inside iframes are unreliable (Safari ITP, Chrome storage partitioning), sign-in MUST use a popup or top-level redirect flow, never an iframe-only session.
 - Store side: credentials, allowed domains, and the garment reference passed to the widget. Stores pay nothing per try-on at launch.
-- Does **not** create white-label Taneh or a public Studio API (R97).
+- Does **not** create white-label Tankhor or a public Studio API (R97).
 - A sample store MUST demonstrate the full flow (including popup sign-in and top-up) and the OFF state in tests.
 
 ### 11.2 AI providers
@@ -569,7 +572,11 @@ Both surfaces share one design system, two languages (FA, EN) and three themes (
 
 - Base direction: **dark velvet brown curtain** (Q02) + natural sky blue. Brown takes roughly 10% of visual space (curtain, emphasis, signature details) — a composition guide, not a pixel budget. The dominant background stays airy and legible.
 - Glass / Liquid Glass only on controlled surfaces (controls over images, floating toolbars). Forms, financial tables and long text sit on stable backgrounds. Without support or with reduced transparency, fall back to opaque surfaces. Garment images keep true colour and detail.
-- Apple HIG and Material Design are interaction references; Taneh keeps its own identity.
+- Apple HIG and Material Design are interaction references; Tankhor keeps its own identity.
+- **Brand architecture (branded house).** One parent mark and wordmark, تنخور / Tankhor. Try It On and Tankhor Studio share the mark, type, colour, curtain and icon rules; they differ by voice, composition and media (airy discovery imagery for Try It On, precise editorial framing and cinematic media for Studio), never by separate logos. Wallet, account and Owner Console use the parent brand; the console applies the same system with less decoration and more emphasis on data and state.
+- **Logo brief (Q04, in-house designer).** Recommended starting direction **A — curtain gap**: two simple masses opening a space, a standalone symbol plus FA/EN wordmark, the same logic continuing in the curtain motion. Alternatives: **B** Persian wordmark-led, **C** open presentation frame. The owner picks the direction before production. Avoid generic hangers, AI sparkles, idealised bodies, cliché cameras, ornate traditional seals and anything resembling a reference service's mark (Photoroom, FASHN, Botika were studied as references only).
+- **Logo acceptance.** Symbol rendered at 16, 32, 64 and 512 px; wordmark tested separately at its real minimum size; mono black, reversed and colour on both themes. The Persian wordmark keeps correct joins and every dot legible at small sizes (ت, ن, خ; the word breaks after و because و and ر do not join forward). Latin wordmark: **Tankhor**. Final SVG has `viewBox`, `title`/`desc`, text converted to paths, no remote font, no bitmap or complex blur. Clear space and minimum size are measured from the final mark, not set in advance. Logos are never mirrored in RTL.
+- **Imagery.** Garment colour and texture are never altered to suit the palette; no global warm filter. Every brand, sample or showcase medium records source, licence, owner/consent, publication scope and AI status; naming a source (e.g. Pinterest) or a reference brand is not a licence.
 - Language and theme switches never change selections, assembly, financial data or results. FA: RTL reading and focus order; addresses, IDs and hex codes keep their own direction. Logos and product photos are never mirrored; only directional icons flip.
 
 ### 12.2 Design tokens
@@ -588,12 +595,16 @@ Palette is the approved baseline (Q02); each text/background pair MUST still pas
 | sky | #BDE4F7 | #274E66 | Blue surfaces, breathing room |
 | action | #185B7A | #A7DBF3 | Interactive action |
 | onAction | #FFFFFF | #102B3B | Text on action |
-| border | #CCD6DF | #506273 | Visible borders |
+| border | #CCD6DF | #506273 | Decorative dividers only; never a control's sole boundary |
+| borderStrong | #185B7A | #A7DBF3 | Meaningful control boundaries (inputs, toggles, chips); same value as `action` |
+| onCurtain | #F1F5F9 | #F1F5F9 | Text and icons on `curtainBase` |
 | success | #146C43 | #80D8A6 | Success, always with text/icon |
 | warning | #8A4B08 | #F3C278 | Warning, always with text/icon |
 | danger | #B42318 | #FFB4AB | Errors and destructive actions |
 
 Light sky is for surfaces; small white text on it is not allowed. Status colour always pairs with text or icon.
+
+**Measured contrast (brand review, 2 Nov 2026).** Opaque flat sRGB pairs, unrounded ratio, WCAG 2.2 formula. Every text pair checked (body, secondary, brand, link, button, sky, curtain and status roles) passes 4.5:1 in both themes (lowest: `textSecondary` on `surfaceMuted`, 5.68:1 light). `onCurtain` on `curtainBase` is 11.10:1. `border` fails the 3:1 non-text threshold (1.47:1 on `surface` and 1.33:1 on `surfaceMuted` light; 2.53:1 and 2.09:1 dark), so it MUST NOT be a control's only visible boundary; `borderStrong` passes (7.46:1 light, 10.68:1 dark). White on light `sky` is 1.35:1 and fails. Not covered by this check: photos, velvet texture, opacity, Glass, focus geometry, keyboard and assistive technology; those still need testing on real screens before token freeze.
 
 ### 12.3 Typography and layout
 
@@ -612,7 +623,7 @@ Spacing scale 4, 8, 12, 16, 24, 32, 48, 64 px. Radii 8, 16, 24 px. Primary butto
 
 ### 12.4 Motion
 
-Curtain, login logo motion, model ring, campaign cards and playful vectors each need a clear purpose; motion supports state comprehension and never blocks navigation or the gallery. Proposed: UI micro-motion 150–250 ms, curtain 400–700 ms, tuned on real prototypes. Reduced motion conveys the same meaning and actions via simpler state changes. Motion assets come from the in-house designer as Lottie/SVG plus reduced-motion stills (Q04). Video has a poster fallback and pause control and starts muted. Hover always has touch and keyboard equivalents.
+Curtain, login logo motion, model ring, campaign cards and playful vectors each need a clear purpose; motion supports state comprehension and never blocks navigation or the gallery. Proposed: UI micro-motion 150–250 ms, curtain 400–700 ms, tuned on real prototypes. Reduced motion conveys the same meaning and actions via simpler state changes. The curtain has two real meanings and never fakes a third: over an empty upload slot it means "no image yet" (removing the image brings it back); over a generating unit it opens only when that unit is really ready. One signature motion is enough: no spinning cards, sparkles or aimless blur added on top. The curtain never hides queue or processing status, and no fake percentage or remaining time is shown. Motion assets come from the in-house designer as Lottie/SVG plus reduced-motion stills (Q04). Video has a poster fallback and pause control and starts muted. Hover always has touch and keyboard equivalents.
 
 ### 12.5 Component contracts
 
@@ -654,7 +665,9 @@ Every component shares one definition of state, cost, selection and error, and d
 ### 12.6 Accessibility
 
 - Target: **WCAG 2.2 AA**. Text contrast ≥ 4.5:1; large text ≥ 3:1 ([contrast](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html)).
-- WCAG 2.2 minimum pointer target is 24×24 CSS px with exceptions; Taneh targets 44×44 ([target size](https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html)).
+- Meaningful control boundaries and focus indicators need ≥ 3:1 against adjacent colours ([non-text contrast](https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html)); use `borderStrong`, not `border` (§12.2). Thresholds are checked on the unrounded ratio.
+- WCAG 2.2 minimum pointer target is 24×24 CSS px with exceptions; Tankhor targets 44×44 ([target size](https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html)).
+- Reduced-motion support is a Tankhor product rule. The related criterion, SC 2.3.3 Animation from Interactions, is AAA; do not describe it as an AA requirement ([animation from interactions](https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html)).
 - Non-essential auto-motion longer than 5 s next to content needs pause, stop or hide. Ring, video and campaigns are checked against this ([pause, stop, hide](https://www.w3.org/WAI/WCAG22/Understanding/pause-stop-hide.html)).
 - Fully keyboard operable; focus visible and unobscured; dialogs have defined focus return and close. Controls have understandable names; meaningful images have alt text. Generation status is announced to screen readers. Errors attach to their field and never rely on colour alone. Zoom and reflow keep reading and acting possible; no navigation or dialog traps ([WCAG quick ref](https://www.w3.org/WAI/WCAG22/quickref/)).
 - Microcopy says what happened and what to do next. "Tokens returned" only after the return is recorded. Errors never clear valid input or bounce the user to the start without reason.
@@ -675,6 +688,14 @@ Try It On speaks as a warm, patient, tasteful old-bazaar seller, addressing the 
 | English | Warm and natural; semantic translation of bazaar idioms | Professional marketing-studio English |
 
 Bazaar flavour comes from welcome, taste and patience, not dialect performance. Avoid constant «حاجی», «آبجی», «خانومی», «داداش», «قابل نداره», and courtesies that blur cost. «بفرما، یه تن بزن» works at the entry, not on every button. No "it'll definitely suit you", purchase pressure or fit guarantee. Studio avoids overly casual tone, sales promises, useless jargon and vague ad-speak; "campaign" only for a set of related content, "project" for the real unit of work. Buttons are short; helper text explains the effect.
+
+**Four speakers, not one voice at two levels.** Try It On (تو) and Studio (شما) as above. Shared sign-in and wallet pages are neutral, preferably without a pronoun, and only a short hint may follow the origin surface (e.g. Try It On: «بعد از ورود، همین لباس رو ادامه می‌دیم.»; Studio: «پس از ورود، انتخاب شما حفظ می‌شود.»). The Owner Console speaks in roles, versions, scope and approval, never with humour.
+
+**Naming in copy.** The parent brand is «تنخور» / "Tankhor". «یه تن بزن» / "Try It On" names the buyer experience; "Try it on" (sentence case) is the button. «استودیو تنخور» / "Tankhor Studio" is used in introductions and headers and shortened to «استودیو» inside Studio. «مدل» in user copy means the human Studio model; where AI models appear next to it in the console, write «مدل انسانی» and «مدل AI». The common noun «تن‌خور» ("fit") is not used in Persian UI copy, because it reads as the brand name; write «اندازه یا فرم واقعی لباس روی تن» instead.
+
+**Punctuation.** Exclamation marks only in Try It On phrases such as «هنوز نپوشیدم!»; never in money, deletion, errors, consent or the console. An ellipsis never replaces a real state. English uses sentence case, natural contractions in Try It On and shared pages, and direct professional English in Studio (no "kindly" or "shall"); «بفرما» is never translated as "Here you go, sir".
+
+**We never say** (in any language, any channel): guaranteed size, fit, exact colour, detail or sales, even "with the power of AI"; "first", "only", "best", "flawless", "revolutionary"; "Tankhor is your store", "cheapest clothes" or any garment/price comparison; invented wait times, progress percentages, user counts, conversion, savings, prices or capacity; "all outputs are ready" on partial or total failure or while a card is still running; "tokens returned" before the return is `posted`, or "payment successful" from a browser redirect alone; "only you can see it" as a denial of logged admin access (Q12), or "deleting removes every copy instantly" without the approved policy; "saving means permission to publish", "submitted means published", "publishing one output publishes the project"; gendered address, purchase pressure, body anxiety, blaming the user, cost-blurring courtesies, or humour about consent and deletion; founder quotes, customer testimonials, brand partnerships or launch dates without evidence. Bazaar terms of address («حاجی», «خانومی», «داداش») and «قابل نداره» next to a cost are not used.
 
 **Copy keys.** Values in braces come from real data. FA strings in the Persian source §2 are canonical; EN below are reviewed in context before release. — means not applicable to that surface.
 
@@ -709,13 +730,32 @@ Bazaar flavour comes from welcome, taste and patience, not dialect performance. 
 | fail_return_pending | Didn't work this time; returning {cost} tokens now. | This output could not be generated. Returning {cost} tokens is in progress. |
 | compare | See these side by side; which one feels right? | Browse project outputs by model, style or project. |
 | empty | Nothing tried on yet; go have a look around. | No projects yet. Create your first project. |
-| share_request | — | Submit this output for publication review in Taneh |
+| share_request | — | Submit this output for publication review in Tankhor |
 | share_pending | — | Request received. Publication happens after admin approval. |
-| share_withdraw | — | Withdraw this output? It will be hidden from Taneh immediately; copies others already downloaded cannot be recalled. |
+| share_withdraw | — | Withdraw this output? It will be hidden from Tankhor immediately; copies others already downloaded cannot be recalled. |
 | delete_account | Delete your account? You have 30 days to change your mind. Your {balance} tokens will be lost after that. | Delete your account? It can be restored for 30 days. Your remaining {balance} tokens are forfeited after that. |
 | delete_image | Delete this photo? | Delete this image? |
+| ai_notice | AI-generated image. It does not guarantee size or real-world fit. | Review product details in every result before use. Exact colour and detail reproduction, and sales growth, are not guaranteed. |
 
 Fixed strings: «هنوز نپوشیدم!» ("Still getting dressed!") and «بیا یه نظر بده!» ("Your try-on is ready. Take a look!") are registered for Try It On only. A return message must match the real transaction state; "free" appears only when cost is 0. Delete confirmations include file name or count and effect. Photo-storage consent and public-publication consent are independent, explicit choices never hidden behind friendly tone. Shared sign-in and wallet pages use neutral main copy. All strings for both languages live in the content panel tagged by surface and situation.
+
+**Shared and landing keys** (neutral voice; FA canonical, EN reviewed in context; *proposed* rows need owner approval before use).
+
+| Key | FA | EN |
+| --- | --- | --- |
+| landing_title *(proposed)* | لباس را تصور کنید. تصویرش را بسازید. | Imagine the look. Create the image. |
+| landing_body *(proposed)* | ظاهر لباس را روی عکس شخصی ببینید یا برای محصولتان محتوا بسازید. یک حساب و کیف پول، دو تجربهٔ مستقل. | Explore clothing in a personal photo or create content for your products. One account and token wallet, two distinct experiences. |
+| landing_ai_notice | تصاویر با هوش مصنوعی ساخته می‌شوند و اندازه، فرم واقعی لباس یا فروش را تضمین نمی‌کنند. | AI-generated images do not guarantee size, fit or sales outcomes. |
+| tryon_not_store | تنخور فروشگاه نیست؛ برای اطلاعات خرید به فروشگاه اصلی برو. | Tankhor is not a store. Visit the original store for purchase details. |
+| wallet_shared | یک حساب و کیف پول برای هر دو تجربه | One account and token wallet for both experiences |
+| topup_amount | مبلغ شارژ: {amount} ریال | Top-up amount: {amount} IRR |
+| topup_tokens | افزایش موجودی: {tokens} توکن | Tokens to add: {tokens} |
+| topup_no_generate | شارژ کیف پول به‌تنهایی تولید را آغاز نمی‌کند. | Topping up your wallet does not start generation. |
+| payment_checking | پرداخت در حال بررسی است. دوباره پرداخت نکنید. | We're checking this payment. Please don't pay again. |
+| payment_unconfirmed | اتصال برقرار نیست. وضعیت پرداخت هنوز تأیید نشده است. | No connection. This payment has not been confirmed. |
+| console_draft_saved | پیش‌نویس ذخیره شد؛ نسخهٔ منتشرشده تغییر نکرد. | Draft saved. The published version is unchanged. |
+
+The landing title is not the slogan; the slogan (FR-LND-02) is still awaiting owner approval. Every string here is a draft until it is wired to the real state it describes.
 
 ## 13. Analytics, metrics and launch readiness
 
@@ -791,7 +831,7 @@ Each flow is end-to-end; auth, top-up, error and back branches are part of the f
 | F09 | Many products or colours | P17 → duplicate card → P18 or colour picker → live total → confirm | Undo and back to P16 keep selections; 50-card limit |
 | F10 | Unfinished work | Edit in select or assemble → leave without saving → recover within 30 days | Manual save and library independent of draft purge |
 | F11 | Partial project finish | P19 → first card ready → download it → other cards finish → summary | Each failed card returns only its own cost |
-| F12 | Publish in Taneh | Output in P19 or P20 → P24 request → admin review → publish after approval | Cancel before publish prevents it; withdrawal after publish hides immediately |
+| F12 | Publish in Tankhor | Output in P19 or P20 → P24 request → admin review → publish after approval | Cancel before publish prevents it; withdrawal after publish hides immediately |
 | F13 | Switch surface, same account | Back to P01 → choose the other path → same account and wallet | No direct Studio link in Try It On; sign-out affects both |
 | F14 | Delete and restore account | P14 → see balance to forfeit → confirm → 30-day window → SMS OTP restore, or final delete | Jobs finish during window; tokens forfeited at final delete |
 | F15 | Manage photos | P13 or P22 → add or delete → use in picker | Max 5 buyer photos; deleting a temp photo never deletes a try-on |
@@ -800,7 +840,7 @@ Each flow is end-to-end; auth, top-up, error and back branches are part of the f
 | F18 | Try on from a link | P05 → paste link → host allowlist check → fetch, preview, confirm target → P06 → P07, P08 | Non-allowlisted host offers upload fallback; no tokens before confirm |
 | F19 | Optional profile | Yellow badge → P46 → height and weight, photo guide → default photo in P13 | Ignoring it never blocks try-on |
 | F20 | Ready notification | Leave P08 and browse → server success → in-app "Come take a look" → that result in P09 | After closing the browser, result recoverable from account |
-| F21 | Share outside Taneh | Result P09 or P10 → explicit share → device share sheet with file, or download | No public link, no auto-send |
+| F21 | Share outside Tankhor | Result P09 or P10 → explicit share → device share sheet with file, or download | No public link, no auto-send |
 | F22 | Enter from model ring | Rotate ring P15 → see styles → pick model → P02 if needed → P16 with all that model's styles | Reduce, extend, clear, add from other models; no tokens spent |
 | F23 | Start from sample | Sample media P15 → P02 for guest → P17 with sample style and product → replace, delete or duplicate | Back to P16 keeps compatible assembly |
 | F24 | Discover styles via model | P16 Styles → P47 detail (no auto-select) → P48 model → select one, several or all → back to P16 | Prior selections stay in shared state |
@@ -810,7 +850,7 @@ Each flow is end-to-end; auth, top-up, error and back branches are part of the f
 | F28 | Share now or later | Ready output P19 or completed P20 → P24 → admin approval P35 → publish | Never automatic; store name + link required |
 | F29 | Shared dashboard | Assembly P17 → sidebar P49 to P25 → top up → same project → P20 or P21 from same sidebar | Work state kept |
 | F30 | Install and return via PWA | Studio in Android Chrome, iOS Safari or desktop Chromium → install → open installed app → sign in, recover projects | No offline generation or push implied |
-| F31 | Widget try-on (when enabled) | Store product page → widget → popup Taneh sign-in → photo → cost from shopper wallet → result in widget and Try-ons | Top-up in popup; store pays nothing |
+| F31 | Widget try-on (when enabled) | Store product page → widget → popup Tankhor sign-in → photo → cost from shopper wallet → result in widget and Try-ons | Top-up in popup; store pays nothing |
 
 ## 15. User stories and acceptance criteria
 
@@ -881,9 +921,9 @@ All 41 product decisions are closed. Q08 and Q34 come from the Word spec; the ot
 | ID | Topic | Decision | Applied in |
 | --- | --- | --- | --- |
 | Q01 | Domain structure | One domain, path-based surfaces (`/`, `/tryon`, `/studio`, `/console`); shared session on one host | §2 |
-| Q02 | Curtain colour | **Dark velvet brown**; §12.2 palette is the baseline, pending contrast checks | §2.1, §12 |
+| Q02 | Curtain colour | **Dark velvet brown**; §12.2 palette is the baseline. Flat-pair contrast measured 2 Nov 2026 (`borderStrong` for control boundaries); real-sample checks still pending | §2.1, §12 |
 | Q03 | Font | **Vazirmatn** with its Latin; Tahoma fallback; self-hosted (OFL) | §12.3 |
-| Q04 | Brand and motion assets | In-house designer delivers logo, Latin wordmark, curtain/hand motion as Lottie/SVG + reduced-motion stills | §2.1, §12.4 |
+| Q04 | Brand and motion assets | In-house designer delivers logo, Latin wordmark, curtain/hand motion as Lottie/SVG + reduced-motion stills; brief starts from logo direction A, owner picks the direction before production | §2.1, §12.1, §12.4 |
 | Q05 | Upload limits | ≤ **15 MB**; JPEG, PNG, WebP, HEIC; shortest edge ≥ 512 px; rejected before any debit | §4.4, §5.6, §7.1 |
 | Q06 | Studio upload retention | "Save all uploaded photos" **ON** by default; when OFF, new uploads purged after **30 days**; toggling never deletes existing library files | §5.6, §5.11, §10 |
 | Q07 | Catalogue sourcing | Both: team-curated launch set and brand self-service later; signed image-use licence always required | §4.1 |
@@ -900,7 +940,7 @@ All 41 product decisions are closed. Q08 and Q34 come from the Word spec; the ot
 | Q18 | Output type and recolour | Image or video chosen per card in step 2; recolour is a priced add-on | §5.5 |
 | Q19 | Store requirements for Share | Store name + valid link, checked at review; not needed to create projects | §5.12 |
 | Q20 | Emergency stop | Running jobs finish; new jobs blocked | §7.3 |
-| Q21 | Widget payment | Shopper pays from own Taneh wallet; popup/redirect sign-in | §11.1 |
+| Q21 | Widget payment | Shopper pays from own Tankhor wallet; popup/redirect sign-in | §11.1 |
 | Q22 | Notification channels | In-app only at launch; push, SMS, email built and OFF | §4.6, §5.7, §7.2 |
 | Q23 | Admin 2FA | Passkey (WebAuthn) with TOTP fallback; recovery by another admin, audited | P30 |
 | Q24 | Revenue basis | Recognised at token spend; unspent tokens a liability; AI cost at invoice-date FX. *Accounting sign-off required* | P31, §13.2 |
@@ -914,17 +954,17 @@ All 41 product decisions are closed. Q08 and Q34 come from the Word spec; the ot
 | Q32 | Auto-draft retention | **30 days** from last activity | §5.5, §10 |
 | Q33 | Empty card at Create | Create disabled; empty cards highlighted until filled or removed | §5.5 |
 | Q34 | Ring start state | P16 with all of the model's styles pre-selected; editable | §5.1 |
-| Q35 | Share withdrawal | Hidden from public display immediately; downloaded copies outside Taneh's control | §5.13 |
+| Q35 | Share withdrawal | Hidden from public display immediately; downloaded copies outside Tankhor's control | §5.13 |
 | Q36 | Pricing model | Flat base price per output type + optional per-style premium (+ recolour add-on) | §5.2, §6.1, P36 |
 | Q37 | PWA targets | Android Chrome, iOS Safari, desktop Chromium | §11.3 |
-| Q38 | Product name | **تنه / Taneh** | §0 |
+| Q38 | Product name | **تنخور / Tankhor** (revised 3 Nov 2026 after the brand review; was تنه / Taneh). Name clearance (trademark, handles) pending before brand assets are final | §0, §12.1 |
 | Q39 | Garments per try-on | One garment per request | §1.2, §4.2 |
 | Q40 | Buyer photos | Personal gallery of up to **5**, one default | §4.4, §4.11 |
 | Q41 | Profile fields | Height and weight only, optional | §4.12 |
 
 **Consequences engineering must carry:**
 
-- **Q21 × widget auth.** Shopper-paid widget means Taneh sign-in inside a third-party page. Use popup or top-level redirect; iframe sessions fail under Safari ITP and Chrome storage partitioning.
+- **Q21 × widget auth.** Shopper-paid widget means Tankhor sign-in inside a third-party page. Use popup or top-level redirect; iframe sessions fail under Safari ITP and Chrome storage partitioning.
 - **Q26 × content ops.** CSV must be UTF-8 with BOM or Persian breaks when edited in Excel. Publish a template per entity with examples.
 - **Q36 × data model.** Quotes snapshot price version, base price, style premium and add-on (§6.3).
 - **Q09 × SMS provider.** SMS OTP delivery is now on the critical path for every sign-in. Use two domestic SMS providers with failover and monitor delivery latency.
@@ -939,7 +979,7 @@ Source key: **Base** = original shared conversation; **Word §n** = Word spec se
 
 | ID | Requirement | Location | Owner control | Acceptance | Source |
 | --- | --- | --- | --- | --- | --- |
-| R01 | Two independent paths, public and Studio; final name Taneh | P01, Q38 | P38, P40 | Two independent entries under the Taneh brand | Word §1, Dec |
+| R01 | Two independent paths, public and Studio; final name Tankhor | P01, Q38 | P38, P40 | Two independent entries under the Tankhor brand | Word §1, Dec |
 | R02 | Shared account and wallet, separate dashboards | P12, P23, P25, U09 | P32, P36 | One account and balance, two fitting navigations | Base |
 | R03 | Owner Console separate from user surfaces | P30, P44 | Whole console | Admin path limited to authorised role | Base |
 | R04 | One domain with path-based surfaces | §2, Q01 | P38 | All surfaces served from one host; shared session works | Dec |
@@ -988,7 +1028,7 @@ Source key: **Base** = original shared conversation; **Word §n** = Word spec se
 | R47 | Unfinished output curtain closed again by hand; Studio copy professional | P19, U17 | P40 | Screen reader and reduced motion in place | Word §6, §11, Req |
 | R48 | Independent reveal; continue after exit; return only failed card | P19, F11, U17 | P34, P36 | One card's failure never refunds successes | Base |
 | R49 | Projects only In Production and Completed; failed projects in Completed with summary | P20, Q16 | P38 | No third tab; zero-success projects flagged | Base, Dec |
-| R50 | Share to Taneh with admin approval; cancel before, immediate hide after | P24, P35, F12, Q35 | P35 | Never public before approval; withdrawal hides at once | Studio, Dec |
+| R50 | Share to Tankhor with admin approval; cancel before, immediate hide after | P24, P35, F12, Q35 | P35 | Never public before approval; withdrawal hides at once | Studio, Dec |
 | R51 | Share free at start; paid infra built and off | P24 | P36, P41 | Zero cost at start; paid model tested | Base |
 | R52 | Same account in Studio; at most one store profile | P23, U18 | P33 | No second account; second store rejected | Base |
 | R53 | Store details optional to start; name + link required to publish | P23, U18, Q19 | P33, P38 | Incomplete profile never blocks a project | Base, Dec |
@@ -1035,7 +1075,7 @@ Source key: **Base** = original shared conversation; **Word §n** = Word spec se
 | R94 | Percentage rollout built, off at start | P42 | P42 | Assignment and rollback tested | Base |
 | R95 | Approved features built, wired and tested from the start | U27 | P41 | Off never accepted in place of unbuilt | Base |
 | R96 | Try-on widget and API built, off at start; shopper pays from own wallet | P28, Q21 | P41 | Sample store flow with popup sign-in | Base, Dec |
-| R97 | Widget is not white-label Taneh; no public Studio API | P28 | Scope | Integration limited to try-on | Base |
+| R97 | Widget is not white-label Tankhor; no public Studio API | P28 | Scope | Integration limited to try-on | Base |
 | R98 | Designed toward ~1 million users; launch tested at 1,000 generations/day | §9, Q28 | P43 | Load test at 2× launch target documented | Base, Dec |
 | R99 | Central auth and wallet, secure files, queue, concurrency, retries, returns, swappable AI, CMS, monitoring, recovery | §9 | P36, P37, P43 | Retry, outage, reconciliation and recovery tests | Base |
 | R100 | PostgreSQL, S3, CDN are options; owner never works in repo or storage | §9 | Whole console | Daily ops via console | Base |
@@ -1044,7 +1084,7 @@ Source key: **Base** = original shared conversation; **Word §n** = Word spec se
 
 | ID | Requirement | Location | Owner control | Acceptance | Source |
 | --- | --- | --- | --- | --- | --- |
-| R101 | Taneh; Try It On with old-bazaar voice and Try-ons | §12.7, P10, Q38 | P38, P40 | Buyer microcopy warm, short, exact | Word §1, Req |
+| R101 | Tankhor; Try It On with old-bazaar voice and Try-ons | §12.7, P10, Q38 | P38, P40 | Buyer microcopy warm, short, exact | Word §1, Req |
 | R102 | Logo with fitting-room curtain and sky behind | P01, U30 | P38, P40 | Scroll draws curtain and reveals name | Word §2 |
 | R103 | Slogan above image; two large tiles below | P01, F01 | P38 | Both paths selectable without traversing the other | Word §1, §2 |
 | R104 | Animated preview per path; entry with logo animation | P01, U30 | P40 | Touch and keyboard equivalents | Buyer |
@@ -1124,7 +1164,7 @@ Source key: **Base** = original shared conversation; **Word §n** = Word spec se
 
 ## 18. Engineering recommendations (non-normative)
 
-Build Taneh as a **Rust monorepo** (one Cargo workspace) with hexagonal crates per bounded context, a double-entry token ledger and a Postgres-backed job queue, serving server-rendered HTML with Askama and htmx plus an OpenAPI-documented JSON API. Full detail, versions, test strategy and Spec Kit prompts: `taneh-rust-implementation-pack.md`.
+Build Tankhor as a **Rust monorepo** (one Cargo workspace) with hexagonal crates per bounded context, a double-entry token ledger and a Postgres-backed job queue, serving server-rendered HTML with Askama and htmx plus an OpenAPI-documented JSON API. Full detail, versions, test strategy and Spec Kit prompts: `tankhor-rust-implementation-pack.md`.
 
 ### 18.1 Shape of the system
 
@@ -1133,7 +1173,7 @@ flowchart TB
     subgraph Clients
         L[Landing /] --- T[Try It On /tryon] --- S[Studio /studio] --- C[Owner Console /console]
     end
-    subgraph App["Rust app binary: taneh serve | worker"]
+    subgraph App["Rust app binary: tankhor serve | worker"]
         direction TB
         WEB[web crate<br/>axum + askama + htmx<br/>/api/v1 + Swagger UI]
         WRK[worker crate<br/>job leases, sweeps, outbox]
@@ -1213,14 +1253,14 @@ An approved product change MUST update the related behaviour, flow, story, accep
 | Studio photo storage | "Save all uploads" setting, ON by default; earlier mandatory storage replaced |
 | Related styles | Tag/category based; visual search out of scope |
 | Compare | Visual only; price, fabric and commercial compare removed |
-| Name, curtain, auth | Taneh; dark velvet brown; mobile + SMS OTP |
+| Name, curtain, auth | Tankhor; dark velvet brown; mobile + SMS OTP |
 | Voice | Public warm with old-bazaar flavour; Studio professional |
 
 ### 19.4 Word spec mapping (W01–W60)
 
 | ID | Word § | Point carried over | Location here |
 | --- | --- | --- | --- |
-| W01 | 1 | Provisional name «تن»; final name Taneh | §0, Q38 |
+| W01 | 1 | Provisional name «تن»; later working name تنه; final name تنخور / Tankhor | §0, Q38 |
 | W02 | 1 | Try-on on own photo; seller content without model or shoot | §1, P03, P15 |
 | W03 | 1 | Two independent paths from the start | P01, R01 |
 | W04 | 1 | No direct path Try It On → Studio | P01, P12, R161 |
@@ -1283,7 +1323,7 @@ An approved product change MUST update the related behaviour, flow, story, accep
 
 ### 19.5 References
 
-- Source: Taneh Comprehensive Product Specification v3.0 (Persian, 2 Nov 2026) and `Tan_Full_Design_Specification_v3(1).docx`.
-- Earlier base: [shared Taneh conversation](https://chatgpt.com/share/6ae46e02-4348-83ed-8205-638b9b1bb8c4) and client-supplied buyer and Studio experience texts.
+- Source: Tankhor Comprehensive Product Specification v3.0 (Persian, 2 Nov 2026) and `Tan_Full_Design_Specification_v3(1).docx`.
+- Earlier base: [shared Tankhor conversation](https://chatgpt.com/share/6ae46e02-4348-83ed-8205-638b9b1bb8c4) and client-supplied buyer and Studio experience texts.
 - Design references: [Apple Human Interface Guidelines](https://developer.apple.com/design/human-interface-guidelines), [Material Design](https://m3.material.io/), [WCAG 2.2](https://www.w3.org/WAI/WCAG22/quickref/). Brand mentions are quality references only and confer no asset licence.
 - §18 ledger patterns align with common practice, e.g. [payment ledger design](https://dodopayments.com/blogs/payment-ledger-design/) and [wallet-as-ledger](https://dev.to/ujjawal_tyagi_c5a84255da4/why-every-d2c-wallet-should-be-a-ledger-not-a-counter-2kok).
