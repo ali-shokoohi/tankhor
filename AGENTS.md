@@ -4,6 +4,13 @@
 - Product: docs/tankhor-prd.md · Behaviour detail: docs/tankhor-technical-spec.md · Decisions (final): docs/tankhor-decisions-qa.md · Stack and architecture: docs/tankhor-rust-implementation-pack.md
 - Active feature: .specify/feature.json → specs/<feature>/spec.md, plan.md, tasks.md
 
+## Sources of truth
+- Read docs/README.md first.
+- Only files marked "authoritative" in docs/README.md decide.
+- Never read docs/fa/ for decisions.
+- Never create versioned copies of documents.
+- Older versions exist only as git tags.
+
 ## How you work
 1. TDD always. Write the failing test, run it, see it fail for the right reason, then write the minimum code. Never write production code first.
 2. One task from tasks.md at a time. Tick it only when its tests pass.

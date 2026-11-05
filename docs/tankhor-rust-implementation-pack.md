@@ -479,8 +479,8 @@ IN SCOPE:
    - Every screen (console and, by extension, all future surfaces) supports Persian (RTL) and English (LTR), and light, dark and system themes.
    - Switching language or theme never alters data or unsaved input.
    - RTL rules: reading/focus order mirrors; IDs, URLs and hex codes keep their own direction; logos and photos never mirror; only directional icons flip. Persian digits in Persian prose; Latin digits in codes and IDs.
-   - Typeface Vazirmatn with its Latin; palette per approved tokens (dark velvet brown + sky blue), including `borderStrong` for meaningful control boundaries and `onCurtain` for text on the curtain; the base `border` token is never a control's only boundary (Technical Spec §12.2).
-   - One parent brand, Tankhor (تنخور), on every surface including the console; no separate logos per surface (FR-UX-17).
+   - Typeface Vazirmatn with its Latin; font stack Vazirmatn, Arial, Tahoma, sans-serif; palette per provisional tokens pending token freeze before closed beta (dark velvet brown + sky blue), including `borderControl` for meaningful control boundaries and `onCurtain` for text on the curtain; the base `border` token is never a control's only boundary (Technical Spec §12.2).
+   - One parent brand, Tankhor (تن‌خور), on every surface including the console; no separate logos per surface (FR-UX-17).
    - Accessibility baseline WCAG 2.2 AA: contrast, 44×44 touch targets, keyboard operation, visible focus, named controls, errors tied to fields and not colour-only, reduced motion.
    - All UI strings come from a managed string table keyed by surface and situation, never hard-coded.
 
@@ -1602,9 +1602,9 @@ IN SCOPE:
    - Short visual intro of both services; footer with contact channel and legal links.
    - Never wait for animation or video to navigate; reduced-motion version; deep links skip the intro.
    - All surfaces on one domain with paths (Q01); Try It On never links to Studio.
-   - Brand and motion assets from the in-house designer (Q04) with reduced-motion stills.
+   - Logo and wordmark from the owner; curtain/hand Lottie + reduced-motion stills from the in-house designer (Q04).
    - Hero, slogan, intro and footer editable via 006. The slogan is not approved yet: it comes only from the content panel, never hard-coded; the shared landing keys and `landing_ai_notice` are in Technical Spec §12.7.
-   - Logo brief starts from direction A (curtain gap); until the designer delivers, the name is rendered as text, never as a stand-in logo.
+   - Logo design is by the owner; assistant concepts are inactive. Until the owner delivers, the name is rendered as text, never as a stand-in logo.
 2. PWA (FR-PWA-01..05, Q37)
    - Installable on Android Chrome, iOS Safari (Add to Home Screen) and desktop Chromium; Firefox works as a website.
    - Install is never required; installed app opens signed-in and restores work.

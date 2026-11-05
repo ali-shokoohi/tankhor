@@ -1,6 +1,6 @@
 # Tankhor — Product Requirements Document (PRD)
 
-**Version 1.1 · 3 November 2026 · Owner: Ali Shokoohi**
+**Version 2.0.1 · 5 November 2026 · Owner: Ali Shokoohi**
 
 > **One line:** Tankhor lets Iranian shoppers see real brand clothes on their own photo before they buy, and lets Iranian sellers turn product photos into professional ad images and videos without a shoot — on one account, paid with one token wallet.
 
@@ -10,15 +10,18 @@
 
 ### 0.1 Purpose
 
-This PRD defines **what** Tankhor must do, **for whom**, **why**, and **how we will know it works**. It is the product-level companion to the *Tankhor Technical Specification v4.0*, which defines **how** engineering builds it. Where the two overlap, they agree; if they ever disagree, this PRD decides product behaviour and the technical specification decides implementation.
+This PRD defines **what** Tankhor must do, **for whom**, **why**, and **how we will know it works**. It is the product-level companion to the *Tankhor Technical Specification v4.1.1*, which defines **how** engineering builds it. Where the two overlap, they agree; if they ever disagree, this PRD decides product behaviour and the technical specification decides implementation.
 
 ### 0.2 Status and sign-off
 
 | Item | Status |
 | --- | --- |
-| Product decisions (Q01–Q41) | **All closed** on 3 Nov 2026 (see §7 and Appendix B) |
+| Product decisions (Q01–Q41) | **All closed** (3 Nov 2026) except **Q02, provisional** until token freeze before closed beta; Q02, Q04 and Q38 revised 2026-11-04 (see §7 and Appendix B) |
 | Legal sign-off: token forfeiture at account deletion (Q11) | **Pending** — must be obtained before launch |
 | Accounting sign-off: revenue recognised at token spend (Q24) | **Pending** — must be obtained before launch |
+| Q02 — Curtain colour | Revised 2026-11-04: brown, provisional until token freeze before closed beta (brandbook v2, owner) |
+| Q04 — Brand and motion assets | Revised 2026-11-04: logo by owner; curtain/hand Lottie + reduced-motion stills by in-house designer (brandbook v2, owner) |
+| Q38 — Product name | Revised 2026-11-04: Tankhor / تن‌خور (ZWNJ U+200C); Tankhor Studio / استودیو تن‌خور; Try It On «یه تن بزن», Try-ons «تن‌زده‌ها» and Set aside «نشون‌کرده‌ها» unchanged (brandbook v2, owner) |
 | Engineering review of this PRD | Pending |
 | Design review of this PRD | Pending |
 | QA review of acceptance criteria | Pending |
@@ -27,11 +30,14 @@ This PRD defines **what** Tankhor must do, **for whom**, **why**, and **how we w
 
 | Document | Role |
 | --- | --- |
-| Tankhor Technical Specification v4.0 (`tankhor-technical-spec.md` / `.pdf`) | Implementation detail, data model, ledger invariants, page specs P01–P49 |
-| Tankhor Decision Q&A (`tankhor-decisions-qa.md`) | Every decision question, every option, the chosen answer |
+| Tankhor Technical Specification v4.1.1 (`tankhor-technical-spec.md`) | Implementation detail, data model, ledger invariants, page specs P01–P49; brand values after brandbook v2 (§12) |
+| Tankhor Decision Q&A (`tankhor-decisions-qa.md`) | Every decision question, every option, the chosen answer, including the revisions of 2026-11-04 (Q02, Q04, Q38) |
+| Tankhor Rust implementation pack (`tankhor-rust-implementation-pack.md`) | Engineering reference only; its technology choices are not product requirements |
+| Brandbook v2 (`docs/brand/brandbook.html`) | Brand guide v2; its version (0.4) is recorded in `docs/README.md`. Only items accepted in `docs/brand/CHANGES.md` apply |
+| Brandbook v2 changes (`docs/brand/CHANGES.md`) | Item-by-item comparison of brandbook v2 with the previous brand baseline; Resolution column and owner answers of 2026-11-04 |
 | Tankhor Comprehensive Product Specification v3.0 (Persian) | Original source; canonical Persian UI copy |
 | `Tan_Full_Design_Specification_v3(1).docx` | Upstream design source (Word spec) |
-| Brand review (`brand-review.html`, 2 Nov 2026 draft) | Brand strategy, audience hypotheses, competitor research, voice, messaging, logo direction, contrast report. Written while the working name was تنه; where it shows Q02, Q03, Q04, Q30 or Q38 as open, the decisions in `tankhor-decisions-qa.md` win |
+| Brand review (`brand-review.html`, 2 Nov 2026 draft) | Brand strategy, audience hypotheses, competitor research, voice, messaging, logo direction, contrast report. Written under the previous working name; where it shows Q02, Q03, Q04, Q30 or Q38 as open, the decisions in `tankhor-decisions-qa.md` win |
 
 ### 0.4 How to read requirements
 
@@ -47,14 +53,61 @@ This PRD defines **what** Tankhor must do, **for whom**, **why**, and **how we w
 | **OUT** | Explicitly not part of the product. Do not build. |
 
 - **Normative words.** MUST / MUST NOT / SHOULD / MAY follow RFC 2119.
-- **Numbers.** Every number in this PRD is either a decided business rule (with its Q ID) or labelled *proposed*. All business-rule numbers are collected in §10 so they can be changed in one place.
+- **Numbers.** Every number in this PRD is either a decided business rule (with its Q ID), an owner-supplied setting bound (labelled *owner bounds 2026-11-04*), or labelled *proposed*. All business-rule numbers are collected in §10 so they can be changed in one place.
 
 ### 0.5 Change log
 
 | Version | Date | Change | Author |
 | --- | --- | --- | --- |
 | 1.0 | 3 Nov 2026 | First complete PRD; all 41 decisions applied | Ali Shokoohi |
-| 1.1 | 3 Nov 2026 | Product renamed تنخور / Tankhor (Q38 revised). Brand review applied: claims we never make (§2.4), uniqueness claim removed (§1), branded-house rule (§3.3), name clearance, slogan and logo-direction dependencies (§6.6, §17.2), control-boundary and curtain tokens (FR-UX-07), claim, brand-architecture and AI-notice rules (FR-UX-16 to FR-UX-18), name risks (RK15, RK16) | Ali Shokoohi |
+| 1.1 | 3 Nov 2026 | Product renamed تن‌خور / Tankhor (Q38 revised). Brand review applied: claims we never make (§2.4), uniqueness claim removed (§1), branded-house rule (§3.3), name clearance, slogan and logo-direction dependencies (§6.6, §17.2), control-boundary and curtain tokens (FR-UX-07), claim, brand-architecture and AI-notice rules (FR-UX-16 to FR-UX-18), name risks (RK15, RK16) | Ali Shokoohi |
+| 2.0 | 5 Nov 2026 | Owner decisions of 2026-11-04 applied: Q02 provisional until token freeze, Q04 and Q38 revised; accepted brandbook v2 items (font stack, type sizes, radii, icons, motion, `borderControl`, non-token references); owner settings bounds and lowering rules (§10.1, FR-CON-32); name, domain and brand-asset launch items. Full list in §0.5.1 | Ali Shokoohi |
+| 2.0.1 | 5 Nov 2026 | Owner decisions of 2026-11-05 on open items OI3 and OI5–OI10 applied; brand book moved to `docs/brand/brandbook.html`; FR-CON-30 table fix. Full list in §0.5.1 | Ali Shokoohi |
+
+### 0.5.1 What changed in v2.0
+
+Compared with v1.1. Changed requirement and risk rows end with "(v2)".
+
+1. **Header.** Version 2.0, 5 November 2026.
+2. **§0.1.** Companion specification is the Technical Specification v4.1 (its current version).
+3. **§0.2.** Decisions are closed except Q02 (provisional until token freeze before closed beta); rows for the 2026-11-04 revisions of Q02, Q04 and Q38. Q11 and Q24 sign-offs still pending.
+4. **§0.3.** Added `tankhor-rust-implementation-pack.md`, the brandbook v2 (now `docs/brand/brandbook.html`, see v2.0.1) and `docs/brand/CHANGES.md`; Technical Specification shown as v4.1 without a PDF copy; the brand review row no longer names the former working name.
+5. **§0.4.** Numbers rule now covers owner-supplied setting bounds.
+6. **§0.5.** v2.0 change-log row and this list.
+7. **Q38 spelling (§1, §6.6, FR-UX-17, RK15, RK16, §17.2, Appendix A).** Product name written تن‌خور with ZWNJ (U+200C); Studio «استودیو تن‌خور» / Tankhor Studio.
+8. **§6.6.** Name clearance now includes a prior-use check and is required before domain purchase and public launch; new row for the domain name (not chosen); Q04 split into logo and wordmark (owner) and curtain/hand motion assets (in-house designer); new row for brandbook v2 linked templates and PDF files from the designer.
+9. **§7.** Opening sentence: Q02 is the only provisional decision. Q01 impact notes that the domain name is not chosen. Q02, Q04 and Q38 show the current decision with *(revised 2026-11-04)*; superseded rows removed (history stays in `tankhor-decisions-qa.md`). Q03 shows the font stack.
+10. **E14, FR-CON-32 (v2).** Settings carry owner bounds with no unbounded setting; upload-format policy; lowering follows §10.1.
+11. **E17, FR-UX-06 (v2).** Vazirmatn weights 400/500/600, SIL OFL 1.1, font stack `Vazirmatn, Arial, Tahoma, sans-serif`, sizes per §10.5.
+12. **E17, FR-UX-07 (v2).** Q02 provisional; jade a documented alternative, not a token; `borderControl` (formerly `borderStrong`); non-token brand references.
+13. **E17, FR-UX-15 (v2).** Logo and wordmark by the owner; curtain/hand Lottie with reduced-motion stills by the in-house designer (Q04).
+14. **E17, FR-UX-17 (v2).** Name spelling with ZWNJ.
+15. **E17, FR-UX-19 (new).** Functional icons: 24 px canvas, 1.5–2 px stroke.
+16. **E17, FR-UX-20 (new).** One source for all visual identity values; automatic WCAG 2.2 AA text/background contrast check.
+17. **E17, FR-UX-21 (new).** Radii: controls 8 px, panels 16 px (former 24 px → 16 px); 48 px primary button; 44 × 44 px touch targets.
+18. **E17, FR-UX-22 (new).** Proposed motion: control feedback 180 ms, curtain/state continuity 500 ms; reduced-motion rules unchanged.
+19. **§10.1.** Configurable settings point to owner bounds; new tables for defaults and bounds, upload formats and lowering rules.
+20. **§10.5 (new).** Brand values after brandbook v2.
+21. **§14.** Brand and motion assets row: owner (logo, wordmark) + in-house designer (curtain/hand Lottie + reduced-motion stills).
+22. **§15.** RK15 and RK16 (v2) spelling; RK17 (new) product name trademark/prior-use conflict.
+23. **§16.6.** Contrast check names `borderControl`.
+24. **§16.7 (new).** Brand and name readiness: trademark/prior-use check, domain, Q02 at token freeze, logo, motion assets.
+25. **§17.2.** Logo row: owner-designed logo and wordmark, assistant concepts inactive (Q04); new rows for the name trademark/prior-use check, domain choice and Q02 final confirmation.
+26. **§17.3 (new).** Open items OI1–OI10.
+27. **Appendix B.** Table of the decisions revised on 2026-11-04.
+
+**v2.0.1 (2026-11-05).** Owner decisions on the v2.0 open items.
+
+1. **Header and §0.5.** Version 2.0.1; change-log row.
+2. **§0.3 (OI3).** Brandbook v2 is `docs/brand/brandbook.html` (moved from `docs/Tankhor-brand-book-v0.4.html`); its version (0.4) is recorded in `docs/README.md`.
+3. **§6.6, §7 Q04, §14, FR-UX-15, Appendix B Q04 (OI5).** Motion assets are Lottie; logo and reduced-motion stills are SVG.
+4. **FR-UX-18 (OI6).** «تن‌خور» only as the brand name (proper noun); as a common noun or descriptor of how clothes sit on the body it stays banned in UI copy because it implies fit (NG2).
+5. **FR-UX-23 (new, OI7).** No emoji in finance, consent, deletion and error copy.
+6. **§10.1 and FR-CON-32 (OI8).** A lower account deletion recovery window applies only to deletion requests made after publication; accounts already pending deletion keep the end date they were shown.
+7. **RK17 (OI9).** Impact High until OI2 is done; likelihood Unknown.
+8. **FR-UX-19 to FR-UX-22 (OI10).** P0 confirmed.
+9. **§17.3.** OI3 and OI5–OI10 closed and moved to a Closed items table; OI1, OI2 and OI4 stay open.
+10. **FR-CON-30.** The `|` inside the code span is escaped so the table renders; wording unchanged.
 
 ---
 
@@ -63,7 +116,7 @@ This PRD defines **what** Tankhor must do, **for whom**, **why**, and **how we w
 **What we are building.** One product, two experiences, one wallet:
 
 1. **Try It On** («یه تن بزن») — a public, image-first gallery of real Iranian brand clothes. A shopper picks a garment, adds one photo of themselves, pays a few tokens, and sees an AI-generated image of themselves wearing it. They keep results, compare up to three side by side, and leave to the brand's own store to buy. Tankhor is not a store and never shows prices.
-2. **Tankhor Studio** («استودیو تنخور») — a professional content studio for sellers. A seller picks curated styles and models, assigns their own product photos to each style, and generates ad-ready images (2048 px) or short videos (1080p, up to 10 s). One upload can produce many colour variants. Outputs can be submitted for publication inside Tankhor.
+2. **Tankhor Studio** («استودیو تن‌خور») — a professional content studio for sellers. A seller picks curated styles and models, assigns their own product photos to each style, and generates ad-ready images (2048 px) or short videos (1080p, up to 10 s). One upload can produce many colour variants. Outputs can be submitted for publication inside Tankhor.
 3. **Owner Console** — a separate, secure admin app that controls content, pricing, AI providers, publishing review, users, finance, rollout and recovery, without anyone touching code or storage.
 
 **Who pays and how.** Every user has one token wallet, topped up in rial (IRR) through a domestic payment gateway. Every generation is priced in tokens, shown before confirmation, and charged only on explicit confirmation. Failed generations return their tokens automatically.
@@ -310,8 +363,11 @@ Visual search, before/after slider, internal messaging or social features, publi
 | AI providers (primary + backup per capability) | All generation | Required before alpha; reachability and billing from Iran verified |
 | Licensed launch catalogue (curated set) | Try It On gallery | Required before beta |
 | Licensed Studio styles, models and sample projects | Studio | Required before beta |
-| Name clearance for تنخور / Tankhor: trademark search in target classes and jurisdictions, app-store and social handles (Q38); no domain check needed | Brand assets, launch | Required before brand assets are finalised; not started |
-| Brand assets (logo, wordmark, curtain/hand motion) from in-house designer (Q04); brand review recommends logo direction A (curtain gap + FA/EN wordmark) as the starting brief | Landing, waiting, reveal | Required before beta |
+| Name clearance for تن‌خور / Tankhor: trademark and prior-use search in target classes and jurisdictions (brandbook v2 reports a prior software use of the name without a source), app-store and social handles (Q38); no domain check needed | Brand assets, domain purchase, launch | Required before brand assets are finalised, and before domain purchase and public launch; not started |
+| Domain name (Q01 fixes one domain with paths; the name itself is not chosen) | Launch | Not chosen; to be chosen after the trademark and prior-use check, before public launch (§17.2, OI1) |
+| Logo and wordmark as SVG from the owner (Q04, revised 2026-11-04) | Landing, waiting, reveal | Required before beta |
+| Curtain/hand motion assets as Lottie + reduced-motion stills as SVG from the in-house designer (Q04, revised 2026-11-04) | Landing, waiting, reveal | Required before beta |
+| Brandbook v2 linked templates (T01–T10) and PDF files from the designer | Brand reference, application templates | Not supplied; needed-by date not set (§17.3, OI4) |
 | Approved slogan, FA and EN | Landing hero (FR-LND-02) | Required before beta; brand-review proposals are not approved |
 | Legal review of Q11, accounting review of Q24 | Account deletion, reports | Required before beta |
 
@@ -319,14 +375,14 @@ Visual search, before/after slider, internal messaging or social features, publi
 
 ## 7. Key product decisions
 
-All decisions are final. Full options and rationale are in `tankhor-decisions-qa.md`.
+All decisions are final except **Q02**, which is provisional until token freeze before closed beta. Decisions changed on 2026-11-04 are marked *(revised 2026-11-04)*. Full options, rationale and superseded answers are in `tankhor-decisions-qa.md`.
 
 | ID | Decision | Product impact |
 | --- | --- | --- |
-| Q01 | One domain, path-based surfaces | One shared session; simple sign-in across surfaces |
-| Q02 | Curtain is dark velvet brown | Brand signature; palette fixed |
-| Q03 | Vazirmatn font (with its Latin) | Consistent FA/EN typography |
-| Q04 | In-house designer makes logo and motion assets | Asset delivery is an internal dependency |
+| Q01 | One domain, path-based surfaces | One shared session; simple sign-in across surfaces; the domain name itself is not chosen (§6.6) |
+| Q02 | Curtain is dark velvet brown, **provisional** until token freeze before closed beta; jade remains a documented alternative in brandbook v2 *(revised 2026-11-04)* | Brand signature; palette provisional until token freeze (§17.2) |
+| Q03 | Vazirmatn font (with its Latin); font stack Vazirmatn, Arial, Tahoma, sans-serif | Consistent FA/EN typography |
+| Q04 | Logo (SVG) by the owner; curtain/hand motion as Lottie + reduced-motion stills as SVG by the in-house designer *(revised 2026-11-04)* | Two asset dependencies: owner logo, in-house motion handoff (§6.6) |
 | Q05 | Uploads ≤ 15 MB, JPEG/PNG/WebP/HEIC, shortest edge ≥ 512 px | Clear limits, rejected before payment |
 | Q06 | "Save all uploaded photos" ON by default; unsaved uploads purged after 30 days | Sellers build a library automatically |
 | Q07 | Catalogue: curated launch set + brand self-service later | Launch depends on a curated, licensed set |
@@ -360,7 +416,7 @@ All decisions are final. Full options and rationale are in `tankhor-decisions-qa
 | Q35 | Share withdrawal hides output immediately | Seller control |
 | Q36 | Pricing = base per output type + style premium (+ recolour add-on) | Flexible pricing, simple mental model |
 | Q37 | PWA on Android Chrome, iOS Safari, desktop Chromium | App-like install |
-| Q38 | Name: تنخور / Tankhor (revised 3 Nov 2026 after the brand review; was تنه / Taneh) | Brand fixed; name clearance still pending (§6.6) |
+| Q38 | Name: تن‌خور / Tankhor (ZWNJ U+200C between تن and خور); Studio: Tankhor Studio / «استودیو تن‌خور»; «یه تن بزن», «تن‌زده‌ها» and «نشون‌کرده‌ها» unchanged *(revised 2026-11-04)* | Brand fixed; name clearance and domain choice still pending (§6.6) |
 | Q39 | One garment per try-on | Clear cost and result |
 | Q40 | Buyer photo gallery up to 5, one default | Fast reuse |
 | Q41 | Optional profile: height and weight only | Minimal personal data |
@@ -845,9 +901,9 @@ Requirements are grouped into 17 epics. Each epic gives: purpose, requirements w
 | FR-CON-27 | Finance and pricing | Token packs, custom-amount rules, bulk-buy discount tiers; base price per output type (try-on, Studio image, Studio video), recolour add-on, per-style premiums. Versioned; confirmed units keep their price. Payment, token, return, adjustment and forfeiture ledgers; reconciliation view; `unknown` payment queue. | P0 | P36, Q36 |
 | FR-CON-28 | AI management | Per capability (try-on, Studio image, Studio video, recolour): primary and one backup provider and model, auto-fallback ON at launch with conditions, cost cap with alert and automatic stop, connection test that never charges users or double-generates, provider latency/cost/error dashboards. Full keys never shown. | P0 | P37, Q25, R79–R82 |
 | FR-CON-29 | Content and pages | No-code editing of text, images, video, section order, cards, menus, models, styles, campaigns and bilingual copy (including all microcopy keys). Hiding a section warns about user paths that depend on it. | P0 | P38, R77 |
-| FR-CON-30 | Bulk import | CSV import: one CSV per entity (styles, models, garments, relations) plus a media archive; UTF-8 with BOM; stable IDs; FA/EN names; file references; relations as `|`-separated ID lists. Validate into staging; show per-row errors (missing file, duplicate ID, invalid relation); publish as one content version; produce an import report. Downloadable templates with examples. | P0 | Q26, R78 |
+| FR-CON-30 | Bulk import | CSV import: one CSV per entity (styles, models, garments, relations) plus a media archive; UTF-8 with BOM; stable IDs; FA/EN names; file references; relations as `\|`-separated ID lists. Validate into staging; show per-row errors (missing file, duplicate ID, invalid relation); publish as one content version; produce an import report. Downloadable templates with examples. | P0 | Q26, R78 |
 | FR-CON-31 | Language, theme, design | Translations, colours, components, media and animation managed here with full preview; missing translations visible and blocked by publish policy. | P0 | P40 |
-| FR-CON-32 | Settings and flags | Every tunable (buyer temp photo TTL 14 d, Studio temp upload TTL 30 d, draft TTL 30 d, card limit 50, upload limits, campaigns, gifts, usage caps) has unit, value, allowed range, effective time and history. Shortening a TTL shows its impact before publishing. P0-OFF features each have an enable switch, impact preview and health check. Security and financial integrity cannot be weakened by settings. | P0 | P41, R72 |
+| FR-CON-32 | Settings and flags | Every tunable has unit, value, allowed range, effective time and history; no setting is unbounded. Defaults and owner bounds (§10.1, owner bounds 2026-11-04): buyer temporary photo lifetime 14 days (1–30 days); Studio temporary upload lifetime 30 days (7–90 days); Studio auto-draft lifetime 30 days (1–90 days); account deletion recovery window 30 days (14–90 days); cards per project 50 (1–100); permanent buyer photos 5 (1–10); upload size 15 MB (1 MB–25 MB); minimum shortest edge 512 px (256 px–1024 px); generation attempt limit 3 (1–3). Upload formats: only JPEG, PNG, WebP and HEIC can be offered; any subset may be enabled, JPEG is always enabled and at least one format stays enabled; no other format can be added through settings. Campaigns, gifts and usage caps are also settings. Lowering a setting shows its impact before publishing and follows the lowering rules in §10.1; a lower account deletion recovery window applies only to deletion requests made after publication, and accounts already pending deletion keep the end date they were shown. P0-OFF features each have an enable switch, impact preview and health check. Security and financial integrity cannot be weakened by settings. (v2) | P0 | P41, R72 |
 | FR-CON-33 | Percentage rollout | Stable audience assignment by account; rollback tested; OFF at launch. | P0-OFF | R94 |
 | FR-CON-34 | Per-user usage limits | Configurable caps with user-facing messages; OFF at launch. | P0-OFF | R92 |
 | FR-CON-35 | Operations and recovery | Queue, service health, cost, errors, SMS delivery, backup status. Daily full backups + continuous WAL; RPO 1 h; RTO 4 h; backups retained 30 days; recorded restore drills. | P0 | P43, Q27, R88 |
@@ -911,8 +967,8 @@ Requirements are grouped into 17 epics. Each epic gives: purpose, requirements w
 | FR-UX-03 | Switching language or theme never changes selections, assembly, financial data or results. | P0 | §12.1 |
 | FR-UX-04 | FA: RTL reading and focus order; IDs, URLs and hex codes keep their own direction; logos and product photos are never mirrored; only directional icons flip. | P0 | §12.1 |
 | FR-UX-05 | Persian digits in Persian prose; Latin digits in URLs, codes and IDs. Money labelled in rial (IRR). | P0 | §12.3 |
-| FR-UX-06 | Typeface: Vazirmatn (with its Latin), Tahoma and sans-serif fallback, self-hosted. | P0 | Q03 |
-| FR-UX-07 | Palette per approved tokens (dark velvet brown + sky blue), including `borderStrong` for meaningful control boundaries and `onCurtain` for text on the curtain. Every text/background pair (≥ 4.5:1, large ≥ 3:1) and control-boundary pair (≥ 3:1) is verified on the unrounded ratio before token freeze. The base `border` token fails 3:1 and MUST NOT be a control's only boundary; small white text on light sky is not allowed. | P0 | Q02, Tech Spec §12.2 |
+| FR-UX-06 | Typeface: Vazirmatn (with its Latin), weights 400, 500 and 600, licensed under SIL OFL 1.1, self-hosted; font stack `Vazirmatn, Arial, Tahoma, sans-serif`. Type sizes and line heights follow §10.5. (v2) | P0 | Q03, Tech Spec §12.3 |
+| FR-UX-07 | Palette per provisional tokens pending token freeze before closed beta (dark velvet brown + sky blue; Q02 provisional, jade remains a documented alternative in brandbook v2 and is not a token), including `borderControl` (formerly `borderStrong`; values unchanged) for meaningful control boundaries and `onCurtain` for text on the curtain. Every text/background pair (≥ 4.5:1, large ≥ 3:1) and control-boundary pair (≥ 3:1) is verified on the unrounded ratio before token freeze. The base `border` token fails 3:1 and MUST NOT be a control's only boundary; small white text on light sky is not allowed. Brandbook v2 tonal scales and surface/gradient recipes are non-token brand references only (§10.5). (v2) | P0 | Q02, Tech Spec §12.2, §12.8 |
 | FR-UX-08 | Accessibility target WCAG 2.2 AA: text contrast ≥ 4.5:1 (large ≥ 3:1); touch targets 44 × 44 px; full keyboard operation; visible focus; named controls; alt text; screen-reader status for generation; errors tied to fields and not colour-only; zoom/reflow; no traps. | P0 | §12.6 |
 | FR-UX-09 | Auto-motion longer than 5 s (ring, poster, campaigns) MUST have pause/stop. Reduced-motion mode everywhere. Hover always has touch and keyboard equivalents. | P0 | §12.6 |
 | FR-UX-10 | **Try It On voice**: warm, patient old-bazaar seller; informal «تو»; short spoken sentences; no pressure, no fit promises; dialect words like «حاجی», «آبجی», «داداش» not used repeatedly. | P0 | R175 |
@@ -920,10 +976,15 @@ Requirements are grouped into 17 epics. Each epic gives: purpose, requirements w
 | FR-UX-12 | Shared pages (sign-in, wallet) use neutral main copy; short hints may follow the origin surface. | P0 | §12.7 |
 | FR-UX-13 | Money and consent copy is always explicit: numbers, units, effect; "free" only when cost is 0; "returned" only after it is recorded; storage and publication consent never hidden behind friendly tone. | P0 | §12.7 |
 | FR-UX-14 | All UI strings live in the content panel, keyed by surface and situation (copy keys in Technical Spec §12.7). | P0 | P38 |
-| FR-UX-15 | Brand assets (logo, Latin wordmark, curtain/hand motion) delivered by the in-house designer as Lottie/SVG with reduced-motion stills. | P0 | Q04 |
+| FR-UX-15 | Logo and Latin wordmark delivered by the owner as SVG; curtain/hand motion as Lottie with reduced-motion stills as SVG delivered by the in-house designer. (v2) | P0 | Q04 |
 | FR-UX-16 | Public and in-product copy MUST NOT use the claims in §2.4. Each capability claim on a public page maps to delivered, tested behaviour; concept or teaser copy is labelled as a concept, not a launch. | P0 | §2.4, Tech Spec §12.7 |
-| FR-UX-17 | Brand architecture: one parent brand, تنخور / Tankhor. «یه تن بزن» / Try It On names the buyer experience and its main action; «استودیو تنخور» / Tankhor Studio names the seller experience, shortened to «استودیو» inside Studio. Wallet, account and Owner Console carry the parent brand, not their own logos. | P0 | Q38, R01 |
-| FR-UX-18 | AI notice text is fixed: FA «این تصویر با هوش مصنوعی ساخته شده و تضمین اندازه یا فرم واقعی لباس روی تن نیست.», EN "AI-generated image. It does not guarantee size or real-world fit." Persian copy MUST NOT use the common noun «تن‌خور» ("fit") where it can be read as the brand name. | P0 | R118, Q38 |
+| FR-UX-17 | Brand architecture: one parent brand, تن‌خور / Tankhor. «یه تن بزن» / Try It On names the buyer experience and its main action; «استودیو تن‌خور» / Tankhor Studio names the seller experience, shortened to «استودیو» inside Studio. Wallet, account and Owner Console carry the parent brand, not their own logos. (v2) | P0 | Q38, R01 |
+| FR-UX-18 | AI notice text is fixed: FA «این تصویر با هوش مصنوعی ساخته شده و تضمین اندازه یا فرم واقعی لباس روی تن نیست.», EN "AI-generated image. It does not guarantee size or real-world fit." «تن‌خور» is used only as the brand name (proper noun); Persian UI copy MUST NOT use it as a common noun or descriptor of how clothes sit on the body, because that implies fit (NG2). (v2) | P0 | R118, Q38, NG2 |
+| FR-UX-19 | Functional icons use a 24 px canvas and a 1.5–2 px stroke. (v2) | P0 | Tech Spec §12.1 |
+| FR-UX-20 | All visual identity values (colour tokens, type, radii, icon and motion values) come from one source, so a brand change touches only that source. Every text/background pair is checked automatically against WCAG 2.2 AA (≥ 4.5:1, large text ≥ 3:1). (v2) | P0 | FR-CON-31, Tech Spec §12.2, §12.6 |
+| FR-UX-21 | Corner radii: controls 8 px, panels 16 px; former 24 px radii use 16 px. Primary button height 48 px; touch targets 44 × 44 px (FR-UX-08). (v2) | P0 | Tech Spec §12.3 |
+| FR-UX-22 | Motion durations (*proposed*): control feedback 180 ms, curtain/state continuity 500 ms, tuned on real prototypes. Reduced-motion rules are unchanged (FR-LND-08, FR-UX-09). (v2) | P0 | Tech Spec §12.4 |
+| FR-UX-23 | No emoji in finance, consent, deletion and error copy. (v2) | P0 | Tech Spec §12.7 |
 
 ---
 
@@ -994,21 +1055,48 @@ Every decided number and rule in one place. Values marked *configurable* are edi
 | Rule | Value | Configurable | Source |
 | --- | --- | --- | --- |
 | Garments per try-on request | 1 | No | Q39 |
-| Personal photos (permanent) per buyer | 5, one default | Yes | Q40 |
-| Buyer temporary photo lifetime | 14 days | Yes | R15 |
-| Upload max size | 15 MB | Yes | Q05 |
-| Upload formats | JPEG, PNG, WebP, HEIC | Yes | Q05 |
-| Upload minimum shortest edge | 512 px | Yes | Q05 |
+| Personal photos (permanent) per buyer | 5, one default | Yes, within owner bounds (below) | Q40 |
+| Buyer temporary photo lifetime | 14 days | Yes, within owner bounds (below) | R15 |
+| Upload max size | 15 MB | Yes, within owner bounds (below) | Q05 |
+| Upload formats | JPEG, PNG, WebP, HEIC | Yes, within owner bounds (below) | Q05 |
+| Upload minimum shortest edge | 512 px | Yes, within owner bounds (below) | Q05 |
 | Results compared at once | 1–3 | No | R23 |
-| Cards per Studio project | 50 | Yes | Q15 |
-| Studio auto-draft lifetime | 30 days from last activity | Yes | Q32 |
+| Cards per Studio project | 50 | Yes, within owner bounds (below) | Q15 |
+| Studio auto-draft lifetime | 30 days from last activity | Yes, within owner bounds (below) | Q32 |
 | "Save all uploaded photos" default | ON | Per seller | Q06 |
-| Studio temporary upload lifetime (setting OFF) | 30 days from upload | Yes | Q06 |
-| Account deletion recovery window | 30 days | Yes | R26 |
-| Internal attempts per generation unit | 3 | Yes | Q29 |
+| Studio temporary upload lifetime (setting OFF) | 30 days from upload | Yes, within owner bounds (below) | Q06 |
+| Account deletion recovery window | 30 days | Yes, within owner bounds (below) | R26 |
+| Internal attempts per generation unit | 3 | Yes, within owner bounds (below) | Q29 |
 | Backup retention | 30 days | Ops | Q27 |
 | RPO / RTO | 1 hour / 4 hours | Ops | Q27 |
 | Launch load-test target | 1,000 generations/day, tested at 2× | — | Q28 |
+
+**Configurable settings: defaults and owner bounds** (owner bounds 2026-11-04). Every configurable setting has a minimum and a maximum; no setting has "no upper bound".
+
+| Setting | Default | Min | Max | Decision source |
+| --- | --- | --- | --- | --- |
+| Buyer temporary photo lifetime | 14 days | 1 day | 30 days | R15; owner bounds 2026-11-04 |
+| Studio temporary upload lifetime | 30 days | 7 days | 90 days | Q06; owner bounds 2026-11-04 |
+| Studio auto-draft lifetime | 30 days | 1 day | 90 days | Q32; owner bounds 2026-11-04 |
+| Account deletion recovery window | 30 days | 14 days | 90 days | R26; owner bounds 2026-11-04 |
+| Cards per project | 50 | 1 | 100 | Q15; owner bounds 2026-11-04 |
+| Permanent buyer photos | 5 | 1 | 10 | Q40; owner bounds 2026-11-04 |
+| Upload size | 15 MB | 1 MB | 25 MB | Q05; owner bounds 2026-11-04 |
+| Minimum shortest edge | 512 px | 256 px | 1024 px | Q05; owner bounds 2026-11-04 |
+| Generation attempt limit | 3 | 1 | 3 | Q29; owner bounds 2026-11-04 |
+
+**Upload formats** (Q05; owner bounds 2026-11-04). The allowed set is exactly JPEG, PNG, WebP and HEIC. An admin may enable any subset; JPEG is always enabled; at least one format is enabled; no other format can be added through settings.
+
+**Lowering a setting** (owner bounds 2026-11-04)
+
+| Setting group | Rule when the value is lowered |
+| --- | --- |
+| Lifetimes (buyer temporary photo, Studio temporary upload, Studio auto-draft) | The impact is previewed before publishing. Each item's lifetime is counted from its original start (upload or last activity), never from publication. Items past the new limit are purged at the next sweep, only after the change is published. |
+| Account deletion recovery window | The impact is previewed before publishing. A lower window applies only to deletion requests made after the change is published; accounts already pending deletion keep the end date they were shown. |
+| Cards per project | Existing drafts and saved projects above the limit stay intact; they cannot add cards and cannot be created until they are at or below the limit. Confirmed projects are unaffected. |
+| Permanent buyer photos | Users above the limit keep their photos and cannot add another permanent photo until they are below the limit. |
+| Upload size, formats, minimum shortest edge | Apply to new uploads only; stored files are never re-validated. |
+| Generation attempt limit | Applies to units queued after the change is published; units already processing keep their starting limit. |
 
 ### 10.2 Outputs
 
@@ -1052,6 +1140,29 @@ Every decided number and rule in one place. Values marked *configurable* are edi
 | Share publication | Admin approval; store name + valid link | Q19 |
 | Share withdrawal | Immediate removal from public display | Q35 |
 | Catalogue images | Signed image-use licence required | Q07 |
+
+### 10.5 Brand values (brandbook v2)
+
+Values are taken from Technical Specification §12 after brandbook v2. Only items accepted in `docs/brand/CHANGES.md` apply. Values marked *proposed* are tuned on real samples before token freeze.
+
+| Item | Value | Source |
+| --- | --- | --- |
+| Font stack | `Vazirmatn, Arial, Tahoma, sans-serif` | Q03; Tech Spec §12.3 |
+| Vazirmatn weights and licence | 400 (body, caption), 500 (controls), 600 (titles); SIL OFL 1.1; self-hosted | Q03; Tech Spec §12.3 |
+| Hero title, desktop | 48 px, 600 / 1.4 *(proposed)* | Tech Spec §12.3 |
+| Hero title, mobile | 32 px, 600 / 1.4 *(proposed)* | Tech Spec §12.3 |
+| Section title | 28 px (large screen) / 24 px (small screen), 600 / 1.5 *(proposed)* | Tech Spec §12.3 |
+| Body | 16 px, 400 / 1.8 (FA) *(proposed)* | Tech Spec §12.3 |
+| Control | 16 px, 500 / 1.6 *(proposed)* | Tech Spec §12.3 |
+| Caption | 14 px, 400 / 1.7 *(proposed)* | Tech Spec §12.3 |
+| Corner radii | Controls 8 px, panels 16 px; former 24 px radii use 16 px | Tech Spec §12.3 |
+| Primary button height | 48 px | Tech Spec §12.3 |
+| Touch target | 44 × 44 px | Tech Spec §12.3, §12.6 |
+| Functional icons | 24 px canvas, 1.5–2 px stroke | Tech Spec §12.1 |
+| Motion | Control feedback 180 ms, curtain/state continuity 500 ms *(proposed)*; reduced-motion rules unchanged | Tech Spec §12.4 |
+| Control-boundary token | `borderControl` (formerly `borderStrong`): light #185B7A, dark #A7DBF3 | Tech Spec §12.2 |
+| Palette | Dark velvet brown + sky blue, provisional until token freeze before closed beta; jade is a documented alternative, not a token | Q02; Tech Spec §12.2 |
+| Non-token brand references | Brown, jade and action-blue tonal scales (50–950) and four surface/gradient recipes (curtain folds, sky wash, quiet surface, photo scrim). Exploratory references only; never tokens or replacements for them | Tech Spec §12.8 |
 
 ---
 
@@ -1281,7 +1392,7 @@ Distributed tracing from confirm to notification per unit; dashboards for queue,
 | Object storage + CDN | Media | Private/public separation; signed URLs; lifecycle via app-driven sweeps | Upload errors shown before cost; outputs stored before success |
 | Partner stores (allowlist) | Garment links (Q31), widget (P0-OFF) | Host on allowlist; licence on file | Non-allowlisted → upload fallback |
 | Brand catalogue sources | Launch gallery | Signed image-use licences; valid store links | Unlicensed items never public |
-| In-house design | Brand and motion assets | Logo, wordmark, curtain/hand motion as Lottie/SVG + reduced-motion stills | Static fallback images |
+| Owner + in-house design | Brand and motion assets | Owner: logo and wordmark (SVG); in-house designer: curtain/hand motion (Lottie) + reduced-motion stills (SVG) | Static fallback images |
 
 ---
 
@@ -1303,8 +1414,9 @@ Distributed tracing from confirm to notification per unit; dashboards for queue,
 | RK12 | Content ops struggle with CSV (Persian encoding) | Medium | Low | UTF-8 BOM templates, examples, per-row error report | Content ops |
 | RK13 | Abuse: repeated "unwanted output" claims or free-campaign farming | Medium | Medium | Support review only (Q13); per-user caps built (P0-OFF) and ready to enable | Ops |
 | RK14 | Load above 1,000/day at launch spike | Low | Medium | Load test at 2×; horizontal workers; emergency stop; queue honesty | Engineering |
-| RK15 | Name تنخور collides with the common noun «تن‌خور» ("fit"), so AI notices read as brand claims, or the Latin form is misspelled (Tankhor / Tankhur / Tanxor) | Medium | Medium | FR-UX-18 copy rule; Latin spelling fixed in Q38; pronunciation, spelling and unaided-recall test with Persian speakers before assets are final | Product + design |
-| RK16 | Trademark or handle conflict for تنخور / Tankhor found after brand assets are made | Unknown | High | Name clearance before brand assets are finalised (§6.6); no public use before clearance | Owner + legal |
+| RK15 | Name تن‌خور collides with the common noun «تن‌خور» ("fit"), so AI notices read as brand claims, or the Latin form is misspelled (Tankhor / Tankhur / Tanxor) (v2) | Medium | Medium | FR-UX-18 copy rule; Latin spelling fixed in Q38; pronunciation, spelling and unaided-recall test with Persian speakers before assets are final | Product + design |
+| RK16 | Trademark or handle conflict for تن‌خور / Tankhor found after brand assets are made (v2) | Unknown | High | Name clearance before brand assets are finalised (§6.6); no public use before clearance | Owner + legal |
+| RK17 | Product name trademark/prior-use conflict (unsourced prior-use report in brandbook v2) (v2) | Unknown | High until OI2 is done | Trademark search before domain purchase and public launch | Owner + legal |
 
 ---
 
@@ -1357,8 +1469,16 @@ All items must be checked before **public launch**. Items marked † must also b
 
 - [ ] WCAG 2.2 AA audit on core journeys; blocking issues fixed.
 - [ ] Persian copy reviewed against voice rules for both surfaces; English copy reviewed for natural tone.
-- [ ] All tokens pass contrast checks on real samples, including control boundaries (`borderStrong` ≥ 3:1).
+- [ ] All tokens pass contrast checks on real samples, including control boundaries (`borderControl` ≥ 3:1).
 - [ ] Public and in-product copy checked against the claims in §2.4 (FR-UX-16).
+
+### 16.7 Brand and name
+
+- [ ] Trademark/prior-use check for Tankhor completed.
+- [ ] Domain chosen.
+- [ ] † Q02 palette confirmed at token freeze.
+- [ ] † Logo delivered by owner.
+- [ ] † Motion assets delivered.
 
 ---
 
@@ -1382,11 +1502,36 @@ All items must be checked before **public launch**. Items marked † must also b
 | Q11 token forfeiture | Legal | Closed beta |
 | Q24 revenue recognition | Accounting | Closed beta |
 | Final palette contrast verification | Design | Token freeze, before beta |
-| Name clearance for تنخور / Tankhor (trademark, handles) | Owner + legal | Before brand assets are finalised |
-| Logo direction: A curtain gap (recommended), B Persian wordmark, C presentation frame | Owner + in-house designer (Q04) | Before brand-asset production |
+| Name clearance for تن‌خور / Tankhor (trademark, handles) | Owner + legal | Before brand assets are finalised |
+| Name trademark and prior-use check for تن‌خور / Tankhor | Owner + legal | Before public launch (and before domain purchase) |
+| Domain choice | Owner | Before public launch, after the trademark and prior-use check |
+| Q02 final confirmation of the brown palette | Owner | By token freeze, before closed beta |
+| Owner-designed logo and wordmark; assistant concepts inactive | Owner (Q04) | Before brand-asset production |
 | Slogan, FA and EN (brand-review proposal «لباس، در تصویری تازه» / "Clothing, in a new frame." is not approved) | Owner | Before beta |
 | KPI targets K1–K10 | Owner | 4 weeks after public launch |
 | *Proposed* NFR values (§12) | Engineering + owner | End of alpha |
+
+### 17.3 Open items
+
+Questions the sources do not answer. None of them is decided by this PRD.
+
+| ID | Open question | Owner | Needed by |
+| --- | --- | --- | --- |
+| OI1 | Which domain name will Tankhor use? Q01 fixes one domain with path-based surfaces, not the name. Brandbook v2 lists candidates that are neither bought nor reserved. | Owner | Before public launch, after OI2 |
+| OI2 | Is تن‌خور / Tankhor clear of trademark conflicts and prior use? Brandbook v2 reports a prior software use of the name without a source. | Owner + legal | Before domain purchase and public launch |
+| OI4 | When will the designer deliver the brandbook v2 linked templates (T01–T10), companion package and PDF files? | Owner + in-house designer | Not set |
+
+**Closed items**
+
+| ID | Question | Resolution |
+| --- | --- | --- |
+| OI3 | The brandbook v2 PDF is not in the repository. Is the HTML brand book (then at `docs/Tankhor-brand-book-v0.4.html`) the intended v2 content, and when will the PDF be added? | Closed 2026-11-05 (owner): the HTML brand book, moved to `docs/brand/brandbook.html`, is the brandbook v2; its version (0.4) is recorded in `docs/README.md`; no PDF is required. |
+| OI5 | Motion asset format: the revised Q04 in `tankhor-decisions-qa.md` says curtain/hand Lottie + reduced-motion stills; the v2.0 brief said Lottie/SVG. Is SVG also a required deliverable? | Closed 2026-11-05 (owner): motion assets are Lottie; logo and reduced-motion stills are SVG (FR-UX-15, §6.6, §14). |
+| OI6 | The brand is now spelled «تن‌خور», the same string as the common noun «تن‌خور» ("fit") that FR-UX-18 keeps out of Persian UI copy. Does the rule stand as written, and how should copy distinguish the two? | Closed 2026-11-05 (owner): «تن‌خور» is allowed only as the brand name (proper noun); as a common noun or descriptor of how clothes sit on the body it stays banned in UI copy because it implies fit (NG2) (FR-UX-18). |
+| OI7 | `docs/brand/CHANGES.md` accepts a brandbook v2 rule of no emoji in finance, consent, deletion or error copy. The technical specification does not contain it. Should it become a requirement? | Closed 2026-11-05 (owner): adopted as FR-UX-23. |
+| OI8 | When the account deletion recovery window is lowered, does the new limit apply to accounts already pending deletion whose end date was shown to the user (FR-IDN-12)? | Closed 2026-11-05 (owner): a lower window applies only to deletion requests made after publication; accounts already pending deletion keep the end date they were shown (§10.1, FR-CON-32). |
+| OI9 | What are the likelihood and impact of RK17? | Closed 2026-11-05 (owner): likelihood Unknown, impact High until OI2 is done (RK17). |
+| OI10 | FR-UX-19 to FR-UX-22 are set to P0 like the other E17 brand requirements; no source states their priority. Confirm. | Closed 2026-11-05 (owner): FR-UX-19 to FR-UX-22 confirmed P0. |
 
 ---
 
@@ -1394,9 +1539,9 @@ All items must be checked before **public launch**. Items marked † must also b
 
 | Term | Meaning |
 | --- | --- |
-| Tankhor (تنخور) | Product name |
+| Tankhor (تن‌خور) | Product name |
 | Try It On («یه تن بزن») | Shopper experience |
-| Tankhor Studio («استودیو تنخور») | Seller experience |
+| Tankhor Studio («استودیو تن‌خور») | Seller experience |
 | Owner Console | Admin app |
 | Target item | The single garment of an outfit that a try-on applies |
 | Try-ons («تن‌زده‌ها») | Shopper's gallery of successful results |
@@ -1419,6 +1564,14 @@ All items must be checked before **public launch**. Items marked † must also b
 ## Appendix B — Decisions
 
 All 41 decisions with every option offered and the chosen answer are in `tankhor-decisions-qa.md`. A summary is in §7 of this PRD.
+
+Decisions revised on 2026-11-04 (all others are unchanged since 3 Nov 2026). Q02 is the only provisional decision.
+
+| ID | Current decision |
+| --- | --- |
+| Q02 | Curtain is dark velvet brown, provisional until token freeze before closed beta; jade remains a documented alternative in brandbook v2 *(revised 2026-11-04)* |
+| Q04 | Logo (SVG) by the owner; curtain/hand motion as Lottie + reduced-motion stills as SVG by the in-house designer *(revised 2026-11-04)* |
+| Q38 | تن‌خور / Tankhor (ZWNJ U+200C between تن and خور); Tankhor Studio / «استودیو تن‌خور»; «یه تن بزن», «تن‌زده‌ها» and «نشون‌کرده‌ها» unchanged *(revised 2026-11-04)* |
 
 ## Appendix C — Traceability: epics to technical specification
 

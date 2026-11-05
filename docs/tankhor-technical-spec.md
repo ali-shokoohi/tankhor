@@ -1,17 +1,18 @@
 # Tankhor — Technical Specification
 
-**Version 4.1 (final) · 3 November 2026 · Ali Shokoohi**
+**Version 4.1.1 (final) · 5 November 2026 · Ali Shokoohi**
 
 ## 0. Document control
 
-This is the final English engineering specification for **Tankhor** (تنخور). It translates the Persian *Tankhor Comprehensive Product Specification v3.0* (2 Nov 2026), itself reconciled with `Tan_Full_Design_Specification_v3(1).docx`, and merges all 41 product decisions taken on 3 Nov 2026. No decision is left open; every former "open" item now states its approved rule and points to its Q ID.
+This is the final English engineering specification for **Tankhor** (تن‌خور). It translates the Persian *Tankhor Comprehensive Product Specification v3.0* (2 Nov 2026), itself reconciled with `Tan_Full_Design_Specification_v3(1).docx`, and merges all 41 product decisions taken on 3 Nov 2026. No decision is left open; every former "open" item now states its approved rule and points to its Q ID.
 
 | Item | Value |
 | --- | --- |
 | Source | Tankhor Comprehensive Product Specification v3.0 (Persian), 2 Nov 2026 |
 | Upstream authority | Word spec v3; owner decisions of 3 Nov 2026 (§16) override earlier open items |
-| Product name | **Tankhor** (تنخور), final (Q38, revised 3 Nov 2026 after the brand review; previously تنه / Taneh). Buyer surface: **Try It On** («یه تن بزن»). Seller surface: **Tankhor Studio** («استودیو تنخور») |
-| Brand reference | `brand-review.html` (2 Nov 2026 draft, written under the working name تنه). Its strategy, voice, messaging, logo and contrast findings are applied in §12; where it shows Q02, Q03, Q04, Q30 or Q38 as open, §16 wins |
+| Product name | **Tankhor** (تن‌خور), final (Q38, Revised 2026-11-04, owner). Buyer surface: **Try It On** («یه تن بزن»). Seller surface: **Tankhor Studio** («استودیو تن‌خور») |
+| Product name (superseded) | **Tankhor** (تنخور), final (Q38, revised 3 Nov 2026 after the brand review; previously تنه / Taneh). Buyer surface: **Try It On** («یه تن بزن»). Seller surface: **Tankhor Studio** («استودیو تنخور») |
+| Brand reference | `brand-review.html` (2 Nov 2026 draft, written under the working name تنه). Its strategy, voice, messaging, logo and contrast findings are applied in §12; where it shows Q02, Q03, Q04, Q30 or Q38 as open, §16 wins | <!-- superseded -->
 | Primary market | Iran; IRR payments via domestic gateways |
 | Audience | Backend, frontend, AI/ML, QA, DevOps, design and product |
 
@@ -31,7 +32,9 @@ This is the final English engineering specification for **Tankhor** (تنخور)
 
 **Section 18 is non-normative.** It holds the Rust implementation recommendations (detailed in `tankhor-rust-implementation-pack.md`); anything there that conflicts with §0–§17 loses.
 
-**Revision 4.1 (3 Nov 2026).** Product renamed تنخور / Tankhor (Q38). Brand review applied: brand architecture and logo brief (§12.1), `borderStrong` and `onCurtain` tokens with measured contrast (§12.2), curtain states (§12.4), non-text contrast (§12.6), naming, claim and AI-notice rules plus new copy keys (§12.7).
+**Revision 4.1 (3 Nov 2026).** Product renamed تنخور / Tankhor (Q38). Brand review applied: brand architecture and logo brief (§12.1), `borderStrong` and `onCurtain` tokens with measured contrast (§12.2), curtain states (§12.4), non-text contrast (§12.6), naming, claim and AI-notice rules plus new copy keys (§12.7). <!-- superseded -->
+
+**Revision 4.1.1 (2026-11-05).** §8.1 new: P41 settings bounds, upload-format rule and lowering rules (owner bounds 2026-11-04; recovery-window rule 2026-11-05). §12.2: one source for all visual identity values and automatic WCAG 2.2 AA text/background contrast check. §12.4: reduced-motion stills as SVG (Q04). §12.7: «تن‌خور» only as the brand name; no emoji in finance, consent, deletion and error copy. §12.8: brand book path `docs/brand/brandbook.html`. §16 Q04: formats (logo and reduced-motion stills SVG, motion Lottie). P39: `\|` escaped in the table row.
 
 **Sign-off still required outside engineering:** Q11 (token forfeiture at account deletion) needs legal review; Q24 (revenue recognition) needs accounting review. Both are decided by the owner and implemented as stated unless those reviews change them.
 
@@ -126,7 +129,7 @@ Exact path names are an implementation choice; the one-host rule is fixed.
 - Then a short scroll: visual intro of both services, footer with contact, email or chosen channel, and mandatory links. Page stays short, image-led, low-text.
 - Browsing and path choice need no account. Desktop MAY preview each tile on hover and focus; mobile MUST have an explicit touch control.
 - Navigation MUST NOT wait for animation end or video download. Reduced-motion mode conveys the same meaning with a simple state change.
-- Logo, Latin wordmark and curtain/hand motion assets are produced by the in-house designer as Lottie/SVG plus reduced-motion stills (Q04).
+- Logo and Latin wordmark are produced by the owner as SVG; curtain/hand motion as Lottie plus reduced-motion stills as SVG are produced by the in-house designer (Q04).
 
 ## 3. Identity, sessions and account
 
@@ -469,12 +472,41 @@ All admins currently hold equal, full permissions; each admin's identity and act
 | P36 | Finance and pricing | Packs, custom purchase, base price per output type, per-style premiums, recolour add-on, bulk-purchase discount tiers, payment/token/return/adjustment ledgers (Q36). Simulations never change real balances. Price changes are versioned; confirmed requests keep their quoted price. Adjustments are independent, reasoned, approved and never erase history |
 | P37 | AI management | Try-on, Studio image, video and recolour each have their own primary and **one backup** provider. Providers are external; OpenRouter or similar is an example; real capability of each integration MUST be tested. Only admins choose engines. **Auto-fallback ON at launch** (Q25). API cost cap, monitoring, alerting and automatic stop ready from day one. Connection and fallback tests MUST NOT double-charge or double-generate. Full keys never appear in UI or logs |
 | P38 | Content and pages | Text, images, video, section order, cards, menus, models, styles, token tariffs and bilingual content managed without code. Draft then preview of that same version. Hiding a section shows user-path dependencies. Owner never needs the repo or raw storage for daily ops |
-| P39 | Bulk content import | Hundreds or thousands of files plus **CSV files** (Q26): one CSV per entity (styles, models, garments, relations) and a media archive. UTF-8 with BOM (so Persian survives Excel editing), stable IDs, FA/EN names, file references; relations as `|`-separated ID lists. Missing file, duplicate ID, invalid relation → fixable per-row errors before publish. Upload completion is not publication; an import result report is required |
+| P39 | Bulk content import | Hundreds or thousands of files plus **CSV files** (Q26): one CSV per entity (styles, models, garments, relations) and a media archive. UTF-8 with BOM (so Persian survives Excel editing), stable IDs, FA/EN names, file references; relations as `\|`-separated ID lists. Missing file, duplicate ID, invalid relation → fixable per-row errors before publish. Upload completion is not publication; an import result report is required |
 | P40 | Language, theme, design | Translations, direction, colours, components, media, animation managed here. Preview covers mobile, tablet, desktop, both languages and display modes. Missing translations visible and subject to publish policy |
-| P41 | Settings and feature flags | Retention defaults (14-day buyer temp photo, 30-day Studio temp upload, 30-day draft), campaigns and gifts, usage caps and other tunables live outside code. Each setting has unit, value, allowed range, effective time and history. Shortening a TTL never triggers an ambiguous mass delete without published policy. Built-but-off features have an enable switch, impact preview and health check. Security and financial integrity cannot be bypassed by settings |
+| P41 | Settings and feature flags | Retention defaults (14-day buyer temp photo, 30-day Studio temp upload, 30-day draft), campaigns and gifts, usage caps and other tunables live outside code. Each setting has unit, value, allowed range, effective time and history; owner bounds, the upload-format rule and the lowering rules are in §8.1, and no setting is unbounded. Shortening a TTL never triggers an ambiguous mass delete without published policy. Built-but-off features have an enable switch, impact preview and health check. Security and financial integrity cannot be bypassed by settings |
 | P42 | Publishing and versions | Shared cycle: save draft, preview, admin approval, publish now or scheduled, version, rollback. Approval binds to that exact version. Financial/ops preview creates no real transaction. Rollback is a new event. Percentage rollout fully built and tested, OFF at launch, with stable audience assignment. Urgent actions (block, adjust, stop) still get impact preview and proportionate approval |
 | P43 | Operations and recovery | Monitor queue, service health, cost, errors, backups. **RPO 1 hour, RTO 4 hours; daily full backup plus continuous WAL for point-in-time recovery; backups retained 30 days** (Q27). Real restore tests recorded. Emergency stop per Q20; independent maintenance per product |
 | P44 | Audit and support | Admin activity, private-image views (with linked report/ticket), blocks, financial adjustments, AI changes, publishing and restores are searchable and attributed. Tickets have full flows once enabled. Turning off optional user notifications never silences mandatory owner alerts. Audit and sensitive data are protected |
+
+### 8.1 P41 — Settings bounds and lowering rules
+
+**Configurable settings: defaults and owner bounds** (owner bounds 2026-11-04). Every configurable setting has a minimum and a maximum; no setting has "no upper bound".
+
+| Setting | Default | Min | Max | Decision source |
+| --- | --- | --- | --- | --- |
+| Buyer temporary photo lifetime | 14 days | 1 day | 30 days | R15; owner bounds 2026-11-04 |
+| Studio temporary upload lifetime | 30 days | 7 days | 90 days | Q06; owner bounds 2026-11-04 |
+| Studio auto-draft lifetime | 30 days | 1 day | 90 days | Q32; owner bounds 2026-11-04 |
+| Account deletion recovery window | 30 days | 14 days | 90 days | R26; owner bounds 2026-11-04 |
+| Cards per project | 50 | 1 | 100 | Q15; owner bounds 2026-11-04 |
+| Permanent buyer photos | 5 | 1 | 10 | Q40; owner bounds 2026-11-04 |
+| Upload size | 15 MB | 1 MB | 25 MB | Q05; owner bounds 2026-11-04 |
+| Minimum shortest edge | 512 px | 256 px | 1024 px | Q05; owner bounds 2026-11-04 |
+| Generation attempt limit | 3 | 1 | 3 | Q29; owner bounds 2026-11-04 |
+
+**Upload formats** (Q05; owner bounds 2026-11-04). The allowed set is exactly JPEG, PNG, WebP and HEIC. An admin may enable any subset; JPEG is always enabled; at least one format is enabled; no other format can be added through settings.
+
+**Lowering a setting** (owner bounds 2026-11-04)
+
+| Setting group | Rule when the value is lowered |
+| --- | --- |
+| Lifetimes (buyer temporary photo, Studio temporary upload, Studio auto-draft) | The impact is previewed before publishing. Each item's lifetime is counted from its original start (upload or last activity), never from publication. Items past the new limit are purged at the next sweep, only after the change is published. |
+| Account deletion recovery window | The impact is previewed before publishing. A lower window applies only to deletion requests made after the change is published; accounts already pending deletion keep the end date they were shown. |
+| Cards per project | Existing drafts and saved projects above the limit stay intact; they cannot add cards and cannot be created until they are at or below the limit. Confirmed projects are unaffected. |
+| Permanent buyer photos | Users above the limit keep their photos and cannot add another permanent photo until they are below the limit. |
+| Upload size, formats, minimum shortest edge | Apply to new uploads only; stored files are never re-validated. |
+| Generation attempt limit | Applies to units queued after the change is published; units already processing keep their starting limit. |
 
 ## 9. Architecture and conceptual data model
 
@@ -527,6 +559,8 @@ Inputs and outputs hold independent references, so deleting or expiring an input
 | Backups | Retained 30 days (Q27) |
 | Financial records, logs | Retained anonymised per approved data policy |
 
+Configurable lifetimes and the account deletion recovery window have owner bounds and lowering rules in §8.1.
+
 Deletion policy MUST cover caches, backups (purged as they age out) and external providers. Financial retention and personal-identity deletion are separated.
 
 ### 10.2 Security requirements
@@ -573,15 +607,17 @@ Both surfaces share one design system, two languages (FA, EN) and three themes (
 - Base direction: **dark velvet brown curtain** (Q02) + natural sky blue. Brown takes roughly 10% of visual space (curtain, emphasis, signature details) — a composition guide, not a pixel budget. The dominant background stays airy and legible.
 - Glass / Liquid Glass only on controlled surfaces (controls over images, floating toolbars). Forms, financial tables and long text sit on stable backgrounds. Without support or with reduced transparency, fall back to opaque surfaces. Garment images keep true colour and detail.
 - Apple HIG and Material Design are interaction references; Tankhor keeps its own identity.
-- **Brand architecture (branded house).** One parent mark and wordmark, تنخور / Tankhor. Try It On and Tankhor Studio share the mark, type, colour, curtain and icon rules; they differ by voice, composition and media (airy discovery imagery for Try It On, precise editorial framing and cinematic media for Studio), never by separate logos. Wallet, account and Owner Console use the parent brand; the console applies the same system with less decoration and more emphasis on data and state.
-- **Logo brief (Q04, in-house designer).** Recommended starting direction **A — curtain gap**: two simple masses opening a space, a standalone symbol plus FA/EN wordmark, the same logic continuing in the curtain motion. Alternatives: **B** Persian wordmark-led, **C** open presentation frame. The owner picks the direction before production. Avoid generic hangers, AI sparkles, idealised bodies, cliché cameras, ornate traditional seals and anything resembling a reference service's mark (Photoroom, FASHN, Botika were studied as references only).
+- **Brand architecture (branded house).** One parent mark and wordmark, تن‌خور / Tankhor. Try It On and Tankhor Studio share the mark, type, colour, curtain and icon rules; they differ by voice, composition and media (airy discovery imagery for Try It On, precise editorial framing and cinematic media for Studio), never by separate logos. Wallet, account and Owner Console use the parent brand; the console applies the same system with less decoration and more emphasis on data and state.
+- **Logo brief (Q04, in-house designer).** Recommended starting direction **A — curtain gap**: two simple masses opening a space, a standalone symbol plus FA/EN wordmark, the same logic continuing in the curtain motion. Alternatives: **B** Persian wordmark-led, **C** open presentation frame. The owner picks the direction before production. Avoid generic hangers, AI sparkles, idealised bodies, cliché cameras, ornate traditional seals and anything resembling a reference service's mark (Photoroom, FASHN, Botika were studied as references only). <!-- superseded -->
+- **Logo brief (Q04, owner).** The owner designs the logo and wordmark; all nine assistant concepts are inactive. Final logo acceptance below remains unchanged.
 - **Logo acceptance.** Symbol rendered at 16, 32, 64 and 512 px; wordmark tested separately at its real minimum size; mono black, reversed and colour on both themes. The Persian wordmark keeps correct joins and every dot legible at small sizes (ت, ن, خ; the word breaks after و because و and ر do not join forward). Latin wordmark: **Tankhor**. Final SVG has `viewBox`, `title`/`desc`, text converted to paths, no remote font, no bitmap or complex blur. Clear space and minimum size are measured from the final mark, not set in advance. Logos are never mirrored in RTL.
+- **Functional icons.** 24 px canvas, 1.5–2 px stroke.
 - **Imagery.** Garment colour and texture are never altered to suit the palette; no global warm filter. Every brand, sample or showcase medium records source, licence, owner/consent, publication scope and AI status; naming a source (e.g. Pinterest) or a reference brand is not a licence.
 - Language and theme switches never change selections, assembly, financial data or results. FA: RTL reading and focus order; addresses, IDs and hex codes keep their own direction. Logos and product photos are never mirrored; only directional icons flip.
 
 ### 12.2 Design tokens
 
-Palette is the approved baseline (Q02); each text/background pair MUST still pass contrast on real samples before token freeze.
+Palette is the provisional brown baseline (Q02), pending token freeze before closed beta; each text/background pair MUST still pass contrast on real samples before token freeze.
 
 | Token | Light | Dark | Use |
 | --- | --- | --- | --- |
@@ -596,7 +632,7 @@ Palette is the approved baseline (Q02); each text/background pair MUST still pas
 | action | #185B7A | #A7DBF3 | Interactive action |
 | onAction | #FFFFFF | #102B3B | Text on action |
 | border | #CCD6DF | #506273 | Decorative dividers only; never a control's sole boundary |
-| borderStrong | #185B7A | #A7DBF3 | Meaningful control boundaries (inputs, toggles, chips); same value as `action` |
+| borderControl | #185B7A | #A7DBF3 | Meaningful control boundaries (inputs, toggles, chips); same value as `action` |
 | onCurtain | #F1F5F9 | #F1F5F9 | Text and icons on `curtainBase` |
 | success | #146C43 | #80D8A6 | Success, always with text/icon |
 | warning | #8A4B08 | #F3C278 | Warning, always with text/icon |
@@ -604,26 +640,28 @@ Palette is the approved baseline (Q02); each text/background pair MUST still pas
 
 Light sky is for surfaces; small white text on it is not allowed. Status colour always pairs with text or icon.
 
-**Measured contrast (brand review, 2 Nov 2026).** Opaque flat sRGB pairs, unrounded ratio, WCAG 2.2 formula. Every text pair checked (body, secondary, brand, link, button, sky, curtain and status roles) passes 4.5:1 in both themes (lowest: `textSecondary` on `surfaceMuted`, 5.68:1 light). `onCurtain` on `curtainBase` is 11.10:1. `border` fails the 3:1 non-text threshold (1.47:1 on `surface` and 1.33:1 on `surfaceMuted` light; 2.53:1 and 2.09:1 dark), so it MUST NOT be a control's only visible boundary; `borderStrong` passes (7.46:1 light, 10.68:1 dark). White on light `sky` is 1.35:1 and fails. Not covered by this check: photos, velvet texture, opacity, Glass, focus geometry, keyboard and assistive technology; those still need testing on real screens before token freeze.
+**Measured contrast (brand review, 2 Nov 2026).** Opaque flat sRGB pairs, unrounded ratio, WCAG 2.2 formula. Every text pair checked (body, secondary, brand, link, button, sky, curtain and status roles) passes 4.5:1 in both themes (lowest: `textSecondary` on `surfaceMuted`, 5.68:1 light). `onCurtain` on `curtainBase` is 11.10:1. `border` fails the 3:1 non-text threshold (1.47:1 on `surface` and 1.33:1 on `surfaceMuted` light; 2.53:1 and 2.09:1 dark), so it MUST NOT be a control's only visible boundary; `borderControl` passes (7.46:1 light, 10.68:1 dark). White on light `sky` is 1.35:1 and fails. Not covered by this check: photos, velvet texture, opacity, Glass, focus geometry, keyboard and assistive technology; those still need testing on real screens before token freeze.
+
+All visual identity values (colour tokens, type, radii, icon and motion values) come from one source, so a brand change touches only that source. Every text/background pair is checked automatically against WCAG 2.2 AA (≥ 4.5:1, large text ≥ 3:1).
 
 ### 12.3 Typography and layout
 
-**Vazirmatn** with its matching Latin, fallback Tahoma, sans-serif (Q03; SIL Open Font License, self-hosted WOFF2). UI text selectable and zoomable. Persian digits in FA prose; Latin digits with isolated direction in URLs, code, IDs. Amounts labelled in **IRR (rial)**; showing toman would need a separate decision.
+**Vazirmatn** with its matching Latin, font stack Vazirmatn, Arial, Tahoma, sans-serif (Q03; SIL Open Font License, self-hosted WOFF2). UI text selectable and zoomable. Persian digits in FA prose; Latin digits with isolated direction in URLs, code, IDs. Amounts labelled in **IRR (rial)**; showing toman would need a separate decision.
 
 | Role | Size (proposed) | Weight / line height |
 | --- | --- | --- |
-| Hero title, desktop | 40–56 px | 600 / 1.35 |
-| Hero title, mobile | 28–36 px | 600 / 1.4 |
-| Section title | 24–32 px | 600 / 1.4 |
+| Hero title, desktop | 48 px | 600 / 1.4 |
+| Hero title, mobile | 32 px | 600 / 1.4 |
+| Section title | 28 / 24 px (large / small screen) | 600 / 1.5 |
 | Body | 16 px | 400 / 1.8 (FA) |
-| Control | 14–16 px | 500 / 1.6 |
-| Caption | min 12–14 px | 400 / 1.7 |
+| Control | 16 px | 500 / 1.6 |
+| Caption | 14 px | 400 / 1.7 |
 
-Spacing scale 4, 8, 12, 16, 24, 32, 48, 64 px. Radii 8, 16, 24 px. Primary button height 48 px; general touch target 44×44 px. Test at 360, 768, 1024, 1440 px and widths between.
+Spacing scale 4, 8, 12, 16, 24, 32, 48, 64 px. Radii: controls 8 px, panels 16 px; former 24 px radii use 16 px. Primary button height 48 px; general touch target 44×44 px. Test at 360, 768, 1024, 1440 px and widths between.
 
 ### 12.4 Motion
 
-Curtain, login logo motion, model ring, campaign cards and playful vectors each need a clear purpose; motion supports state comprehension and never blocks navigation or the gallery. Proposed: UI micro-motion 150–250 ms, curtain 400–700 ms, tuned on real prototypes. Reduced motion conveys the same meaning and actions via simpler state changes. The curtain has two real meanings and never fakes a third: over an empty upload slot it means "no image yet" (removing the image brings it back); over a generating unit it opens only when that unit is really ready. One signature motion is enough: no spinning cards, sparkles or aimless blur added on top. The curtain never hides queue or processing status, and no fake percentage or remaining time is shown. Motion assets come from the in-house designer as Lottie/SVG plus reduced-motion stills (Q04). Video has a poster fallback and pause control and starts muted. Hover always has touch and keyboard equivalents.
+Curtain, login logo motion, model ring, campaign cards and playful vectors each need a clear purpose; motion supports state comprehension and never blocks navigation or the gallery. Proposed: control feedback 180 ms, curtain/state continuity 500 ms, tuned on real prototypes. Reduced motion conveys the same meaning and actions via simpler state changes. The curtain has two real meanings and never fakes a third: over an empty upload slot it means "no image yet" (removing the image brings it back); over a generating unit it opens only when that unit is really ready. One signature motion is enough: no spinning cards, sparkles or aimless blur added on top. The curtain never hides queue or processing status, and no fake percentage or remaining time is shown. Curtain/hand motion assets come from the in-house designer as Lottie plus reduced-motion stills as SVG (Q04). Video has a poster fallback and pause control and starts muted. Hover always has touch and keyboard equivalents.
 
 ### 12.5 Component contracts
 
@@ -665,7 +703,7 @@ Every component shares one definition of state, cost, selection and error, and d
 ### 12.6 Accessibility
 
 - Target: **WCAG 2.2 AA**. Text contrast ≥ 4.5:1; large text ≥ 3:1 ([contrast](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html)).
-- Meaningful control boundaries and focus indicators need ≥ 3:1 against adjacent colours ([non-text contrast](https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html)); use `borderStrong`, not `border` (§12.2). Thresholds are checked on the unrounded ratio.
+- Meaningful control boundaries and focus indicators need ≥ 3:1 against adjacent colours ([non-text contrast](https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html)); use `borderControl`, not `border` (§12.2). Thresholds are checked on the unrounded ratio.
 - WCAG 2.2 minimum pointer target is 24×24 CSS px with exceptions; Tankhor targets 44×44 ([target size](https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html)).
 - Reduced-motion support is a Tankhor product rule. The related criterion, SC 2.3.3 Animation from Interactions, is AAA; do not describe it as an AA requirement ([animation from interactions](https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html)).
 - Non-essential auto-motion longer than 5 s next to content needs pause, stop or hide. Ring, video and campaigns are checked against this ([pause, stop, hide](https://www.w3.org/WAI/WCAG22/Understanding/pause-stop-hide.html)).
@@ -691,9 +729,9 @@ Bazaar flavour comes from welcome, taste and patience, not dialect performance. 
 
 **Four speakers, not one voice at two levels.** Try It On (تو) and Studio (شما) as above. Shared sign-in and wallet pages are neutral, preferably without a pronoun, and only a short hint may follow the origin surface (e.g. Try It On: «بعد از ورود، همین لباس رو ادامه می‌دیم.»; Studio: «پس از ورود، انتخاب شما حفظ می‌شود.»). The Owner Console speaks in roles, versions, scope and approval, never with humour.
 
-**Naming in copy.** The parent brand is «تنخور» / "Tankhor". «یه تن بزن» / "Try It On" names the buyer experience; "Try it on" (sentence case) is the button. «استودیو تنخور» / "Tankhor Studio" is used in introductions and headers and shortened to «استودیو» inside Studio. «مدل» in user copy means the human Studio model; where AI models appear next to it in the console, write «مدل انسانی» and «مدل AI». The common noun «تن‌خور» ("fit") is not used in Persian UI copy, because it reads as the brand name; write «اندازه یا فرم واقعی لباس روی تن» instead.
+**Naming in copy.** The parent brand is «تن‌خور» / "Tankhor". «یه تن بزن» / "Try It On" names the buyer experience; "Try it on" (sentence case) is the button. «استودیو تن‌خور» / "Tankhor Studio" is used in introductions and headers and shortened to «استودیو» inside Studio. «مدل» in user copy means the human Studio model; where AI models appear next to it in the console, write «مدل انسانی» and «مدل AI». «تن‌خور» appears in Persian UI copy only as the brand name (proper noun). It is never used as a common noun or descriptor of how clothes sit on the body, because that implies fit (PRD NG2); write «اندازه یا فرم واقعی لباس روی تن» instead.
 
-**Punctuation.** Exclamation marks only in Try It On phrases such as «هنوز نپوشیدم!»; never in money, deletion, errors, consent or the console. An ellipsis never replaces a real state. English uses sentence case, natural contractions in Try It On and shared pages, and direct professional English in Studio (no "kindly" or "shall"); «بفرما» is never translated as "Here you go, sir".
+**Punctuation.** Exclamation marks only in Try It On phrases such as «هنوز نپوشیدم!»; never in money, deletion, errors, consent or the console. An ellipsis never replaces a real state. English uses sentence case, natural contractions in Try It On and shared pages, and direct professional English in Studio (no "kindly" or "shall"); «بفرما» is never translated as "Here you go, sir". No emoji in finance, consent, deletion and error copy.
 
 **We never say** (in any language, any channel): guaranteed size, fit, exact colour, detail or sales, even "with the power of AI"; "first", "only", "best", "flawless", "revolutionary"; "Tankhor is your store", "cheapest clothes" or any garment/price comparison; invented wait times, progress percentages, user counts, conversion, savings, prices or capacity; "all outputs are ready" on partial or total failure or while a card is still running; "tokens returned" before the return is `posted`, or "payment successful" from a browser redirect alone; "only you can see it" as a denial of logged admin access (Q12), or "deleting removes every copy instantly" without the approved policy; "saving means permission to publish", "submitted means published", "publishing one output publishes the project"; gendered address, purchase pressure, body anxiety, blaming the user, cost-blurring courtesies, or humour about consent and deletion; founder quotes, customer testimonials, brand partnerships or launch dates without evidence. Bazaar terms of address («حاجی», «خانومی», «داداش») and «قابل نداره» next to a cost are not used.
 
@@ -746,7 +784,7 @@ Fixed strings: «هنوز نپوشیدم!» ("Still getting dressed!") and «ب�
 | landing_title *(proposed)* | لباس را تصور کنید. تصویرش را بسازید. | Imagine the look. Create the image. |
 | landing_body *(proposed)* | ظاهر لباس را روی عکس شخصی ببینید یا برای محصولتان محتوا بسازید. یک حساب و کیف پول، دو تجربهٔ مستقل. | Explore clothing in a personal photo or create content for your products. One account and token wallet, two distinct experiences. |
 | landing_ai_notice | تصاویر با هوش مصنوعی ساخته می‌شوند و اندازه، فرم واقعی لباس یا فروش را تضمین نمی‌کنند. | AI-generated images do not guarantee size, fit or sales outcomes. |
-| tryon_not_store | تنخور فروشگاه نیست؛ برای اطلاعات خرید به فروشگاه اصلی برو. | Tankhor is not a store. Visit the original store for purchase details. |
+| tryon_not_store | تن‌خور فروشگاه نیست؛ برای اطلاعات خرید به فروشگاه اصلی برو. | Tankhor is not a store. Visit the original store for purchase details. |
 | wallet_shared | یک حساب و کیف پول برای هر دو تجربه | One account and token wallet for both experiences |
 | topup_amount | مبلغ شارژ: {amount} ریال | Top-up amount: {amount} IRR |
 | topup_tokens | افزایش موجودی: {tokens} توکن | Tokens to add: {tokens} |
@@ -756,6 +794,20 @@ Fixed strings: «هنوز نپوشیدم!» ("Still getting dressed!") and «ب�
 | console_draft_saved | پیش‌نویس ذخیره شد؛ نسخهٔ منتشرشده تغییر نکرد. | Draft saved. The published version is unchanged. |
 
 The landing title is not the slogan; the slogan (FR-LND-02) is still awaiting owner approval. Every string here is a draft until it is wired to the real state it describes.
+
+### 12.8 Brand reference (non-token)
+
+Brandbook v2 references: `docs/brand/brandbook.html` chapters 05–06. The following tonal scales and surface/gradient recipes are exploratory references only, not semantic tokens or approved replacements for §12.2. New uses require real-sample contrast checks. They do not change garment colours or add logo effects.
+
+| Reference | Exact values |
+| --- | --- |
+| Brown | 50 #F2F0F0; 100 #E4E0DF; 200 #C9C1BE; 300 #A49793; 400 #77635D; 500 #4A2F27; 600 #412922; 700 #38231D; 800 #2C1C17; 900 #211512; 950 #160E0C |
+| Jade | 50 #EFF2F2; 100 #DCE4E3; 200 #B9C9C7; 300 #8AA6A1; 400 #507972; 500 #164C43; 600 #13433B; 700 #103932; 800 #0D2E28; 900 #0A221E; 950 #071714 |
+| Action blue | 50 #EFF4F6; 100 #DCE6EB; 200 #BACED7; 300 #8CADBC; 400 #52849B; 500 #185B7A; 600 #15506B; 700 #12445C; 800 #0E3749; 900 #0B2937; 950 #071B25 |
+| Curtain folds | `repeating-linear-gradient(90deg,transparent 0 18px,rgba(0,0,0,.08) 18px 24px),var(--curtainBase)` |
+| Sky wash | `linear-gradient(135deg,var(--sky),var(--surface))` |
+| Quiet surface | `linear-gradient(135deg,var(--surfaceMuted),var(--surface))` |
+| Photo scrim | `linear-gradient(180deg,#18232D00,#18232DDD)` |
 
 ## 13. Analytics, metrics and launch readiness
 
@@ -921,9 +973,11 @@ All 41 product decisions are closed. Q08 and Q34 come from the Word spec; the ot
 | ID | Topic | Decision | Applied in |
 | --- | --- | --- | --- |
 | Q01 | Domain structure | One domain, path-based surfaces (`/`, `/tryon`, `/studio`, `/console`); shared session on one host | §2 |
-| Q02 | Curtain colour | **Dark velvet brown**; §12.2 palette is the baseline. Flat-pair contrast measured 2 Nov 2026 (`borderStrong` for control boundaries); real-sample checks still pending | §2.1, §12 |
-| Q03 | Font | **Vazirmatn** with its Latin; Tahoma fallback; self-hosted (OFL) | §12.3 |
-| Q04 | Brand and motion assets | In-house designer delivers logo, Latin wordmark, curtain/hand motion as Lottie/SVG + reduced-motion stills; brief starts from logo direction A, owner picks the direction before production | §2.1, §12.1, §12.4 |
+| Q02 | Curtain colour | Revised 2026-11-04: brown, provisional until token freeze before closed beta (brandbook v2, owner) | §2.1, §12 |
+| Q02 (superseded) | Curtain colour | **Dark velvet brown**; §12.2 palette is the baseline. Flat-pair contrast measured 2 Nov 2026 (`borderStrong` for control boundaries); real-sample checks still pending | §2.1, §12 |
+| Q03 | Font | **Vazirmatn** with its Latin; Arial, Tahoma, sans-serif fallback; self-hosted (OFL) | §12.3 |
+| Q04 | Brand and motion assets | Revised 2026-11-04: logo by owner; curtain/hand Lottie + reduced-motion stills by in-house designer (brandbook v2, owner). Formats 2026-11-05: logo and reduced-motion stills SVG, motion Lottie (owner) | §2.1, §12.1, §12.4 |
+| Q04 (superseded) | Brand and motion assets | In-house designer delivers logo, Latin wordmark, curtain/hand motion as Lottie/SVG + reduced-motion stills; brief starts from logo direction A, owner picks the direction before production | §2.1, §12.1, §12.4 |
 | Q05 | Upload limits | ≤ **15 MB**; JPEG, PNG, WebP, HEIC; shortest edge ≥ 512 px; rejected before any debit | §4.4, §5.6, §7.1 |
 | Q06 | Studio upload retention | "Save all uploaded photos" **ON** by default; when OFF, new uploads purged after **30 days**; toggling never deletes existing library files | §5.6, §5.11, §10 |
 | Q07 | Catalogue sourcing | Both: team-curated launch set and brand self-service later; signed image-use licence always required | §4.1 |
@@ -957,7 +1011,8 @@ All 41 product decisions are closed. Q08 and Q34 come from the Word spec; the ot
 | Q35 | Share withdrawal | Hidden from public display immediately; downloaded copies outside Tankhor's control | §5.13 |
 | Q36 | Pricing model | Flat base price per output type + optional per-style premium (+ recolour add-on) | §5.2, §6.1, P36 |
 | Q37 | PWA targets | Android Chrome, iOS Safari, desktop Chromium | §11.3 |
-| Q38 | Product name | **تنخور / Tankhor** (revised 3 Nov 2026 after the brand review; was تنه / Taneh). Name clearance (trademark, handles) pending before brand assets are final | §0, §12.1 |
+| Q38 | Product name | Revised 2026-11-04: Tankhor / تن‌خور (ZWNJ U+200C); Tankhor Studio / استودیو تن‌خور; Try It On «یه تن بزن», Try-ons «تن‌زده‌ها» and Set aside «نشون‌کرده‌ها» unchanged (brandbook v2, owner) | §0, §12.1 |
+| Q38 (superseded) | Product name | **تنخور / Tankhor** (revised 3 Nov 2026 after the brand review; was تنه / Taneh). Name clearance (trademark, handles) pending before brand assets are final | §0, §12.1 |
 | Q39 | Garments per try-on | One garment per request | §1.2, §4.2 |
 | Q40 | Buyer photos | Personal gallery of up to **5**, one default | §4.4, §4.11 |
 | Q41 | Profile fields | Height and weight only, optional | §4.12 |
@@ -1260,7 +1315,7 @@ An approved product change MUST update the related behaviour, flow, story, accep
 
 | ID | Word § | Point carried over | Location here |
 | --- | --- | --- | --- |
-| W01 | 1 | Provisional name «تن»; later working name تنه; final name تنخور / Tankhor | §0, Q38 |
+| W01 | 1 | Provisional name «تن»; later working name تنه; final name تنخور / Tankhor | §0, Q38 | <!-- superseded -->
 | W02 | 1 | Try-on on own photo; seller content without model or shoot | §1, P03, P15 |
 | W03 | 1 | Two independent paths from the start | P01, R01 |
 | W04 | 1 | No direct path Try It On → Studio | P01, P12, R161 |

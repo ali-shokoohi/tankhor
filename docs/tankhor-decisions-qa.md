@@ -4,7 +4,7 @@
 
 All 41 open items from the Tankhor specification (Q01–Q41). 39 were asked as multiple-choice questions on 3 Nov 2026; Q08 and Q34 were already settled by the Word spec.
 
-**Revision 3 Nov 2026 (after the brand review, `brand-review.html`):** Q38 changed from تنه / Taneh to **تنخور / Tankhor**, approved by the owner. No other decision changed. Where the brand review still shows Q02, Q03, Q04 or Q30 as open, the answers below win.
+**Revision 3 Nov 2026 (after the brand review, `brand-review.html`):** Q38 changed from تنه / Taneh to **تنخور / Tankhor**, approved by the owner. No other decision changed. Where the brand review still shows Q02, Q03, Q04 or Q30 as open, the answers below win. — superseded
 
 **Legend:** ✅ = chosen · ☆ = option recommended at the time of asking · ⚖️ = needs legal or accounting sign-off before launch
 
@@ -13,9 +13,11 @@ All 41 open items from the Tankhor specification (Q01–Q41). 39 were asked as m
 | ID | Topic | Chosen | Followed recommendation |
 | --- | --- | --- | --- |
 | Q01 | Domain structure | One domain, paths | No |
-| Q02 | Curtain colour | Dark velvet brown | Yes |
+| Q02 | Curtain colour | Revised 2026-11-04: brown, provisional until token freeze before closed beta (brandbook v2, owner) | Yes |
+| Q02 (superseded) | Curtain colour | Dark velvet brown | Yes |
 | Q03 | Font | Vazirmatn + its Latin | Yes |
-| Q04 | Brand and motion assets | In-house designer | — |
+| Q04 | Brand and motion assets | Revised 2026-11-04: logo by owner; curtain/hand Lottie + reduced-motion stills by in-house designer (brandbook v2, owner). Formats 2026-11-05: logo and reduced-motion stills SVG, motion Lottie (owner) | — |
+| Q04 (superseded) | Brand and motion assets | In-house designer | — |
 | Q05 | Upload limits | 15 MB, JPEG/PNG/WebP/HEIC, ≥512 px | Yes |
 | Q06 | Studio upload retention | On by default; unsaved 30 days | Yes |
 | Q07 | Catalogue sourcing | Both | No |
@@ -49,7 +51,8 @@ All 41 open items from the Tankhor specification (Q01–Q41). 39 were asked as m
 | Q35 | Share withdrawal | Hidden immediately | Yes |
 | Q36 | Studio pricing | Flat base + style premium | No |
 | Q37 | PWA targets | Android Chrome, iOS Safari, desktop Chromium | Yes |
-| Q38 | Product name | تنخور / Tankhor (revised 3 Nov, was تنه / Taneh) | — |
+| Q38 | Product name | Revised 2026-11-04: Tankhor / تن‌خور (ZWNJ U+200C); Tankhor Studio / استودیو تن‌خور; Try It On «یه تن بزن», Try-ons «تن‌زده‌ها» and Set aside «نشون‌کرده‌ها» unchanged (brandbook v2, owner) | — |
+| Q38 (superseded) | Product name | تنخور / Tankhor (revised 3 Nov, was تنه / Taneh) | — |
 | Q39 | Garments per try-on | One garment per request | Yes |
 | Q40 | Buyer personal photos | Gallery up to 5, one default | Yes |
 | Q41 | Optional profile fields | Height and weight | — |
@@ -137,18 +140,22 @@ All 41 open items from the Tankhor specification (Q01–Q41). 39 were asked as m
 
 ### Q02 — Curtain colour?
 
-- [x] ✅ **Dark velvet brown** ☆ — Matches the proposed palette and tokens already drafted
+- [x] ✅ **Dark velvet brown** ☆ — Matches the proposed palette and tokens already drafted — superseded
+
+Revised 2026-11-04: brown, provisional until token freeze before closed beta (brandbook v2, owner)
 - [ ] Jade green — Needs a reworked brand token set
 - [ ] Prototype both, decide in user test — Delays token freeze
 
 ### Q38 — Final product name?
 
-- [x] ✅ **تنخور / Tankhor** — Chosen by the owner after the brand review (revision, 3 Nov 2026). Studio is «استودیو تنخور» / Tankhor Studio; the buyer surface stays «یه تن بزن» / Try It On.
-- [ ] تنه / Taneh — The previous working name; chosen in round 4, then replaced
+- [x] ✅ **تنخور / Tankhor** — Chosen by the owner after the brand review (revision, 3 Nov 2026). Studio is «استودیو تنخور» / Tankhor Studio; the buyer surface stays «یه تن بزن» / Try It On. — superseded
+
+Revised 2026-11-04: Tankhor / تن‌خور (ZWNJ U+200C); Tankhor Studio / استودیو تن‌خور; Try It On «یه تن بزن», Try-ons «تن‌زده‌ها» and Set aside «نشون‌کرده‌ها» unchanged (brandbook v2, owner)
+- [ ] تنه / Taneh — The previous working name; chosen in round 4, then replaced — superseded
 - [ ] تن / Tan — The Word spec's provisional name
 - [ ] Not decided yet — Keep open; working name stays
 
-> Name clearance (trademark search in the target classes and jurisdictions, app-store and social handles; no domain check needed) for تنخور / Tankhor has not been done yet; it is a launch dependency (PRD §6.6). The brand review's checks covered the old name, not Tankhor. In UI copy, don't use the common noun «تن‌خور» ("fit") anywhere it could be read as the brand name (Technical Specification §12.7).
+> Name clearance (trademark search in the target classes and jurisdictions, app-store and social handles; no domain check needed) for تن‌خور / Tankhor has not been done yet; it is a launch dependency (PRD §6.6). The brand review's checks covered the old name, not Tankhor. In UI copy, «تن‌خور» is used only as the brand name (proper noun); using it as a common noun or descriptor of how clothes sit on the body stays banned because it implies fit (PRD NG2, Technical Specification §12.7).
 
 ### Q30 — Persian name for the buyer's Liked list?
 
@@ -271,7 +278,9 @@ All 41 open items from the Tankhor specification (Q01–Q41). 39 were asked as m
 
 ### Q03 — Font family?
 
-- [x] ✅ **Vazirmatn + its Latin** ☆ — Open licence (OFL), good FA/EN harmony, Tahoma fallback
+- [x] ✅ **Vazirmatn + its Latin** ☆ — Open licence (OFL), good FA/EN harmony, Tahoma fallback — superseded
+
+Revised 2026-11-04: fallback stack Vazirmatn, Arial, Tahoma, sans-serif (brandbook v2)
 - [ ] Vazirmatn + Inter for Latin — Stronger Latin UI, two families to tune
 - [ ] Licensed commercial font — e.g. Yekan Bakh; licence cost and web terms
 
@@ -297,7 +306,9 @@ All 41 open items from the Tankhor specification (Q01–Q41). 39 were asked as m
 
 ### Q04 — Who produces the logo, Latin wordmark and curtain/hand motion assets?
 
-- [x] ✅ **In-house designer** — Deliver Lottie/SVG + reduced-motion stills
+- [x] ✅ **In-house designer** — Deliver Lottie/SVG + reduced-motion stills — superseded
+
+Revised 2026-11-04: logo by owner; curtain/hand Lottie + reduced-motion stills by in-house designer (brandbook v2, owner). Formats 2026-11-05: logo and reduced-motion stills SVG, motion Lottie (owner)
 - [ ] External agency — Brief from §12 tokens and voice guide
 - [ ] Not decided yet — Keep Q04 open
 
