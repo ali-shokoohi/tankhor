@@ -66,8 +66,11 @@ These boundaries keep business rules independently testable and vendors replacea
   database or external service. Startup MUST fail when the environment is production and
   any fake adapter is selected. Release builds MUST NOT include the `"mocks"` or `"fakes"`
   features.
-- A real adapter MUST be added only after its port's contract suite passes on the fake.
-  The same suite MUST then drive the real adapter through the TDD cycle in Principle I.
+- Required per port: mock, fake, contract suite, real adapter. This list specifies required
+  artifacts, not a time order. The contract suite MUST pass on the fake before any real
+  adapter is written. Mock and fake tests for an application service MUST be written and
+  observed to fail before that service's implementation. The same contract suite MUST
+  drive the real adapter through the TDD cycle in Principle I.
 
 Ports make every external dependency replaceable; shared contracts keep fakes honest, and
 a Unit of Work preserves cross-repository invariants without sacrificing local isolation.
@@ -226,14 +229,14 @@ auto-stop (GR7), no success notification on failure (GR8), and confirmed garment
    run nightly and before releases; release checks MUST cover Android Chrome, iOS Safari
    and desktop Chromium, FA/EN, and light/dark modes as required by the PRD.
 7. Plans, task lists and review checklists MUST account for every port, including `Clock`,
-   `IdGenerator` and `UnitOfWork`. Each port's tasks MUST explicitly follow the sequence
-   trait → contract suite → fake → real adapter → mock tests. The contract suite MUST be
-   written and observed to fail before implementing the fake, then pass on the fake before
-   real-adapter work starts; the same suite MUST be observed to fail against the missing
-   real behaviour before that behaviour is implemented. Mock interaction tests MUST be
-   written and observed to fail before the application-service behaviour they drive.
-   This artifact sequence MUST NOT waive Principle I or defer driving tests until after
-   production behaviour. Review MUST verify all four port deliverables, configuration-based
+   `IdGenerator` and `UnitOfWork`. Each port's task coverage MUST include its trait,
+   contract suite, fake, real adapter and application-service mock tests; these are
+   completeness requirements, not a temporal sequence. The contract suite MUST be written
+   and observed to fail before implementing the fake, then pass on the fake before any
+   real adapter is written. The same suite MUST be observed to fail against missing real
+   behaviour before that behaviour is implemented. Mock and fake application-service tests
+   MUST be written and observed to fail before the service implementation they drive.
+   Review MUST verify all four port deliverables, configuration-based
    composition, database-free local execution, production rejection of fakes and release
    exclusion of the `"mocks"` and `"fakes"` features.
 
@@ -262,4 +265,4 @@ That report MUST be removed before committing the amendment. Constitution update
 rewrite dependent templates or commands; they consume this document at runtime. Any separate
 implementation or delivery work MUST remain outside the constitution-update scope.
 
-**Version**: 1.1.0 | **Ratified**: TODO(RATIFICATION_DATE): owner must confirm original adoption date | **Last Amended**: 2026-11-05
+**Version**: 1.1.1 | **Ratified**: 2026-11-03 | **Last Amended**: 2026-11-05
