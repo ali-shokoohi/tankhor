@@ -41,19 +41,36 @@ This makes financial, privacy and generation guarantees executable rather than a
 
 These boundaries keep business rules independently testable and vendors replaceable.
 
-### III. Repository Ports and Unit of Work
+### III. Repository Pattern with Unit of Work
 
-- Every persistence need MUST be expressed through a repository port. Ports MUST use
-  mockable async traits. `#[cfg_attr(any(test, feature = "mocks"), mockall::automock)]`
-  MUST appear above `#[async_trait::async_trait]` when both attributes are used.
-- New persistence behaviour MUST include the repository method, an in-memory fake in
-  `testkit`, the PostgreSQL implementation in `infra-postgres` and a shared contract suite.
-  Each port MUST have contract tests run against both its fake and real adapter.
-- Atomic changes spanning repositories MUST use a `UnitOfWork` port. Transaction handles
-  exposed to contexts MUST remain infrastructure-independent; SQL transaction types MUST
-  stay inside adapters. Commit and rollback behaviour MUST be tested, including failures.
+- Every dependency on storage, time, ID generation, randomness, crypto challenges or any
+  external service MUST be a port: an async trait in `<context>/src/ports/`, annotated with
+  `#[cfg_attr(any(test, feature = "mocks"), mockall::automock)]` ABOVE
+  `#[async_trait::async_trait]`.
+- Application services MUST depend only on port traits for these dependencies. Domain and
+  application code MUST NOT call the system clock or generate IDs directly; `Clock` and
+  `IdGenerator` MUST be ports. Domain code MUST remain pure as required by Principle II.
+- Every port, without exception, MUST have all four of the following:
+  1. A `mockall` mock for interaction tests.
+  2. An in-memory fake in `crates/testkit` behind feature `"fakes"`.
+  3. A contract test suite in `crates/testkit` run against BOTH the fake and every real adapter.
+  4. At least one real adapter in an `infra-*` crate.
+- Every persistence need MUST remain a repository-port method, with its fake, shared contract
+  suite and PostgreSQL implementation in `infra-postgres` satisfying the same four rules.
+- Writes spanning repositories MUST go through the `UnitOfWork` port, which MUST satisfy
+  the same four rules. Transaction handles exposed to contexts MUST remain infrastructure-
+  independent; SQL transaction types MUST stay inside adapters. Commit and rollback
+  behaviour MUST be tested, including failures.
+- The `app` crate MUST be the only composition root. Adapters MUST be selected by
+  configuration, and the whole application MUST be runnable locally on fakes with no
+  database or external service. Startup MUST fail when the environment is production and
+  any fake adapter is selected. Release builds MUST NOT include the `"mocks"` or `"fakes"`
+  features.
+- A real adapter MUST be added only after its port's contract suite passes on the fake.
+  The same suite MUST then drive the real adapter through the TDD cycle in Principle I.
 
-A shared contract keeps fakes honest; a Unit of Work preserves cross-repository invariants.
+Ports make every external dependency replaceable; shared contracts keep fakes honest, and
+a Unit of Work preserves cross-repository invariants without sacrificing local isolation.
 
 ### IV. Money Is Sacred
 
@@ -94,9 +111,11 @@ A shared contract keeps fakes honest; a Unit of Work preserves cross-repository 
   real-sample accessibility checks for textures, photos, opacity and rendered interactions.
 - Fonts, scripts and other UI assets MUST be self-hosted, never CDN dependencies. Typography
   and all other visual identity values (colours, radii, icons and motion) MUST come only
-  from the single design tokens source governed by the technical specification §12.2 and
-  Q02–Q04, never independent values copied from brand references or hard-coded elsewhere.
-  Language/theme changes MUST preserve user input.
+  from `crates/web/design/tokens.toml`, the single design tokens source governed by the
+  technical specification §12.2 and Q02–Q04. CSS MUST be generated from that source.
+  Hex colours MUST NOT be authored elsewhere; generated CSS MUST derive its colour values
+  from the token source. Independent visual identity values copied from brand references
+  or hard-coded elsewhere MUST NOT be used. Language/theme changes MUST preserve user input.
 
 ### VI. API Contract
 
@@ -206,6 +225,17 @@ auto-stop (GR7), no success notification on failure (GR8), and confirmed garment
    Mutation testing of `wallet` and `generation` MUST run nightly. E2E journeys J1–J5 MUST
    run nightly and before releases; release checks MUST cover Android Chrome, iOS Safari
    and desktop Chromium, FA/EN, and light/dark modes as required by the PRD.
+7. Plans, task lists and review checklists MUST account for every port, including `Clock`,
+   `IdGenerator` and `UnitOfWork`. Each port's tasks MUST explicitly follow the sequence
+   trait → contract suite → fake → real adapter → mock tests. The contract suite MUST be
+   written and observed to fail before implementing the fake, then pass on the fake before
+   real-adapter work starts; the same suite MUST be observed to fail against the missing
+   real behaviour before that behaviour is implemented. Mock interaction tests MUST be
+   written and observed to fail before the application-service behaviour they drive.
+   This artifact sequence MUST NOT waive Principle I or defer driving tests until after
+   production behaviour. Review MUST verify all four port deliverables, configuration-based
+   composition, database-free local execution, production rejection of fakes and release
+   exclusion of the `"mocks"` and `"fakes"` features.
 
 ## Governance
 
@@ -232,4 +262,4 @@ That report MUST be removed before committing the amendment. Constitution update
 rewrite dependent templates or commands; they consume this document at runtime. Any separate
 implementation or delivery work MUST remain outside the constitution-update scope.
 
-**Version**: 1.0.1 | **Ratified**: TODO(RATIFICATION_DATE): owner must confirm original adoption date | **Last Amended**: 2026-11-05
+**Version**: 1.1.0 | **Ratified**: TODO(RATIFICATION_DATE): owner must confirm original adoption date | **Last Amended**: 2026-11-05
