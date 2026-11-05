@@ -5,6 +5,11 @@ model supersedes the original per-compiled-binary wording and initial per-proces
 proposal. Trace: user planning clarification; constitution Principles I–III; FR-CON-37 and
 NFR-SEC-09 database ownership/isolation validation. Tests: [test-plan.md](test-plan.md).
 
+Owner amendment: feature 001 implements PostgreSQL fixtures only. MinIO startup/readiness
+and bucket-lifecycle fixtures are deferred to feature 004; the Compose MinIO service remains.
+No storage behavior or MinIO fixture coverage is claimed for 001. Automatic PostgreSQL
+fallback, ownership checks and the live-run fixture lease remain required.
+
 ## 1. Shared-run services and pinned nextest
 
 Pin **cargo-nextest 0.9.151** in CI installation and developer toolchain documentation. Rust
@@ -13,6 +18,9 @@ The declarative target in `.config/nextest.toml` is:
 
 ```toml
 experimental = ["setup-scripts"]
+
+[profile.fixture-bootstrap]
+default-filter = 'binary(/^fixture_bootstrap_/)'
 
 [scripts.setup.integration-services]
 command = ["bash", "scripts/setup-integration.sh"]
@@ -23,21 +31,42 @@ setup = "integration-services"
 ```
 
 This is a design fragment, not the complete config. The profile also selects integration
-binaries, sets a bounded test group and defines timeouts. Default/ci exclude those binaries;
+binaries, sets a bounded test group and defines timeouts. Default/ci exclude both
+`integration_*` and `fixture_bootstrap_*` binaries; normal integration excludes bootstrap
+binaries. `fixture-bootstrap` inherits no shared setup registration; the shared hook remains
+scoped only to `profile.integration`. Bootstrap lifecycle tests are named
+`fixture_bootstrap_postgres` and `fixture_bootstrap_roles` and run
+with `cargo nextest run --profile fixture-bootstrap -p testkit`. They start/use only their
+own test-owned Testcontainers resources through the helper under test, never through
+`scripts/setup-integration.sh`, global fixture endpoints or the Cargo fallback launcher.
+The runner passes bootstrap binaries through directly, including after normal setup exists.
+
+Install the bootstrap profile first. After ownership, PostgreSQL startup/readiness and role
+tests pass, observe the endpoint-export test's intended failure, then implement the wrapper
+without activating shared setup. Run the live-run lease driver and implementation next;
+only after export and lease tests are green register the shared hook and smoke-test the shared
+path. Activation must acquire the already-tested lease before starting/reusing shared services.
+The export/configuration driving test verifies disjoint
+selectors and this activation order. No missing script
+or recursive invocation of the helper under test is accepted as red evidence. The complete
+Phase 1 checkpoint includes both bootstrap and shared-path validation. Thereafter
 pure/mock/HTTP tests do not start services. Verify filters against actual test inventory:
 no required integration test may miss setup. Enable `experimental` at the top level, not
 inside a profile; use `scripts.setup`, not deprecated `script.*` definitions.
+The TOML fragment describes the eventual workspace. At shared-hook activation use only
+present package filters (initially testkit); expand to infra-postgres when that crate exists,
+never reference a missing package during helper bootstrap.
 
 For each run, the idempotent setup script:
 
 1. Identifies repository fixture scope and, in CI, exact job/run scope.
 2. Acquires a setup lock, claims a live-run lease and starts/reuses one detached PostgreSQL
-   16 and one detached MinIO container carrying exact ownership labels.
+   16 container carrying exact ownership labels.
 3. Uses dynamic loopback ports and refuses unrelated/developer/production containers.
-4. Waits for PostgreSQL connectivity and MinIO readiness, not just container existence.
+4. Waits for PostgreSQL connectivity, not just container existence.
 5. Provisions cluster-global fixture roles once idempotently; per-test migrations do not
    race to CREATE/ALTER the same global roles.
-6. Appends DATABASE_URL and S3_ENDPOINT to `$NEXTEST_ENV` for matching tests. Failure ends
+6. Appends password-free DATABASE_URL to `$NEXTEST_ENV` for matching tests. Failure ends
    setup/run with an error, never a skipped-green suite.
 
 No nextest child owns a Testcontainers guard for these detached shared services. Local
@@ -77,9 +106,26 @@ Pinned SQLx 0.9.0 constraints:
 Schema privileges still matter inside each database; isolation does not waive runtime-role,
 append-only trigger, constraint or UoW atomicity tests.
 
-## 3. MinIO bucket ownership
+Existing admin/publication integration drivers use those isolated databases and restricted
+runtime connections to commit admin revocation/deactivation/recovery with a durable monotonic
+epoch advance, then commit restoration separately before worker execution. Fresh reads must
+retain the advanced epoch, never reset/reuse it; rollbacks commit neither invalidation nor
+epoch change. Cover deactivate→reactivate and revoke→restore cancellation, and an unchanged
+epoch/all-other-gates-valid execution control in the existing prepared publication harness.
+No new fixture service, endpoint or task is required.
 
-Each test needing MinIO gets a random unique bucket namespaced to the run. Helpers remove
+## 3. MinIO bucket ownership — deferred to feature 004
+
+Deferred startup case `minio_fixture_startup_is_idempotent_and_waits_for_readiness` uses
+`fixture_bootstrap_minio` on test-owned resources, without shared setup, inherited endpoints
+or fallback recursion. Implement owned detached startup/reuse in `fixtures/minio.rs`; neither
+duplicate an existing owned container nor report ready before its readiness endpoint succeeds.
+Deferred `minio_bucket_names_are_isolated_and_cleanup_covers_panics` drives `fixtures/buckets.rs`:
+per-test isolation, awaited success/error/panic teardown and closing clients before returning.
+These are the four removed 001 checklist entries, not deleted assertions or media delivery.
+
+These assertions move to feature 004, not to 001's green checklist. Each test needing
+MinIO gets a random unique bucket namespaced to the run. Helpers remove
 its objects/bucket on normal success/error/panic teardown, awaiting async cleanup before
 propagating failure. A killed process cannot promise async cleanup; exact-run cleanup handles
 orphans. Never remove resources outside managed fixture scope. These are infrastructure
@@ -98,10 +144,10 @@ configured IDE launch. `just test-tools` prepares it before developer test runs:
 1. Pass non-test executables, discovery/list/help and non-storage tests through unchanged
    without Docker. Cargo runners also see `cargo run`, bench and test discovery.
 2. With validated fixture endpoints supplied, execute the same binary/arguments without
-   starting another service pair. Validation requires the managed test fixture identity;
+   starting another service. Validation requires the managed test fixture identity;
    reject an unrelated developer/production DATABASE_URL before SQLx setup.
-3. For storage tests without DATABASE_URL, start scoped Testcontainers PostgreSQL (and
-   MinIO only when needed), retain guards, then spawn the exact same binary/arguments
+3. For PostgreSQL tests without DATABASE_URL, start scoped Testcontainers PostgreSQL,
+   retain guards, then spawn the exact same binary/arguments
    with safe `Command::env` child-only endpoints and protected credentials.
 4. Await the child, forward failures/signals/exit status, then release guards. Never call
    `std::env::set_var`; the child's endpoints prevent fallback recursion.
@@ -118,9 +164,9 @@ the shared detached path. No production code imports testkit.
 ## 5. Secrets and cleanup
 
 Nextest may include exported setup environment values in JUnit properties even with quiet
-stdout. Export password-free DATABASE_URL and credential-free S3_ENDPOINT. Use a protected
-Postgres passfile (SQLx supports PGPASSFILE) and protected MinIO credential configuration
-outside exported endpoint values. Never print keys, endpoint userinfo or passfile contents.
+stdout. Export password-free DATABASE_URL. Use a protected Postgres passfile (SQLx supports
+PGPASSFILE). Feature 004 additionally exports credential-free S3_ENDPOINT with protected
+MinIO credentials outside endpoint values. Never print keys, userinfo or passfile contents.
 Only safe ownership IDs/readiness categories enter logs. No production endpoint is reused.
 
 CI always removes containers using both project and exact run labels, including failure
@@ -131,6 +177,21 @@ label is not permission for broad Docker prune or external-volume deletion.
 Future commands: `just test-tools`, `cargo nextest run --profile integration`, plain
 `cargo test` after runner setup, IDE through that runner, and `just test-down`. Their actual
 implementations require the named failing fixture tests first; none is created here.
+
+Toolchain installation, container startup and process/harness preparation are setup steps,
+not behavioral red evidence. Fixture-policy helpers (ownership, lease, readiness protocol,
+role isolation and cleanup) each have their own focused tests before implementation. Prepare
+the executable test harness first; a missing Docker/runner/credential file is a setup blocker.
+
+For each new or changed checked query, migrate the isolated preparation database, prepare
+metadata online with `SQLX_OFFLINE=false`, then rerun the driving/affected/integration suites
+offline with `SQLX_OFFLINE=true` before marking the implementation pair green. Refresh and
+commit the generated `.sqlx/query-*.json` files in that implementation increment. Never use
+online preparation as a substitute for runtime-role privilege tests; final full-workspace
+freshness validation remains mandatory.
+
+This is each retained adapter's completion criterion: **sqlx metadata prepared and offline
+check passes before green**, not a separate later metadata task.
 
 ## Evidence
 

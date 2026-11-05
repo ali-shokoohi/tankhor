@@ -1,13 +1,13 @@
 # HTTP, Template and API Contracts — Feature 001
 
 Design only. Trace: FR-CON-01–11/32/37; FR-UX-01–09/14/17; Q01–Q03/Q09/Q23;
-AC-ADM-001–045. All handlers call application services, not repositories or vendor clients.
+AC-ADM-001–047. All handlers call application services, not repositories or vendor clients.
 
 ## 1. Common transport/security behaviour
 
 - One configured HTTPS origin, paths on that host; no console subdomain. Exact WebAuthn
   RP/origin configuration, no wildcard origins. Browser challenge state is stored server-side.
-- Separate opaque primary/enrollment and full-admin cookies. Production uses Secure,
+- Separate opaque primary/ceremony and full-admin cookies. Production uses Secure,
   HttpOnly, SameSite=Lax and no Domain attribute. If using `__Host-` names, Path MUST be `/`,
   not `/console`. Cookie path is not an authorisation boundary. Full admin access always
   rechecks session, finite expiry and current security epoch; no end-user-cookie substitution.
@@ -15,9 +15,11 @@ AC-ADM-001–045. All handlers call application services, not repositories or ve
   CSRF and origin checks. GETs do not perform those mutations. No sensitive values in URLs,
   request tracing, redirects, analytics or body dumps. Auth responses use `Cache-Control: no-store`.
 - Unauthenticated HTML access redirects to `/console/sign-in` with a validated same-origin
-  return destination. A known non-admin/invalid grant cannot see protected content. JSON
+  return destination. A known non-admin/invalid session cannot see protected content. JSON
   errors return problem+json, never an HTML redirect disguised as API success.
-- Valid form mutation: 303 to a full-page GET. Invalid field: 422 rendered form with preserved
+- Valid ordinary form mutation: 303 to a full-page GET. Ceremony-begin responses may return
+  HTML directly; TOTP provisioning returns its one-time no-store response, never a redisplay GET.
+  Invalid field: 422 rendered form with preserved
   safe input and associated errors; stale revision: 409 conflict view; absent/failed prerequisite:
   visible blocked status without live changes. Missing audit/DB: sanitized retryable failure,
   not success. Invalid primary/factor material is not echoed back into HTML.
@@ -25,6 +27,22 @@ AC-ADM-001–045. All handlers call application services, not repositories or ve
   works without it; apply `Vary: HX-Request` where representation changes. No GET side effects.
 - Strict CSP and local assets. Minimal essential passkey bridge calls browser WebAuthn and
   submits a form; no SPA, CDN, unsafe JSON-to-script interpolation or logging credentials.
+- CSP has `default-src 'self'`, `object-src 'none'`, `base-uri 'none'`,
+  `frame-ancestors 'none'`, `form-action 'self'`, self-only connect/font/image sources
+  (data images only for locally rendered enrollment QR), and self-only scripts/styles.
+  Executable inline handlers, unsafe-inline/unsafe-eval and external validators are refused;
+  passkey, dialog and Swagger initialization scripts are local files. HTTP tests inspect
+  headers and escaped options; browser tests exercise the actual local scripts under CSP.
+- A validated operator transport policy supplies finite positive body-byte and in-flight
+  limits. Reject an oversized form before handler/application invocation: HTML 413 with
+  localized error, JSON 413 problem+json. Reject excess concurrent requests without queueing
+  indefinitely: HTML 503 or JSON 503 problem+json; release permits on completion/error/cancel.
+  Tests use explicit small policy fixtures, not invented production SLA/default values.
+  These controls never replace CSRF/current-admin/factor checks.
+
+Foundation debug fake mode serves only a localized shell and health/API base with outbound
+networking denied. Its readiness reflects real prerequisites of that increment; it must
+not report a nonexistent registry as seeded. Management routes appear only with their story.
 
 ## 2. Access HTML/form routes
 
@@ -39,10 +57,10 @@ implementation choices; their semantics and service boundaries are the contract.
 | POST `/console/sign-in/passkey/begin` | BeginPasskey, primary proof required | HTML containing escaped public options and opaque ceremony reference |
 | POST `/console/sign-in/passkey/finish` | FinishPasskey | Verify server state + assertion; audited session or localized error |
 | POST `/console/sign-in/totp` | FinishTotp, primary proof required | Atomically verify accepted timestep and issue audited session |
-| GET `/console/access/enrol` | Restricted invited/recovery grant + primary proof | Enrollment screen only; no protected management content |
+| GET `/console/access/enrol` | GetEnrollment; protected target authorization + matching phone-OTP primary proof | Safe choices only after stage/browser/session/purpose/target/epoch/expiry checks through SessionStore and AdminRepository; no writes or repository access in web |
 | POST `/console/access/enrol/passkey/begin` | BeginEnrollment | Bound registration state/options |
 | POST `/console/access/enrol/passkey/finish` | FinishEnrollment | New confirmed factor, one-use state, no old-epoch access |
-| POST `/console/access/enrol/totp/begin` | BeginEnrollment | Locally rendered shared-secret/QR setup once; no-store, not logged |
+| POST `/console/access/enrol/totp/begin` | BeginEnrollment | Exactly one secret/QR display to the authenticated enrolling admin, direct no-store response; never logged, re-displayable or sent elsewhere |
 | POST `/console/access/enrol/totp/finish` | FinishEnrollment | Confirm and consume timestep before session eligibility |
 | POST `/console/sign-out` | SignOut | Revoke current full session, clear cookie, redirect |
 
@@ -55,6 +73,16 @@ No-JS sign-in uses phone OTP plus already-enrolled TOTP. Passkeys intrinsically 
 browser scripting; when unavailable, explain fallback. Do not automatically enrol TOTP,
 invent password login or bypass a second factor for an admin lacking the fallback. Test both
 real verification paths and no-htmx management. (AC-ADM-002/005/030/032/043)
+
+The constitution v1.2.0 exception applies only to this authenticated TOTP enrollment ceremony:
+matching verified phone-OTP proof, target authorization and bound SessionStore state are
+required; a pre-existing full second-factor session is not required for first enrollment.
+Atomically mark provisioning presented before returning it with `Cache-Control: no-store`.
+Concurrent/repeated requests, refresh, redirects, query DTOs and errors cannot redisplay the
+same secret/QR. Do not embed it in URLs, client bundles, audit, diagnostics, external QR
+services or any other delivery channel. All other UI secrets remain prohibited. Existing
+begin-enrollment mock/fake and HTTP drivers assert authorized one-winner presentation,
+no-store and refusal without target/stage/browser/session/epoch checks or on replay.
 
 ## 3. Protected management HTML/form routes
 
@@ -71,18 +99,39 @@ All rows require a current fully verified admin session. CSRF applies to every P
 | GET `/console/changes/{id}` | GetChange | Current revision, live versus proposed, approval/blocked status |
 | POST `/console/changes/{id}/preview` | Preview | Persist exact revision/baseline report; no downstream side effects |
 | POST `/console/changes/{id}/approve` | Approve | Explicit revision and reviewed preview; stale mismatch conflicts |
-| POST `/console/changes/{id}/publish` | Publish/SchedulePublish | Approval + stable operation identity; immediate or scheduled UTC/zone |
-| GET `/console/publications/{id}` | GetPublication | Pending/blocked/completed, reason, scheduled/actual time; no false success |
+| POST `/console/changes/{id}/publish` | Publish/SchedulePublish | Approval + stable identity; local date+time in display zone (default Asia/Tehran), validated and stored UTC; retain scheduling admin/epoch and approver |
+| GET `/console/publications/{id}` | GetPublication | Pending/blocked/cancelled/completed, visible reason, scheduling admin/approver and scheduled/actual time; cancellation requires another admin to reschedule, never false success |
 | POST `/console/versions/{id}/rollback` | Rollback | New draft from earlier values; normal review still required |
 | GET `/console/audit` | SearchAudit | Actor/action/subject/time filters, bounded cursor pagination |
 | GET `/console/admins` | Admin query | Equal permissions and identity-safe administration list |
-| POST `/console/admins/invite` | InviteAdmin | Another-admin grant, reason and audit; not instant console access |
-| POST `/console/admins/{id}/recover` | RecoverAdmin | Revoke all target sessions/factors/proofs, issue restricted enrollment grant, audit |
+| POST `/console/admins/invite` | InviteAdmin | Record audited enrollment authorization on protected target identity; no bearer credential to deliver; not instant access |
+| POST `/console/admins/{id}/recover` | RecoverAdmin | Revoke all target sessions/factors/proofs/OTPs, increment epoch, record protected target enrollment authorization and audit |
 | POST `/console/preferences` | Presentation preference handling | Locale/theme only; carry safe current form state/revision without silently saving or editing business data |
 
 Do not add audit-edit/delete endpoints, generic security toggles, user/media inspection,
 financial operations, pricing, emergency stop, content editor, reports or optional-capability
 behaviour. Those remain later features. OTP sends do not depend on the external-notifications flag.
+
+### Scheduled time and cancellation contract
+
+Reject ambiguous/nonexistent local date+time in the selected IANA display zone rather than
+guessing an offset; reject new/revised schedules earlier than the application Clock instant.
+Persist the resulting UTC instant and display zone. Test Asia/Tehran conversion/default and
+Europe/Berlin spring-gap/autumn-overlap rejection, valid neighboring times and past input.
+JSON time values, wherever decoded, accept ISO 8601 only with explicit Z or numeric offset;
+reject naive or malformed values. Feature 001 still adds no management JSON endpoint.
+Immediate publication uses its existing server-time intent; the input check does not reject
+durable overdue work. Cancellation is terminal, separate from a retryable prerequisite block.
+At execution, invalid scheduling-admin eligibility/epoch causes audited cancellation and
+localized rescheduling instructions. Every committed admin revocation, deactivation or
+recovery durably advances that admin's monotonic epoch; reactivation/restoration never
+resets or reuses it. Any mismatch with the captured scheduling epoch cancels even when
+deactivate→reactivate or revoke→restore finished before execution. Existing publication
+detail shows the localized epoch-invalidation reason, not a retryable block or success.
+An unchanged epoch permits execution only when all other gates pass; no new route is added.
+Audit shows actor = scheduling admin, executed_by =
+system worker, and approver. Another currently verified admin reschedules via the existing
+draft/review/approval flow; edits to the scheduled time invalidate the old approval as before.
 
 ## 4. Template, Fluent and interaction contract
 
@@ -136,3 +185,12 @@ disable external validation. Production authorisation covers the UI, redirects, 
 schema. Offline `tankhor openapi` uses the exact router/document builder without a database
 connection, provider account or running web server. Implementation commits its output at
 `docs/openapi.json`; snapshot/schema-conformance and CI regeneration/diff prevent drift.
+
+The existing browser acceptance matrix also runs
+`swagger_initializes_under_strict_csp_without_external_requests`: before navigating to
+`/api/docs`, capture `securitypolicyviolation` events and every attempted request; sign in
+through the delivered admin flow, follow local redirects, wait for actual Swagger
+initialization and its same-origin `/api/v1/openapi.json` fetch, and assert a rendered health
+operation, a schema response matching the generated document, zero CSP violations and zero
+off-origin requests (including blocked attempts). Run in both existing backend projects;
+do not relax CSP, bypass production docs authorization or add a new endpoint.

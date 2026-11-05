@@ -4,13 +4,50 @@
 
 **Created**: 2026-11-03
 
-**Status**: Ready for planning — formal clarification review completed
+**Status**: Planned and tasked — in-place remediation complete; implementation evidence pending
 
 **Input**: User description: "Feature 001 — Tankhor admin foundation: secure Owner Console
 access, versioned settings, feature flags, audit log, and the bilingual/theme shell every
 later feature builds on."
 
 ## Clarifications
+
+### Owner consolidation decisions — 2026-11-05
+
+- Constitution v1.2.0 permits exactly one display of a TOTP enrollment secret/QR, only to
+  the admin performing the authenticated enrollment ceremony, with `Cache-Control: no-store`.
+  It is never logged, re-displayable or sent elsewhere; no other secret may appear in UI.
+- Scheduled publication records the scheduling admin and approver. The worker acts on behalf
+  of the scheduling admin and rechecks that admin's active/eligible state and unchanged
+  security epoch, plus approval validity, at execution. Revocation, recovery or deactivation
+  cancels the publication without execution; audit and the visible reason require another
+  admin to reschedule it. Audit actor is the scheduling admin; executed_by is system worker;
+  the approver is recorded. Cancellation is terminal, not an automatically retried block.
+- Every committed admin revocation, deactivation or recovery MUST durably advance that
+  admin's security epoch monotonically, atomically with the invalidating transition.
+  Reactivation/restoration MUST NOT reset or reuse an epoch. Any mismatch between the
+  captured scheduling epoch and the current epoch MUST cancel publication with audit and
+  a visible reason, even if eligibility was restored before execution. Deactivate→reactivate
+  and revoke→restore before execution cancel; unchanged epoch permits execution only when
+  all existing eligibility, approval and publication gates pass. No new endpoint is added.
+- Console schedules use local date+time in a display time zone, default `Asia/Tehran`, and
+  persist UTC. Ambiguous/nonexistent local times and newly submitted past schedules are
+  rejected. JSON time values require ISO 8601 with an explicit offset; this defines a value
+  contract, not a new JSON endpoint. Durable overdue work retains its existing retry rules.
+- Another administrator records audited enrollment authorization for a **target admin
+  identity**. No transferable enrollment grant is issued or delivered. The target verifies
+  their phone OTP, then confirms a fresh passkey or TOTP. Authorization alone never opens
+  the console. Preserve stage/target checks, CSRF, challenge/session binding, one-use
+  proofs, replay protection, security epochs and atomic recovery revocation.
+- Impact/readiness rules preserve explicit unavailable evidence; destructive publication
+  remains blocked when required evidence is unavailable. All six undelivered capabilities
+  remain not delivered and OFF; there is no administrator-controlled readiness override.
+- Publication retains atomic audit/version/live changes, one effect under concurrent
+  HTTP/worker retries, baseline identity and durable overdue rechecks. Internal coordination
+  is simplified in the plan/contracts without changing those observable outcomes.
+- MinIO fixture implementation moves to feature 004; the local-stack service stays declared.
+  Feature 001 does not claim storage behavior is tested. All other scope and acceptance
+  assertions remain unchanged; task consolidation is not feature completion evidence.
 
 ### Session 2026-11-03
 
@@ -242,7 +279,10 @@ needing any later business capability. (PRD: FR-CON-05, FR-CON-08, FR-CON-37)
    checks all still pass; otherwise it remains blocked with the reason and required
    action visible. Repeated recovery attempts cannot duplicate the publication. A
    successful overdue publication takes effect when actually published, not retroactively,
-   and records both scheduled and actual publication times. (PRD: FR-CON-05–07,
+    and records both scheduled and actual publication times. Revocation, recovery or
+    deactivation of the scheduling admin instead cancels the request, records that admin as
+    actor, system worker as executed_by and the approver, and visibly requires another admin
+    to reschedule; approval validity is still checked. (PRD: FR-CON-05–07,
    FR-CON-32, FR-CON-37; session clarification: overdue publication)
 
 ---
@@ -383,7 +423,8 @@ underlying optional product capability is needed for this management test. (PRD:
   PRD: FR-CON-05–07, FR-CON-32; session clarification: scheduled-change baseline)
 - The service is unavailable at a scheduled publication time: on recovery, recheck all
   publication prerequisites and publish once if they pass; otherwise leave it blocked
-  with the reason visible. Do not backdate the live effect to the missed scheduled time.
+  with the reason visible, except invalid scheduling-admin authority causes terminal audited
+  cancellation requiring another admin to reschedule. Do not backdate the live effect.
   (AC-ADM-045; PRD: FR-CON-05–07, FR-CON-32, FR-CON-37;
   session clarification: overdue publication)
 - The last admin loses both factors: remain locked without a self-recovery exception to
@@ -434,6 +475,9 @@ underlying optional product capability is needed for this management test. (PRD:
   invalidate all of the recovered admin's existing console sessions and old second-factor
   credentials and require fresh enrolment before access; other admins' sessions MUST
   remain unaffected. Without another admin, recovery MUST NOT bypass the access rule.
+  Every committed revocation, deactivation or recovery of an admin MUST atomically advance
+  that admin's durable, monotonic security epoch; reactivation/restoration MUST NOT reset
+  or reuse an epoch. This is an admin-state invariant, not a new management endpoint.
   (PRD: FR-CON-02–03, FR-CON-37; NFR-SEC-05; acceptance: AC-ADM-004–006, AC-ADM-043;
   session clarification: recovery revocation)
 - **FR-005**: All admins MUST have equal full permissions, with separate attribution for
@@ -476,14 +520,24 @@ underlying optional product capability is needed for this management test. (PRD:
   fresh preview and approval. Approval MUST identify the affected live values used for
   that review. (PRD: FR-CON-05–07; acceptance: AC-ADM-014, AC-ADM-044)
 - **FR-013**: Approved changes MUST support immediate or scheduled publication with an
-  unambiguous effective time. Invalidated approvals MUST block scheduled publication;
+  unambiguous effective time. Console input MUST be local date+time in a display time zone
+  (default Asia/Tehran), converted to UTC; ambiguous/nonexistent local times and newly
+  submitted past schedules MUST be rejected. JSON time values MUST be ISO 8601 with an
+  explicit offset, not naive local time; this adds no management JSON endpoint.
+  Invalidated approvals MUST block scheduled publication;
   a scheduled change MUST also be blocked if another publication has changed the same
   affected live setting or flag since approval. Fresh preview and approval against the
   latest live value MUST be required before that change can publish; unrelated changes
   MUST NOT by themselves invalidate approval. A blocked change MUST remain identifiable
   to admins with the reason and required review visible. In all publication paths,
   repeating the same publication MUST NOT create a second effective version or second
-  successful publication event. (PRD: FR-CON-05, FR-CON-07, FR-CON-32, FR-CON-37;
+  successful publication event. A revoked, recovered or deactivated scheduling admin MUST
+  cause cancellation at execution, not a live change or retryable block; another admin
+  MUST reschedule it. Store the scheduling admin and approver and recheck active eligibility,
+  scheduling security epoch and approval validity. Any mismatch with the captured epoch
+  MUST cancel with audit and a visible reason even after reactivation/restoration before
+  execution; an unchanged epoch permits execution only if all other gates pass.
+  (PRD: FR-CON-05, FR-CON-07, FR-CON-32, FR-CON-37;
   acceptance: AC-ADM-016–018, AC-ADM-044; session clarification: scheduled-change baseline)
 - **FR-014**: Rollback MUST follow preview, approval and publication, restore selected
   earlier values as a new version, and retain all prior history and executed actions.
@@ -507,6 +561,8 @@ underlying optional product capability is needed for this management test. (PRD:
 - **FR-021**: Audit MUST record foundation sign-ins and factor used, admin additions and
   recoveries, drafts, previews, approvals, schedules, publications and rollbacks. Each record
   MUST identify actor, action, subject, time, reason and before/after where relevant.
+  Scheduled execution and cancellation MUST identify actor = scheduling admin,
+  executed_by = system worker and the approver; cancellation MUST retain a visible reason.
   (PRD: FR-CON-03–05, FR-CON-37; acceptance: AC-ADM-021)
 - **FR-022**: Verified admins MUST be able to search audit history by actor, action,
   subject and time period. Non-admins MUST NOT see it. (PRD: FR-CON-01, FR-CON-37;
@@ -567,7 +623,9 @@ underlying optional product capability is needed for this management test. (PRD:
   assigned limit, and processing units keep the limit they started with.
   (PRD: FR-CON-32; §10.1; Q29; acceptance: AC-ADM-042; owner-supplied attempt-change rules)
 - **FR-037**: A publication missed during service unavailability MUST be retried on
-  recovery, without requiring another confirmation if its exact-version approval,
+  recovery, unless its scheduling admin has been revoked, recovered or deactivated, in which
+  case it MUST be cancelled, audited and visibly require another admin to reschedule it.
+  Otherwise retry without requiring another confirmation if its exact-version approval,
   live-value checks, impact information and required health checks still pass. It MUST
   publish at most once; if any prerequisite fails or is unavailable it MUST remain
   blocked with the reason and required action visible. Successful overdue publication
@@ -657,7 +715,9 @@ delivery; behaviour behind these flags remains outside Feature 001. (PRD: FR-CON
 - **Publication and version**: The attributable event making approved values effective
   now or later; rollback creates a new event referencing earlier values. An overdue
   publication retains its scheduled time and records its actual publication time;
-  recovery retries cannot create duplicate effective versions. (PRD: FR-CON-05,
+  recovery retries cannot create duplicate effective versions. A scheduled request retains
+  scheduling admin, that admin's security epoch and approver; invalid scheduling authority
+  produces a terminal, audited cancellation, not publication. (PRD: FR-CON-05,
   FR-CON-08, FR-CON-37)
 - **Audit entry**: Protected, searchable evidence of actor, action, subject, time, reason
   and relevant before/after, without authentication secrets or private content.
@@ -681,7 +741,8 @@ delivery; behaviour behind these flags remains outside Feature 001. (PRD: FR-CON
   100% of scheduled changes whose affected live value changed after approval are blocked
   until fresh preview and approval against the latest live value. Overdue publications
   take effect once on recovery only if all current prerequisites pass; otherwise they
-  remain blocked, and no successful overdue change is backdated.
+  remain blocked, except invalid scheduling-admin authority produces audited cancellation
+  requiring another admin to reschedule. No successful overdue change is backdated.
   (PRD: FR-CON-05–10; evidence: AC-ADM-010–011, AC-ADM-014–020, AC-ADM-034, AC-ADM-044–045)
 - **SC-003**: All ten initial settings expose the required bilingual labels, units,
   owner-approved finite bounds or permitted format choices, and history. Both boundaries
@@ -709,12 +770,12 @@ delivery; behaviour behind these flags remains outside Feature 001. (PRD: FR-CON
   engineering assistance or direct modification of stored records.
   (PRD: FR-CON-05–08, FR-CON-32, FR-CON-37; evidence: AC-ADM-010–011, AC-ADM-016, AC-ADM-019,
   AC-ADM-021–022)
-- **SC-009**: 100% of reviewed changes across the five published-policy groups explain
+- **SC-009**: 100% of reviewed changes across the six published-policy groups explain
   their existing-item and new-item effects before approval. Lifetime previews identify
   next-sweep consequences; other previews explain the preservation of existing projects,
   photos, stored uploads and assigned attempt allowances as applicable, without executing
   those downstream actions. (PRD: FR-CON-32; §10.1;
-  evidence: AC-ADM-012, AC-ADM-039–042; owner-supplied change rules)
+  evidence: AC-ADM-012, AC-ADM-039–042, AC-ADM-046; owner-supplied change rules)
 
 ## Assumptions
 

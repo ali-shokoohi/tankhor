@@ -2,13 +2,30 @@
 
 **Branch**: `001-admin-foundation` (Spec Kit identifier; actual Git branch remains `main`)
 
-**Date**: 2026-11-04 | **Spec**: [spec.md](spec.md)
+**Date**: 2026-11-05 | **Spec**: [spec.md](spec.md)
 
 **Input**: `specs/001-admin-foundation/spec.md`; user planning prompt; common block from
 `docs/tankhor-rust-implementation-pack.md` §10, with stack/testing rules from §§2–7.
 
-**Status**: Phase 0 research and Phase 1 design complete. No application code, migrations,
-deployment files, generated runtime OpenAPI document or `tasks.md` is created by this plan.
+**Status**: Phase 0 research and Phase 1 design complete; in-place remediation against
+constitution v1.2.0 aligned at design level. Existing tasks are edited directly, not
+regenerated. No application code, migrations, deployment or runtime test evidence is created.
+
+**Owner consolidation**: 580 → **491 tasks**; 19 → **16 ports**. All 47 canonical acceptance
+names, 38 FRs and nine outcomes remain. The full 580-baseline → current-ID map and assertion
+destinations are in tasks.md's Owner Consolidation section. No task is marked complete.
+These current owner decisions supersede incompatible older research/quickstart examples
+about publication coordination and MinIO fixtures; those background files are outside this
+requested eight-file edit set and are not rewritten here.
+
+**Owner follow-up decisions**: 491 → **491 tasks** (net zero); existing drivers gain all
+new assertions. TOTP provisioning follows the constitution's authenticated, exactly-once,
+no-store UI exception, never logging, redisplaying or sending the secret/QR elsewhere.
+Phase gates validate planned-artifact/driver/completion links for completed work only; the final gate
+requires every actual port symbol/runner/interaction and both feature graphs. Test partial
+and final modes. Shared setup is activated/smoke-tested only after the live-run lease pair
+passes; the wrapper still follows its own observed intended red. T460–T462 are regression
+validation of existing flag guards unless a genuinely new flag-specific case is named first.
 
 ## Summary
 
@@ -27,6 +44,26 @@ changes recheck affected live versions and current prerequisites; overdue work r
 recovery without backdating. Owner-approved defaults, ranges and preservation rules are
 unchanged. Design detail and rationale are in [research.md](research.md).
 
+Scheduled requests store scheduling_admin_id, scheduling_security_epoch and approver_id.
+The worker acts on behalf of the scheduling admin, rechecking active eligibility, epoch and
+approval validity under the final transaction. Revocation, recovery or deactivation produces
+terminal cancellation plus audit and a visible reason, no live effect; another admin must
+reschedule through the reviewed workflow. Audit actor = scheduling admin, executed_by =
+system worker, with approver recorded. This adds no admin-deactivation route or lifecycle.
+Every committed admin revocation, deactivation or recovery atomically advances that admin's
+durable, monotonic security epoch through the existing AdminRepository/UoW, under the same
+admin-row lock used by finalization. Reactivation/restoration never resets or reuses an
+epoch. Compare the captured scheduling epoch to the current value: any mismatch cancels
+with audit and a visible reason even when eligibility has been restored before execution.
+Existing domain, shared fake/real repository and ScheduledPublish drivers cover
+deactivate→reactivate and revoke→restore before execution (cancelled), plus unchanged epoch
+with all existing gates satisfied (executes). No tasks, ports or endpoints are added.
+Console scheduling accepts local date+time in a display zone (default Asia/Tehran), rejects
+ambiguous/nonexistent local times and past submissions, and stores UTC plus the display zone.
+JSON time decoding requires ISO 8601 with explicit offset (Z or a numeric offset); no new JSON endpoint.
+Use Asia/Tehran and Europe/Berlin DST boundary fixtures; previously authorized overdue work
+is not rejected merely because its persisted schedule is now past.
+
 ## Technical Context
 
 **Language/Version**: Rust stable 1.98.1, edition 2024; pin toolchain, rustfmt, clippy and
@@ -35,7 +72,8 @@ llvm-tools-preview. Single Cargo.lock and shared workspace dependency/lint decla
 **Primary Dependencies**: tokio 1.x; axum 0.8.9; askama/askama_web 0.16 with `axum-0.8`;
 Fluent bundles; vendored htmx 2.x; SQLx 0.9.0; utoipa 5.5/utoipa-axum 0.2/Swagger UI 9.0.2
 (`axum,vendored`); webauthn-rs 0.6.2; totp-rs 6.0.0; aes-gcm 0.11.1; reqwest in infra-sms
-only; uuid, time, serde, thiserror, async-trait and sha2 as appropriate pure libraries.
+only; uuid, time, serde, thiserror, async-trait and sha2 as appropriate pure libraries;
+pure chrono/chrono-tz with pinned embedded IANA rules for local scheduling resolution.
 Research R12–R13 verifies metadata/protocols; the first TDD build resolves exact compatible
 patches into Cargo.lock. No dependency compilation is claimed by planning.
 
@@ -46,9 +84,9 @@ is a pinned local-stack service only; media/storage behaviour is not Feature 001
 **Testing**: nextest; unit/proptest; mockall on ports; transactional testkit fakes; shared
 fake/real suites; Testcontainers modules 0.15/core 0.27; wiremock; axum oneshot/scraper/insta;
 test-only Playwright/axe plus required real-device checks. Pin cargo-nextest 0.9.151 in CI
-and developer toolchain docs. Owner-approved integration setup shares labelled Postgres/MinIO
-services across a run, with a fresh SQLx database and isolated MinIO bucket per test;
-plain Cargo/IDE execution has a testkit process-launcher fallback. All 45 named scenarios
+and developer toolchain docs. Owner-approved integration setup shares labelled PostgreSQL
+across a run, with a fresh SQLx database per test; MinIO fixture implementation moves to 004;
+plain Cargo/IDE execution has a testkit process-launcher fallback. All 47 named scenarios
 are mapped in [contracts/test-plan.md](contracts/test-plan.md).
 
 **Target Platform**: Linux services; one HTTPS origin with `/console`; browsers per PRD
@@ -58,7 +96,7 @@ does not replace actual iOS Safari acceptance.
 **Project Type**: Rust hexagonal monorepo, SSR web application and scheduled-publication worker.
 
 **Performance Goals**: paginated audit/registry reads, bounded request bodies/concurrency,
-indexed due-work claiming, no vendor calls under database locks, no full-table population
+indexed bounded due-work reads, no vendor calls under database locks, no full-table population
 scans in handlers. Measure PRD proposed latency/availability targets; do not promote them
 or the pack's proposed mutation/other-crate coverage percentages to decided requirements.
 The 1,000/day generation target and 2× load test remain later full-product checks, not a
@@ -70,19 +108,20 @@ cookies/CSRF/CSP; genuine primary and second-factor checks; ≥90% kernel covera
 same floor for wallet/generation/identity as delivered; no vendor APIs from tests.
 
 **Scale/Scope**: ten settings, nine finite numeric ranges plus JPEG-mandatory format subset;
-six OFF flags; equal full admin permissions; one subject per draft; 45 acceptance scenarios,
-37 feature requirements and nine measurable outcomes. No invented admin-count/throughput SLA.
+six OFF flags; equal full admin permissions; one subject per draft; 47 acceptance scenarios,
+38 feature requirements and nine measurable outcomes. No invented admin-count/throughput SLA.
 
 ## Constitution Check
 
-Gates apply before Phase 0 and again after Phase 1. PASS means compliant design, not built
-software or successful runtime tests. The initial repository contains documentation only.
+Gates apply before Phase 0, after Phase 1 and after this task remediation. PASS means
+conformant design only, not built software or successful runtime tests. The initial
+repository contains documentation only.
 
 | Principle | Pre-research gate | Post-design evidence | Result |
 | --- | --- | --- | --- |
-| I — TDD | Tests must precede code; no production work in this command | All 45 AC names preserved; layered test/contract/CI matrix; later tasks must pair red test before implementation | PASS |
+| I — TDD | Tests must precede code; tooling failures are not red evidence | All 47 AC names preserved; focused red/green pairs; setup precedes behavioral tests; regression checks do not manufacture failures | PASS (design only) |
 | II — Hexagonal Rust | One workspace and pure context boundaries | infra-auth/infra-sms added where needed; cargo-deny plus metadata/import checks; no empty future context crates | PASS |
-| III — Ports/UoW | Every persistence need needs port/fake/real contract | Explicit TxHandle, shared transactional fake, all repository and runtime ports mapped; no testkit cycles | PASS |
+| III — Ports/UoW | Every external dependency has an async automock port, fake, shared contract and infra-* adapter | Sixteen ports; SessionStore absorbs pending authentication state; pure impact/readiness are not ports; fake contracts pass before real adapters; mock/fake tests precede services; app-wide mode, fake smoke and production/release guards retained | PASS (design only; implementation evidence pending) |
 | IV — Money | No raw-money/ledger shortcuts | No money behaviour in 001; no simulation writes balances; future debit/unit/outbox and return atomicity retained as later gates | PASS |
 | V — SSR | Askama/Fluent/progressive, bilingual accessible shell | HTML/form contracts, local assets, approved Vazirmatn/palette; no new brand or SPA | PASS |
 | VI — JSON contract | All JSON under `/api/v1`, generated schema/errors | Annotated health and schema-serving routes; local Swagger `/api/docs`; documented finite bootstrap; offline export/diff | PASS |
@@ -91,8 +130,8 @@ software or successful runtime tests. The initial repository contains documentat
 
 **Post-design caveats, not waivers:** production SMS account/template access, encryption keys,
 trusted TLS, operator-authorised initial provisioning and developer-tool installation are
-documented prerequisites. Constitution ratification-date TODO is pre-existing governance
-metadata and is not altered here. Missing prerequisites block deployment/acceptance, never
+documented prerequisites. Constitution v1.2.0 retains original ratification 2026-11-03; no governance
+metadata is changed here. Missing prerequisites block deployment/acceptance, never
 allow fake primary authentication, healthy stubs or silent gate bypasses.
 
 ## Project Structure
@@ -130,11 +169,14 @@ scripts/{setup-integration.sh,test-runner.sh,test-down.sh,tests/}
 justfile
 deploy/{compose.yml,Dockerfile}
 crates/
-├── kernel/src/{ids,clock,locale,error,uow}.rs
+├── kernel/src/
+│   ├── {ids,locale,error}.rs
+│   └── ports/{clock,id_generator,unit_of_work}.rs
 ├── admin/src/{domain/,application/,ports/}
 ├── infra-postgres/{src/,migrations/,tests/}
 ├── infra-auth/{src/,tests/}
 ├── infra-sms/{src/,tests/}
+├── infra-system/src/{clock,id_generator}.rs
 ├── web/{src/,templates/console/,templates/partials/,locales/{fa,en}/,static/,tests/}
 │   ├── design/tokens.toml           # ONLY source of visual identity values (FR-UX-20)
 │   ├── build.rs                     # Generates CSS custom properties from design/tokens.toml
@@ -148,13 +190,49 @@ docs/development.md                 # Pin Rust and nextest/tool installation ver
 ```
 
 **Structure Decision:** Context crates are added only when their feature is built. Kernel
-contains pure ID/value/error types and async Clock/IdGenerator/UoW ports; its pure FixedClock
-is reused by testkit. System clock/random implementations live at composition. Admin modules:
+contains pure ID/value/error types and async Clock/IdGenerator/UnitOfWork traits in
+`crates/kernel/src/ports/`. FixedClock and deterministic IDs live only in
+`crates/testkit/src/fakes/` behind feature `fakes`; real clock/UUID implementations live in
+`infra-system`. App selects and wires adapters but implements none. Admin modules:
 typed settings/flags/revisions/approval/audit/access; SaveDraft, Preview, Approve, Publish,
 Rollback, ScheduledPublish, access/enrollment/recovery, registry/audit queries and health
-application services; repositories and crypto/SMS/impact/readiness ports. Infra-postgres owns
+application services; repositories and crypto/SMS ports. Infra-postgres owns
 SQLx/migrations. Infra-auth owns WebAuthn/TOTP/token/secret protection. Infra-sms owns only
 provider HTTP protocols. Web never verifies factors or queries repositories directly.
+
+BootstrapAdmin owns the existing operator-authorised eligibility/enrollment/audit transition
+in `admin/application`; the provisioning CLI only parses protected input/config and delegates.
+GetEnrollment owns read-only protected identity authorization and SessionStore primary-proof/
+stage/browser/session/purpose/target/epoch/expiry checks before the
+enrollment page. Both service slices have failing mock/fake drivers before implementation
+and before US1 real storage; no new port, public endpoint or product requirement is added.
+
+**Pure policies:** ImpactAssessment and CapabilityReadiness are direct pure calculations in
+`admin/domain`, not ports or adapters. Typed input/provenance cases live in original domain
+and workflow drivers. A code-owned delivered-capability registry marks all six capabilities
+not delivered; no writable health override. Missing population evidence stays explicitly
+unavailable and blocks destructive publication, never an invented zero.
+
+**Owner simplifications:** enrollment authorization is protected, audited target-admin state,
+not a transferable token. Target verifies phone OTP then enrolls passkey/TOTP; SessionStore
+owns pending proofs and ceremonies. AdminRepository owns authorization; no AuthStateRepository.
+Epochs, one-use/replay, CSRF, challenge/session binding and recovery revocation remain.
+Publication reads bounded durable due candidates, gathers evidence outside write locks, then
+uses short transactional row locking, unique publication identity and conditional finalization.
+Baseline, one-effect HTTP/worker retry, audit atomicity, unknown-outcome lookup and overdue
+rechecks remain; no publication lease/fencing protocol. The PostgreSQL fixture live-run lease
+is a separate safety mechanism and remains unchanged.
+
+**Incremental foundation:** before any user story, debug fake mode starts only the delivered
+shell and health routes with outbound networking denied. Health is unavailable until its
+genuine seed prerequisite exists; no synthetic readiness or placeholder management route is
+installed. Each story extends this same composition. One application-wide `real|fake` mode
+selects a coherent backend, without per-group overrides or mixing. Production rejects fake mode
+before resource acquisition; release builds exclude mocks/fakes features.
+
+AdminAuthenticator's real port implementation is T224. T216/T218/T220/T222 implement its
+internal envelope/capability/TOTP/passkey dependencies, not additional real port adapters;
+the unchanged shared contract drives the aggregate adapter through T223–T224.
 
 **Design tokens:** `crates/web/design/tokens.toml` is the only source of visual identity
 values: light and dark colours including `borderControl`, typography, spacing, radii and
@@ -181,11 +259,32 @@ families. No design clarification remains; source values marked proposed stay pr
 - [contracts/test-plan.md](contracts/test-plan.md): named AC coverage and additional domain,
   contract, integration, HTTP/template, browser, architecture and workspace tests.
 - [contracts/integration-fixtures.md](contracts/integration-fixtures.md): owner-selected
-  shared-run services, per-test database/bucket isolation, safe process fallback and cleanup.
+  shared-run PostgreSQL, per-test database isolation, safe process fallback and cleanup;
+  MinIO startup/bucket fixture implementation is deferred to feature 004. Keep Compose
+  MinIO; no storage behavior is claimed tested in feature 001.
 - [quickstart.md](quickstart.md): prerequisites, future executable validation commands and
   expected results, clearly distinguished from current planning-only validation.
 
 ### Test-first implementation sequencing for later tasks
+
+Tool installation, fixture startup, Playwright/axe configuration and SQLx metadata preparation
+are explicit **setup** tasks. Missing tools or harnesses never count as a behavioral red.
+Executable harnesses precede their test tasks. Every new/split production behavior has its
+own preceding failing test; application behavior is driven by both mock and fake tests.
+Already implemented membership/acceptance behavior is rerun as regression coverage, not
+reimplemented or deliberately broken to obtain red. Canonical six-OFF flag definitions precede
+the first flag contract/seed. Each introducing story completes fake-based services before SQL.
+US2 validates OI8 domain/preview policy only; its publication-policy assertion runs in US3
+after Publish exists. Account deletion execution remains outside feature 001.
+
+The existing impact gate compares canonical revision/subject, baseline version, policy/source,
+effect rules and applicable known counts, as specified in application-ports §4; assessment
+time/report IDs alone do not require reapproval. Changed semantic evidence requires new
+preview/approval; unavailable required evidence blocks; no TTL or population inventory is
+introduced. Existing domain/contract/workflow tasks exercise all three cases. Existing
+passkey/TOTP/recovery CAS/replay/audit-rollback assertions belong to their original drivers.
+Later audit completion, unknown-commit and publication SQL repair assertions likewise move
+into the original service/contract drivers; aggregate and real-storage acceptance remain.
 
 | Driving failing tests first | Minimum implementation slice | Required green validation |
 | --- | --- | --- |
@@ -212,10 +311,26 @@ guidance, not permission to create workspace/migrations before their tests or ma
   experimental setup scripts, and scope the idempotent service setup to integration tests.
   Setup exports endpoints through `$NEXTEST_ENV`; shared services do not imply shared test
   databases. Serialize independent local runs reusing the same PostgreSQL server.
+- Fixture lifecycle helpers instead use `fixture_bootstrap_*` binaries and the dedicated
+  `fixture-bootstrap` profile with no shared setup/fallback launcher. Install this profile
+  before testing helpers. Implement the export wrapper after ownership/startup/role tests
+  pass and its own intended failure is observed, without activating the shared hook. Only
+  after export and the live-run lease driver/implementation are green activate and smoke-test
+  shared setup. Default/ci and normal
+  integration exclude bootstrap binaries;
+  the Phase 1 checkpoint/CI run bootstrap and shared validation separately without recursion.
 - Unit/mock/fake/HTTP run on every PR. Integration runs on infra-*/wallet/generation changes
   and nightly for all present adapters. Real restricted-role and trigger tests are mandatory.
 - SQLx checked queries have committed `.sqlx/` metadata, generated with the intended migrated
-  role/schema; CI checks freshness. Ordinary builds explicitly use `SQLX_OFFLINE=true`;
+  role/schema **with each adapter/query change, before that pair's offline green checkpoint**.
+  Apply the current migrations to the isolated preparation database; run
+  `SQLX_OFFLINE=false cargo sqlx prepare --workspace -- --all-targets --all-features`, then
+  restore `SQLX_OFFLINE=true` and run the driving/affected/integration tests. This online
+  preparation is a setup operation, not red evidence or a production offline-mode waiver.
+  It is folded into every retained adapter's completion criterion: **sqlx metadata prepared
+  and offline check passes before green**, not a standalone follow-up task.
+  The final metadata tasks repeat prepare/check across the complete workspace; they are
+  not the first metadata generation. CI checks freshness. Ordinary builds use `SQLX_OFFLINE=true`;
   prepare/check has access to the intended migrated test database. Compile-time SQL checking
   is not the audit privilege test. Each `#[sqlx::test]` uses the canonical workspace migrator,
   while adapter pools connect with restricted runtime credentials.
@@ -225,6 +340,8 @@ guidance, not permission to create workspace/migrations before their tests or ma
   verified separately because SQLx treats some drop failures as best effort.
 - Generate `docs/openapi.json` offline, snapshot it and fail any diff from the committed
   artifact. Validate every JSON response, including the document endpoint, against its schema.
+  The existing dual-backend browser matrix also loads protected `/api/docs`, proves actual
+  Swagger initialization/schema fetch under strict CSP, and rejects CSP/off-origin attempts.
 - Enforce ≥90% line coverage on each present kernel/wallet/generation/identity crate. Report
   other-crate coverage without silently adopting the proposed 80% threshold. Missing future
   crates are reported as not delivered, not as successful coverage results.
@@ -233,11 +350,18 @@ guidance, not permission to create workspace/migrations before their tests or ma
 - Nightly/pre-release E2E includes all delivered journeys. A separate full-product release
   check fails until all required contexts, J1–J5, guardrails and PRD launch gates exist and
   pass. Feature 001's scoped J5 test is not labelled the complete J5 or a product release.
+- Partial checkpoints check planned-artifact/driver/completion links for completed work only;
+  unfinished feature symbols are not prerequisites for Phase 1. The final T491 gate runs
+  the full actual-symbol/runner/direct-interaction inventory for all sixteen ports, including
+  both SmsSender adapters and real/fake feature graphs. The original checker driver tests
+  valid partial work, premature completion, final missing evidence and the complete state.
 
 ## Complexity Tracking
 
 No constitution exceptions are requested. Infra-auth/infra-sms are necessary adapters for
-required authentication, not additional product contexts. The Cargo metadata audit closes a
+required authentication, not additional product contexts. Infra-system groups the two local
+port adapters without creating a new business context or a policy-only crate. The Cargo
+metadata audit closes a
 real cargo-deny limitation. Shared integration services and a test-only process launcher
 implement the owner's 2026-11-04 fixture decision; no unsafe process-environment mutation or
 false in-process cross-nextest singleton is used. No event bus, generic workflow engine,

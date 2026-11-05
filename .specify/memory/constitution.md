@@ -1,3 +1,19 @@
+<!--
+Sync Impact Report — temporary amendment review material; remove before commit.
+Version change: 1.1.1 → 1.2.0 (MINOR, explicitly approved by the owner).
+Modified principle: VII. Security and Privacy by Default (title unchanged).
+Added sections: none. Removed sections: none. All eight principles are retained.
+Rationale: reconcile mandatory TOTP enrollment (Q23; FR-CON-02) with the no-secrets-in-UI
+rule through one narrow, owner-approved provisioning exception; no Q decision is changed.
+Test/delivery impact: authenticated enrollment must enforce exactly-once, no-store
+presentation and reject redisplay, logging or any other delivery of the provisioning
+secret/QR. All other UI secrets and all secrets in client bundles remain prohibited.
+Migration/compatibility: governance only; no application, feature, template or command
+changes are made. Runtime constitution consumers read this amendment directly.
+Input classification: all supplied intent is constitution content; no separate
+non-governance intent is deferred. Deferred placeholders/TODOs: none.
+-->
+
 # Tankhor (تن‌خور) Constitution
 
 ## Core Principles
@@ -143,7 +159,12 @@ a Unit of Work preserves cross-repository invariants without sacrificing local i
   URLs (GR5). Admin viewing of private media MUST require a linked report/support ticket ID,
   be scoped to that case and produce an attributable audit entry (Q12; GR6).
 - Logs MUST NOT contain phone numbers, OTPs, keys, photos or payment data. Secrets MUST NOT
-  appear in UI or client bundles. Audit records MUST be append-only and access-controlled.
+  appear in any UI, with one narrow exception: a TOTP enrollment secret/QR MAY be shown
+  exactly once, only to the admin performing an authenticated enrollment ceremony, in a
+  response with `Cache-Control: no-store`. This provisioning material MUST NOT be logged,
+  MUST NOT be re-displayable, and MUST NOT be sent anywhere else. All other secrets MUST
+  NOT appear in any UI. Secrets MUST NOT appear in client bundles. Audit records MUST be
+  append-only and access-controlled.
 - Uploads MUST be validated by actual content, size and dimensions, re-encoded and stripped
   of metadata including GPS before use. Q05 limits MUST be checked before payment. Permanent
   personal-photo storage MUST require explicit consent and an AI-processing notice.
@@ -265,4 +286,4 @@ That report MUST be removed before committing the amendment. Constitution update
 rewrite dependent templates or commands; they consume this document at runtime. Any separate
 implementation or delivery work MUST remain outside the constitution-update scope.
 
-**Version**: 1.1.1 | **Ratified**: 2026-11-03 | **Last Amended**: 2026-11-05
+**Version**: 1.2.0 | **Ratified**: 2026-11-03 | **Last Amended**: 2026-11-05
