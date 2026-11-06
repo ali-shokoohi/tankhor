@@ -228,6 +228,21 @@ isolation and constitution Principle I):
   run the live-run lease driver/implementation, then activate and smoke-test shared setup
   only after both export and lease are green. Assertions belong to the
   existing `nextest_profiles_select_storage_tests_only` and endpoint-export test tasks.
+- Owner-approved nextest sequencing correction (2026-11-06): extend the existing T008 driver
+  to cover fast-only, bootstrap-present and complete genuine-target inventories, and load/list
+  all four profiles in the real workspace. Retain final default/ci exclusions, disjoint
+  storage selectors, no bootstrap setup and bounded concurrency assertions. Reject package/
+  binary predicates matching no current target; inactive storage profiles select `none()`.
+  T009 installs scaffolding only; T013 adds bootstrap selectors/exclusions/group assignment
+  alongside the first real bootstrap driver, before its red run. T021 adds
+  `shared_fixture_exports_owned_ready_postgres` in
+  `crates/testkit/tests/integration_shared_fixture.rs` alongside integration selectors,
+  exclusions/group assignment and shared-hook activation, after bootstrap/export/lease are
+  green. The smoke check verifies the inherited password-free endpoint's ownership and ready
+  PostgreSQL connection through tested helpers, without startup/fallback or new policy in
+  its body. T032 requires both complete final selection checks and real bootstrap/shared-smoke
+  execution. Empty inactive profiles or probe-only success are never fixture coverage; no
+  future adapter or Phase 2 test is pulled into Phase 1.
 - `sqlx_cases_get_distinct_migrated_databases` covers all pools, failed-database retention
   until same-case rerun and successful cleanup after closing app pools;
   `local_shared_server_rejects_concurrent_independent_runs`.

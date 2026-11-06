@@ -1,0 +1,29 @@
+{
+  "name": "CI",
+  "on": {"pull_request": {}, "push": {"branches": ["main"]}},
+  "permissions": {"contents": "read"},
+  "jobs": {
+    "checks": {
+      "runs-on": "ubuntu-24.04",
+      "timeout-minutes": 45,
+      "env": {"SQLX_OFFLINE": "true", "CARGO_TERM_COLOR": "always"},
+      "steps": [
+        {"uses": "actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683", "with": {"fetch-depth": 0}},
+        {"name": "Pinned toolchain", "run": "rustup toolchain install 1.98.1 --profile minimal --component rustfmt --component clippy --component llvm-tools-preview\ncargo install cargo-nextest --version 0.9.151 --locked\ncargo install cargo-deny --version 0.20.2 --locked\ncargo nextest --version\ncargo deny --version\ndocker info --format '{{.ServerVersion}}'"},
+        {"id": "changes", "name": "Integration impact", "env": {"BASE_SHA": "${{ github.event.pull_request.base.sha || github.event.before }}", "HEAD_SHA": "${{ github.sha }}"}, "run": "python3 - <<'PY'\nimport os,subprocess\nbase=os.environ['BASE_SHA']\nhead=os.environ['HEAD_SHA']\npaths=subprocess.check_output(['git','diff','--name-only',base,head],text=True).splitlines() if base and set(base)!={'0'} else ['crates/testkit/']\nprefixes=('crates/infra-','crates/wallet/','crates/generation/','crates/testkit/','scripts/','.config/','.cargo/','.github/','specs/')\nneeded=any(p.startswith(prefixes) or p in ('Cargo.toml','Cargo.lock','rust-toolchain.toml','deny.toml','justfile') for p in paths)\nwith open(os.environ['GITHUB_OUTPUT'],'a') as output: output.write('integration='+str(needed).lower()+'\\n')\nPY"},
+        {"name": "Build test tooling", "run": "cargo build --locked -p testkit --bin fixture-runner"},
+        {"name": "Format", "run": "cargo fmt --check"},
+        {"name": "Clippy", "run": "cargo clippy --all-targets --all-features -- -D warnings"},
+        {"name": "Dependency policy", "run": "cargo deny check"},
+        {"name": "Architecture", "run": "python3 scripts/check-architecture.py"},
+        {"name": "Completed-work traceability", "run": "python3 scripts/check-test-traceability.py --mode partial"},
+        {"name": "Repository checks", "run": "python3 -m unittest discover -s scripts/tests"},
+        {"name": "Fast tests", "run": "cargo nextest run --profile ci"},
+        {"name": "Present adapter inventory", "run": "cargo metadata --no-deps --format-version 1 | python3 -c 'import json,sys; names={p[\"name\"] for p in json.load(sys.stdin)[\"packages\"]}; [print(name+\": \"+(\"present\" if name in names else \"not present; no runtime coverage claimed\")) for name in (\"infra-postgres\",\"infra-auth\",\"infra-sms\",\"wallet\",\"generation\")]'"},
+        {"name": "Fixture bootstrap", "if": "steps.changes.outputs.integration == 'true'", "run": "cargo nextest run --profile fixture-bootstrap -p testkit"},
+        {"name": "Shared integration", "if": "steps.changes.outputs.integration == 'true'", "run": "cargo nextest run --profile integration"},
+        {"name": "Exact-run teardown", "if": "always()", "run": "if test -x target/debug/fixture-runner && test -f \"target/fixtures/ci-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${GITHUB_JOB}/live-run.lease\"; then bash scripts/test-down.sh; else printf '%s\\n' 'No shared fixture lease was created'; fi"}
+      ]
+    }
+  }
+}

@@ -1,0 +1,17 @@
+/target/
+**/*.rs.bk
+*.profraw
+*.profdata
+__pycache__/
+*.pyc
+.env
+.env.*
+/e2e/node_modules/
+/e2e/test-results/
+/e2e/playwright-report/
+/mutants.out*/
+.DS_Store
+*.swp
+*.tmp
+.idea/
+.vscode/

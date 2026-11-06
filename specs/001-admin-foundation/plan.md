@@ -312,13 +312,27 @@ guidance, not permission to create workspace/migrations before their tests or ma
   Setup exports endpoints through `$NEXTEST_ENV`; shared services do not imply shared test
   databases. Serialize independent local runs reusing the same PostgreSQL server.
 - Fixture lifecycle helpers instead use `fixture_bootstrap_*` binaries and the dedicated
-  `fixture-bootstrap` profile with no shared setup/fallback launcher. Install this profile
-  before testing helpers. Implement the export wrapper after ownership/startup/role tests
-  pass and its own intended failure is observed, without activating the shared hook. Only
-  after export and the live-run lease driver/implementation are green activate and smoke-test
-  shared setup. Default/ci and normal
+  `fixture-bootstrap` profile with no shared setup/fallback launcher. Install profile/group/
+  timeout scaffolding at T009, with inactive storage profiles selecting `none()`. Nextest
+  0.9.151 validates every profile's package/binary predicates against the current Cargo target
+  inventory; no predicate may name only absent targets. At T013, create the genuine bootstrap
+  driver and add bootstrap selection, default/ci exclusion and bounded group assignment before
+  its red run. Keep integration inactive until T021. The T008 driver checks all staged
+  inventories, final selection guarantees and real-workspace loadability; empty inactive
+  profiles are not fixture coverage. Implement the export wrapper after ownership/startup/role
+  tests pass and its own intended failure is observed, without activating the shared hook. Only
+  after export and the live-run lease driver/implementation are green, T021 adds the genuine
+  `crates/testkit/tests/integration_shared_fixture.rs` smoke target for already-tested behavior,
+  installs integration selection/default/ci exclusion/bounded group assignment and activates
+  shared setup. Its `shared_fixture_exports_owned_ready_postgres` smoke test requires the
+  inherited password-free endpoint and verifies the owned ready PostgreSQL connection; it
+  does not launch fixtures itself or introduce policy. Default/ci and normal
   integration exclude bootstrap binaries;
   the Phase 1 checkpoint/CI run bootstrap and shared validation separately without recursion.
+  T032 requires the complete final configuration and real test execution for both families,
+  including the shared smoke test; temporary `none()` selectors or probe-only evidence cannot
+  satisfy it. This owner-approved sequencing correction (2026-11-06; FR-024/FR-CON-37) keeps
+  the toolchain, final isolation/concurrency behavior and Phase 1 scope unchanged.
 - Unit/mock/fake/HTTP run on every PR. Integration runs on infra-*/wallet/generation changes
   and nightly for all present adapters. Real restricted-role and trigger tests are mandatory.
 - SQLx checked queries have committed `.sqlx/` metadata, generated with the intended migrated

@@ -41,21 +41,45 @@ own test-owned Testcontainers resources through the helper under test, never thr
 `scripts/setup-integration.sh`, global fixture endpoints or the Cargo fallback launcher.
 The runner passes bootstrap binaries through directly, including after normal setup exists.
 
-Install the bootstrap profile first. After ownership, PostgreSQL startup/readiness and role
-tests pass, observe the endpoint-export test's intended failure, then implement the wrapper
+Owner-approved sequencing correction (2026-11-06; FR-024/FR-CON-37): nextest 0.9.151 validates
+package and binary predicates in every profile against Cargo's current workspace target
+inventory. Before storage targets exist, T009 installs profile/group/timeout scaffolding with
+`fixture-bootstrap` and `integration` selecting `none()`, bounded profile concurrency, and
+no binary overrides or shared hook. Default/ci select the currently present fast tests.
+At T013, create the real `fixture_bootstrap_postgres.rs` driver, then install its family's
+bootstrap selector, default/ci exclusion and bounded group assignment before running its red.
+Integration stays inactive. Missing-target filter errors are setup blockers, not valid red;
+never create placeholder targets to silence validation.
+
+Install the applicable bootstrap selectors before testing helpers. After ownership,
+PostgreSQL startup/readiness and role tests pass, observe the endpoint-export test's intended
+failure, then implement the wrapper
 without activating shared setup. Run the live-run lease driver and implementation next;
-only after export and lease tests are green register the shared hook and smoke-test the shared
-path. Activation must acquire the already-tested lease before starting/reusing shared services.
+only after export and lease tests are green, T021 adds the genuine
+`crates/testkit/tests/integration_shared_fixture.rs` target and its
+`shared_fixture_exports_owned_ready_postgres` smoke check of already-tested behavior. With
+that target present, install integration selectors, default/ci exclusions for both storage
+families and bounded group assignment, register the shared hook and smoke-test the shared
+path. The smoke test requires the inherited password-free DATABASE_URL, validates ownership
+and PostgreSQL connectivity through tested helpers, and never starts services or invokes
+fallback itself. This setup verification does not introduce new policy or require fabricated
+red. Activation must acquire the already-tested lease before starting/reusing shared services.
 The export/configuration driving test verifies disjoint
 selectors and this activation order. No missing script
 or recursive invocation of the helper under test is accepted as red evidence. The complete
-Phase 1 checkpoint includes both bootstrap and shared-path validation. Thereafter
+Phase 1 checkpoint includes both bootstrap and shared-path validation, including the shared
+smoke target. T008 must verify staged inventories and load/list all four profiles against
+the real workspace, retaining the full final selection assertions. T032 requires active
+selectors for both real target families and their bounded groups; empty inactive profiles or
+probe-only selection tests are not evidence of executed fixture coverage. Thereafter
 pure/mock/HTTP tests do not start services. Verify filters against actual test inventory:
 no required integration test may miss setup. Enable `experimental` at the top level, not
 inside a profile; use `scripts.setup`, not deprecated `script.*` definitions.
 The TOML fragment describes the eventual workspace. At shared-hook activation use only
-present package filters (initially testkit); expand to infra-postgres when that crate exists,
-never reference a missing package during helper bootstrap.
+present package filters (initially testkit) and binary predicates matching genuine current
+targets; expand to infra-postgres when that crate exists, never reference a missing package
+or unmatched target family during helper bootstrap. Each predicate must match the current
+inventory; it need not enumerate every future binary in an already-present family.
 
 For each run, the idempotent setup script:
 

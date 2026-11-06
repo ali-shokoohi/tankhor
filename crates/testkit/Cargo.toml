@@ -1,0 +1,19 @@
+[package]
+name = "testkit"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[features]
+default = []
+fakes = []
+
+[dependencies]
+sqlx.workspace = true
+testcontainers.workspace = true
+testcontainers-modules.workspace = true
+tokio.workspace = true
+
+[lints]
+workspace = true

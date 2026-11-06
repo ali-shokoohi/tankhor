@@ -1,0 +1,52 @@
+# Nextest profiles (T009; FR-024, FR-CON-37). Pinned to cargo-nextest 0.9.151: setup scripts
+# are experimental, see specs/001-admin-foundation/contracts/integration-fixtures.md.
+experimental = ["setup-scripts"]
+
+[store]
+dir = "target/nextest"
+
+[test-groups]
+# Shared PostgreSQL connection budget across concurrently running storage tests.
+integration-storage = { max-threads = 4 }
+# Lifecycle helper tests start and stop their own containers.
+fixture-bootstrap = { max-threads = 1 }
+
+[profile.default]
+default-filter = 'not (binary(/^fixture_bootstrap_/) | binary(/^integration_/))'
+slow-timeout = { period = "30s", terminate-after = 4 }
+
+[profile.ci]
+default-filter = 'not (binary(/^fixture_bootstrap_/) | binary(/^integration_/))'
+fail-fast = false
+slow-timeout = { period = "30s", terminate-after = 4 }
+
+[profile.ci.junit]
+path = "junit.xml"
+
+[profile.integration]
+default-filter = 'binary(/^integration_/)'
+test-threads = 4
+fail-fast = false
+slow-timeout = { period = "60s", terminate-after = 5 }
+
+[[profile.integration.overrides]]
+filter = 'binary(/^integration_/)'
+test-group = "integration-storage"
+
+[scripts.setup.integration-services]
+command = ["bash", "scripts/setup-integration.sh"]
+
+[[profile.integration.scripts]]
+filter = 'binary(/^integration_/) & rdeps(testkit)'
+setup = "integration-services"
+
+[profile.fixture-bootstrap]
+# Bootstrap tests own their resources and never inherit shared setup.
+default-filter = 'binary(/^fixture_bootstrap_/)'
+test-threads = 1
+fail-fast = false
+slow-timeout = { period = "60s", terminate-after = 5 }
+
+[[profile.fixture-bootstrap.overrides]]
+filter = 'binary(/^fixture_bootstrap_/)'
+test-group = "fixture-bootstrap"

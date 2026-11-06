@@ -1,0 +1,64 @@
+# cargo-deny policy (T007; FR-001, FR-CON-01; constitution II).
+#
+# Bans keep I/O libraries out of kernel and context crates: each banned crate may only be a
+# direct dependency of its listed wrappers. Indirect paths (renamed, transitive or
+# family-member edges) are also rejected by `scripts/check-architecture.py`, which reads the
+# full cargo metadata graph that cargo-deny's per-edge wrappers cannot express.
+
+[graph]
+all-features = true
+
+[advisories]
+yanked = "deny"
+unmaintained = "all"
+# Owner-approved T010 exception, 2026-11-06 (FR-024/FR-CON-37): unmaintained
+# transitive test tooling, not a vulnerability waiver. Both core 0.27.3 and 0.28.0
+# require this crate; modules 0.15.0 requires core 0.27.x. Revisit when a compatible
+# maintained Testcontainers dependency graph is available. Other advisories remain enforced.
+ignore = [
+    { id = "RUSTSEC-2026-0440", reason = "Owner-approved testcontainers 0.27.3 fixture-tooling exception: astral-tokio-tar is unmaintained; no patched version. Review on compatible maintained replacement availability." },
+]
+
+[licenses]
+# Owner-approved permissive allowlist (2026-11-06).
+allow = [
+    "MIT",
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "Unicode-3.0",
+    "Zlib",
+    "CC0-1.0",
+    "0BSD",
+    "MPL-2.0",
+    "CDLA-Permissive-2.0",
+]
+confidence-threshold = 0.8
+exceptions = []
+
+[licenses.private]
+# Workspace crates are unpublished and carry no licence field.
+ignore = true
+
+[bans]
+multiple-versions = "warn"
+wildcards = "deny"
+allow-wildcard-paths = true
+highlight = "all"
+deny = [
+    { crate = "sqlx", wrappers = ["infra-postgres", "testkit"], reason = "SQL access belongs to infra-postgres and the test fixture crate only" },
+    # T010 owner-approved wrapper (2026-11-06): Testcontainers' Docker client uses
+    # tonic -> axum internally. The metadata checker still rejects all such paths in contexts/kernel.
+    { crate = "axum", wrappers = ["web", "app", "askama_web", "utoipa-axum", "utoipa-swagger-ui", "tonic"], reason = "HTTP belongs to web/composition or approved framework internals, including Testcontainers' tonic wrapper; never contexts/kernel" },
+    { crate = "reqwest", wrappers = ["infra-sms"], reason = "outbound HTTP belongs to infra-sms only" },
+    { crate = "aws-config", reason = "object storage is not part of feature 001" },
+    { crate = "aws-sdk-s3", reason = "object storage is not part of feature 001" },
+]
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+allow-git = []
