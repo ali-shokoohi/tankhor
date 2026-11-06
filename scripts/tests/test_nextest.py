@@ -52,14 +52,10 @@ def write_probe(base: Path, families: set[str]) -> Path:
 
 
 def list_tests(manifest: Path, profile: str, config: Path = CONFIG) -> subprocess.CompletedProcess:
-    # Load real profiles through existing library targets even while a new test API is
-    # intentionally red. Cargo metadata still supplies the complete target inventory for
-    # filter validation; current-stage probes below verify the actual binary isolation.
-    targets = ["--lib"] if manifest == ROOT / "Cargo.toml" else []
     return subprocess.run(
         ["cargo", "nextest", "list", "--manifest-path", str(manifest),
          "--config-file", str(config), "--profile", profile,
-         "--message-format", "json", "--color", "never", *targets],
+         "--message-format", "json", "--color", "never"],
         capture_output=True,
         text=True,
         check=False,
@@ -135,6 +131,17 @@ def staged_config(source: str, families: set[str]) -> str:
 
 @unittest.skipUnless(shutil.which("cargo-nextest"), "setup blocker: cargo-nextest is not installed")
 class NextestProfilesTest(unittest.TestCase):
+    def test_real_workspace_profiles_select_exact_fixture_binaries(self) -> None:
+        expectations = {
+            "default": {"fixture_ownership"},
+            "ci": {"fixture_ownership"},
+            "fixture-bootstrap": {"fixture_bootstrap_postgres", "fixture_bootstrap_roles"},
+            "integration": {"integration_shared_fixture"},
+        }
+        for profile, expected in expectations.items():
+            with self.subTest(real_workspace=profile):
+                self.assertEqual(selected_binaries(ROOT / "Cargo.toml", profile), expected)
+
     def test_nextest_profiles_select_storage_tests_only(self) -> None:
         self.assertTrue(CONFIG.is_file(), ".config/nextest.toml is missing")
         with CONFIG.open("rb") as handle:

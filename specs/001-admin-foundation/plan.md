@@ -370,6 +370,18 @@ guidance, not permission to create workspace/migrations before their tests or ma
   both SmsSender adapters and real/fake feature graphs. The original checker driver tests
   valid partial work, premature completion, final missing evidence and the complete state.
 
+#### Dependency policy exceptions
+
+Owner approval: **2026-11-06**, recorded in `deny.toml`; these are supply-chain policy
+exceptions, not constitution or context-boundary waivers. Re-check every entry at **every
+`cargo update`** and retain `cargo deny check` plus the full metadata architecture check.
+
+| Exception / affected crate or policy | Why accepted / scope | Approval | Review trigger and evidence |
+| --- | --- | --- | --- |
+| RUSTSEC-2026-0440 · `astral-tokio-tar` 0.6.4 | Unmaintained transitive fixture tooling, not a vulnerability waiver; no patched version. Required by pinned Testcontainers core 0.27.3; core 0.28.0 also requires it, while modules 0.15.0 requires core 0.27.x. | Owner, 2026-11-06 | Upstream fix or compatible maintained replacement available; re-check at every `cargo update`. `cargo tree -i astral-tokio-tar` shows only Testcontainers → testkit paths. |
+| `tonic` → `axum` wrapper | Testcontainers' Bollard Docker client uses tonic/axum internally; allow tonic as a direct wrapper only. Kernel/context I/O bans remain enforced transitively. | Owner, 2026-11-06 | Re-check at every `cargo update` and when the Docker transport changes. Observed `cargo tree -i axum`: axum 0.8.9 ← tonic 0.14.9 ← bollard/bollard-buildkit-proto/tonic-prost ← testcontainers 0.27.3 ← testkit (directly or via modules 0.15.0); no kernel/context root. `cargo tree -p kernel --all-features` contains kernel alone; context crates are not yet present. Repeat inverse-tree and architecture checks as they arrive. |
+| Licence allowlist | Explicit allowed identifiers: MIT, Apache-2.0, Apache-2.0 WITH LLVM-exception, BSD-2-Clause, BSD-3-Clause, ISC, Unicode-3.0, Zlib, CC0-1.0, 0BSD, MPL-2.0, CDLA-Permissive-2.0. These cover the approved dependency graph; `licenses.exceptions = []`, confidence threshold 0.8. Unpublished private workspace crates are ignored. | Owner, 2026-11-06 | Re-check at every `cargo update`, new dependency, or licence change; cargo-deny rejects identifiers outside this allowlist. |
+
 ## Complexity Tracking
 
 No constitution exceptions are requested. Infra-auth/infra-sms are necessary adapters for

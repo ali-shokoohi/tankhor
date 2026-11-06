@@ -141,9 +141,9 @@ integration setup provisions only owned isolated services. No application accept
 - [X] T016 Make pass: T015 implement idempotent cluster migration/runtime role provisioning only in `crates/testkit/src/fixtures/roles.rs`; edit only this behavior and its module registration (FR-024, FR-CON-37).
 - [X] T017 Write failing test: [unit] `setup_exports_only_matching_tests_ready_endpoints` in `scripts/tests/test_setup_integration.py`; expect passwords/unready or foreign endpoints to be exported into NEXTEST_ENV; also reject shared setup on fixture-bootstrap, selectors that overlap, or shared-hook activation before ownership/startup/roles/export tests pass (FR-024, FR-CON-37). Assert wrapper implementation follows green bootstrap tests plus its own observed intended red; activation/smoke follows its green result, with no recursive bootstrap setup. Activation must also wait for the live-run lease driver/implementation T019/T020 to pass; test premature activation refusal without using shared setup for bootstrap.
 - [X] T018 Make pass: T017 after T011/T013/T015 bootstrap tests pass and T017's intended endpoint-export failure is observed, implement only the thin ready-endpoint wrapper in `scripts/setup-integration.sh` using tested helpers through `crates/testkit/src/bin/fixture-runner.rs`. Do not activate the shared hook yet and do not require T017 to be green before implementing it (FR-024, FR-CON-37).
-- [X] T019 Write failing test: [integration] `local_shared_server_rejects_concurrent_independent_runs` in `scripts/tests/test_fixture_lease.py`; expect a second run to reuse SQLx deterministic database names unsafely or lose ownership metadata (FR-024, FR-CON-37).
-- [X] T020 Make pass: T019 implement setup lock/live owner lease/stale-owner checks in `crates/testkit/src/fixtures/lease.rs` and wire `crates/testkit/src/fixtures/services.rs`; retain the owned PostgreSQL service between runs; MinIO fixture startup is deferred to 004 (FR-024, FR-CON-37).
-- [X] T021 Setup: only after T017 and the live-run lease driver/implementation T019/T020 are green and bootstrap validation passes, assemble tested fixture modules in `crates/testkit/src/fixtures/services.rs` and `crates/testkit/src/lib.rs`. Add `shared_fixture_exports_owned_ready_postgres` in `crates/testkit/tests/integration_shared_fixture.rs` as a genuine smoke check of the already-tested ownership/readiness/export/role behavior through shared setup; require the inherited password-free endpoint and verify the owned PostgreSQL connection, without bootstrap startup or fallback in the test body. With this real target present, update `.config/nextest.toml` to select only integration_* binaries in integration, exclude both storage families from default/ci, assign the bounded integration group, and activate shared setup using present-package filters (testkit initially). Re-run T008, list all four profiles against the real workspace, then run the bootstrap suite followed by the shared smoke test before normal integration. No new policy logic or fabricated red; MinIO fixtures move to 004 (FR-024, FR-CON-37). Acquire the already-tested live-run lease before shared startup/readiness and retain the disjoint bootstrap selectors.
+- [X] T019 Write failing test: [integration] `local_shared_server_rejects_concurrent_independent_runs`, `shared_scope_derives_local_repository_scope`, `shared_scope_derives_exact_ci_job_run_scope`, `nextest_owner_identifies_live_ancestor`, `nextest_owner_rejects_mismatched_ancestor` and `nextest_owner_rejects_absent_ancestor` in `scripts/tests/test_fixture_lease.py`; cover repository-local versus exact CI run/attempt/job scope derivation and live nextest-owner identification/refusal (contract §1 steps 1–2), as well as a second run reusing SQLx deterministic database names unsafely or losing ownership metadata. Require per-behavior mutation → red → revert → green evidence for the existing scope/owner implementation (FR-024, FR-CON-37).
+- [X] T020 Make pass: T019 implement repository/CI scope derivation and nextest-owner identification in `crates/testkit/src/bin/fixture-runner.rs`, setup lock/live owner lease/stale-owner checks in `crates/testkit/src/fixtures/lease.rs` and wire `crates/testkit/src/fixtures/services.rs`; retain the owned PostgreSQL service between runs; MinIO fixture startup is deferred to 004 (FR-024, FR-CON-37).
+- [X] T021 Setup (wiring only): only after T017 and the scope/owner/live-run lease driver/implementation T019/T020 are green and bootstrap validation passes, assemble tested fixture modules in `crates/testkit/src/fixtures/services.rs` and `crates/testkit/src/lib.rs`. Add `shared_fixture_exports_owned_ready_postgres` in `crates/testkit/tests/integration_shared_fixture.rs` as a genuine smoke check of the already-tested ownership/readiness/export/role behavior through shared setup; require the inherited password-free endpoint and verify the owned PostgreSQL connection, without bootstrap startup or fallback in the test body. With this real target present, update `.config/nextest.toml` to select only integration_* binaries in integration, exclude both storage families from default/ci, assign the bounded integration group, and activate shared setup using present-package filters (testkit initially). Re-run T008, list all four profiles against the real workspace, then run the bootstrap suite followed by the shared smoke test before normal integration. Scope derivation, owner identification and lease policy are driven by T019/T020; no new policy logic or fabricated red belongs here. MinIO fixtures move to 004 (FR-024, FR-CON-37). Acquire the already-tested live-run lease before shared startup/readiness and retain the disjoint bootstrap selectors.
 - [X] T022 Write failing test: [unit] `fallback_runner_sets_only_child_environment` in `scripts/tests/test_test_runner.py`; expect missing runner, discovery-triggered Docker, bootstrap binaries not passed through directly, lost child status or global environment mutation (FR-024, FR-CON-37).
 - [X] T023 Make pass: T022 create `scripts/test-runner.sh`, `.cargo/config.toml`, `justfile`, `crates/testkit/src/fixtures/process.rs`; launch the same test binary with child-only endpoints, retain guards, pass through fixture_bootstrap_* binaries directly without setup and non-storage/list/run commands and validate supplied fixture ownership (FR-024, FR-CON-37).
 - [X] T024 Write failing test: [unit] `ci_cleanup_matches_only_current_run_labels` in `scripts/tests/test_test_down.py`; expect missing cleanup or acceptance of an active/foreign run (FR-024, FR-CON-37).
@@ -158,7 +158,7 @@ integration setup provisions only owned isolated services. No application accept
 
 **T032 observed checkpoint evidence (2026-11-06):** fmt and clippy passed; Python repository
 suite 13 passed; fixture-bootstrap 2 passed, default 1 passed, shared integration 1 passed
-with `integration-services` SETUP PASS; cargo-deny advisories/bans/licenses/sources all ok
+with `integration-services` SETUP PASS; cargo-deny advisories ok with 1 owner-approved ignore (RUSTSEC-2026-0440); bans/licenses/sources ok
 (duplicate/unused-allowance warnings remain non-failing). Architecture and partial
 traceability passed. Real-workspace listings verified default/ci select fixture_ownership,
 bootstrap selects fixture_bootstrap_postgres/fixture_bootstrap_roles, and integration
@@ -167,6 +167,44 @@ found only reusable local PostgreSQL bc7dea1fe78b (project tankhor-34921e0ba9d27
 Live isolated Compose verification reached healthy PostgreSQL/MinIO and confirmed restricted
 distinct database roles; its temporary stack/volumes were removed. Hosted GitHub workflows
 were syntax/policy-checked locally, not executed remotely. No Phase 2 work or commit performed.
+
+**T008/T019–T021 remediation evidence (2026-11-06):** T019/T020/T021 were reopened
+before extending the driver and re-ticked only after the following observed evidence.
+The Python driver compiles `shared_scope`, `nextest_owner` and `environment` verbatim
+from fixture-runner into a temporary std-only probe, exercising child-only environment
+and live `/proc` ancestry without shared startup. A compiled launcher named exactly
+`cargo-nextest` supplies a known live ancestor PID; `cargo-nextest-impostor` and direct
+launch exercise mismatch/absence refusal. Each row below was run separately; every
+production mutation was reverted immediately, and fixture-runner has no remaining diff.
+
+| Task · test | Deliberate mutation / wrong expectation | Observed red assertion | Revert → green |
+| --- | --- | --- | --- |
+| T008 · `test_real_workspace_profiles_select_exact_fixture_binaries` | Add integration_shared_fixture to default's expected set | Items in the second set but not the first: integration_shared_fixture; FAILED (failures=1) | Restore exact set; full test_nextest module: 2 tests OK |
+| T019 · `test_shared_scope_derives_local_repository_scope` | local → local-wrong | 'local-wrong' != 'local'; FAILED (failures=1) | Reverted; 1 test OK |
+| T019 · `test_shared_scope_derives_exact_ci_job_run_scope` | GITHUB_JOB lookup → wrong-job | 'ci-701-1-wrong-job' != 'ci-701-1-integration'; missing/invalid job accepted; FAILED (failures=7) | Reverted; 1 test OK |
+| T019 · `test_nextest_owner_identifies_live_ancestor` | Return setup process PID instead of discovered nextest PID | '1014252' != '1014251'; lease owner must be nextest, not its setup child; FAILED (failures=1) | Reverted; 1 test OK |
+| T019 · `test_nextest_owner_rejects_mismatched_ancestor` | Exact name equality → starts_with(cargo-nextest) | 0 == 0: a nextest-like ancestor is not the owner; FAILED (failures=1) | Reverted; 1 test OK |
+| T019 · `test_nextest_owner_rejects_absent_ancestor` | At ancestry exhaustion return setup PID instead of Err | 0 == 0: setup without nextest must refuse an owner; FAILED (failures=1) | Reverted; full test_fixture_lease module: 6 tests OK |
+
+T020: existing implementation passes the strengthened driver; `cargo nextest run -p testkit`
+passed (1 test). T021: bootstrap passed (2 tests), then the shared smoke passed (1 test)
+with integration-services SETUP PASS. Exact real-workspace listings include test binaries:
+default/ci → fixture_ownership; fixture-bootstrap → fixture_bootstrap_postgres and
+fixture_bootstrap_roles; integration → integration_shared_fixture.
+
+**Remediation checkpoint (2026-11-06):** `cargo fmt --check` passed;
+`cargo clippy --all-targets --all-features -- -D warnings` passed;
+`cargo nextest run` passed (1/1); `cargo nextest run --profile integration` passed
+(1/1, integration-services SETUP PASS); `cargo nextest run --profile fixture-bootstrap
+-p testkit` passed (2/2); `cargo deny check` passed: advisories ok with 1 owner-approved
+ignore (RUSTSEC-2026-0440), bans/licenses/sources ok, non-failing duplicate/unused-wrapper/
+unused-licence warnings retained. `python3 -m unittest discover -s scripts/tests` passed
+(19/19); `python3 scripts/check-test-traceability.py --mode partial` passed;
+`python3 scripts/check-architecture.py` passed; `git diff --check` passed.
+Dependency exceptions are recorded in plan CI gates and research R13; all eight requested
+later checkpoint tasks and the execution-order note now require evidence and stopping,
+with the owner committing. No outstanding remediation blocker or retained mutation;
+Phase 2 was not started and no commit was made. Next scheduled task is T033, owner-gated.
 
 ## Phase 2: Foundational — Kernel ports, safe composition and web/API base
 
@@ -263,7 +301,7 @@ unseeded readiness is unavailable and no placeholder management routes are insta
 - [ ] T101 Setup: prepare a child-process outbound-network-denial harness in `crates/app/tests/support/network_sandbox.rs`; retain loopback listener access, refuse external sockets and verify the sandbox itself before the app smoke assertion. Missing isolation capability blocks setup, not a red business result (FR-001, FR-CON-01).
 - [ ] T102 Write failing test: [integration] `fake_foundation_shell_and_health_start_without_network` in `crates/app/tests/foundation_fake_serve.rs`; expect the prepared debug fake-mode process to fail to serve the localized shell and sanitized health endpoint without DB/S3/provider configuration, to contact an external service, or to register a placeholder management route; unseeded health must be 503, never fabricated ready (FR-001, FR-025, FR-CON-01, FR-UX-01).
 - [ ] T103 Make pass: T102 wire only delivered shell/health services to feature-gated fakes; extend crates/app/src/serve.rs, crates/app/src/main.rs and crates/app/src/composition.rs within the app crate; reject production fakes before acquisition and keep absent management routes unregistered in `crates/app/src/foundation.rs`; edit only this behavior and its module registration (FR-001, FR-025, FR-CON-01, FR-UX-01).
-- [ ] T104 Verify checkpoint: run `cargo nextest run` (and `--profile integration` where relevant); all green; commit. Record actual kernel/fake/real/HTTP results in `specs/001-admin-foundation/tasks.md`; story auth/management and real health seeding remain explicitly undelivered (FR-CON-01, FR-CON-37, FR-UX-20).
+- [ ] T104 Verify checkpoint: Run the checkpoint commands; all green; report evidence and stop. The owner commits. Commands include `cargo nextest run` (and `--profile integration` where relevant). Record actual kernel/fake/real/HTTP results in `specs/001-admin-foundation/tasks.md`; story auth/management and real health seeding remain explicitly undelivered (FR-CON-01, FR-CON-37, FR-UX-20).
 
 ## Phase 3: User Story 1 — Enter and Recover the Console Securely (P1, MVP)
 
@@ -480,7 +518,7 @@ durable behavior through the caller UoW, using no adapter-to-adapter orchestrati
 - [ ] T271 [US1] Make pass: T270 implement `crates/app/src/composition.rs`, `crates/app/src/serve.rs`, `crates/app/src/main.rs`, app dependencies; real adapters only in normal production path, debug-only testkit selection, same shared UoW/store, no database connection in fake mode (FR-001, FR-002, FR-004, FR-CON-01, AC-ADM-001, AC-ADM-002, AC-ADM-043).
 - [ ] T272 [US1] Write failing test: [integration] `initial_provisioning_is_operator_authorized_not_public_registration` in `crates/app/tests/integration_provision_admin.rs`; expect missing protected CLI parsing/config-based operator context or delegation to BootstrapAdmin, unsafe secrets in CLI/logs or an exposed alternate write path; use the completed service in real/fake composition, not CLI-owned repository orchestration (FR-004, FR-CON-03, AC-ADM-004, AC-ADM-006).
 - [ ] T273 [US1] Make pass: T272 implement only CLI parsing, protected configuration and BootstrapAdmin delegation for the operator provisioning command in `crates/app/src/provision_admin.rs`, `crates/app/src/main.rs`; wire the completed BootstrapAdmin service; no eligibility, authorization, repository, UoW or audit business logic in app, no direct storage access or recovery bypass (FR-004, FR-CON-03, AC-ADM-004, AC-ADM-006).
-- [ ] T274 [US1] Verify checkpoint: run `cargo nextest run` (and `--profile integration` where relevant); all green; commit. Confirm AC-ADM-001–007/043 on fakes AND real adapters, record only observed results in `specs/001-admin-foundation/tasks.md` (FR-CON-01, FR-CON-02, FR-CON-03, FR-CON-37).
+- [ ] T274 [US1] Verify checkpoint: Run the checkpoint commands; all green; report evidence and stop. The owner commits. Commands include `cargo nextest run` (and `--profile integration` where relevant). Confirm AC-ADM-001–007/043 on fakes AND real adapters, record only observed results in `specs/001-admin-foundation/tasks.md` (FR-CON-01, FR-CON-02, FR-CON-03, FR-CON-37).
 
 ## Phase 4: User Story 2 — Inspect and Safely Prepare Settings (P1)
 
@@ -592,7 +630,7 @@ live mutation before review. Flags share subject storage here; enablement remain
 - [ ] T362 [US2] Make pass: T361 implement `crates/web/src/console/changes.rs`, console index, `crates/web/templates/console/change.html`, `crates/web/templates/partials/impact.html` and both console Fluent files; no deletion/financial side effects, preserve revision and safe valid input (FR-009, FR-010, FR-033, FR-034, FR-035, FR-036, FR-CON-06, P41, AC-ADM-011, AC-ADM-012, AC-ADM-039, AC-ADM-040, AC-ADM-041, AC-ADM-042, AC-ADM-046).
 - [ ] T363 [US2] Write failing test: [integration] `foundation_seed_command_updates_health_and_is_idempotent` in `crates/app/tests/integration_seed_foundation.rs`; expect absent migrate/seed commands, wrong migration/runtime role, seed rerun overwrite or fake mode contacting storage (FR-006, FR-017, FR-CON-32, AC-ADM-008, AC-ADM-033).
 - [ ] T364 [US2] Make pass: T363 implement `crates/app/src/migrate.rs`, `crates/app/src/seed_foundation.rs`, `crates/app/src/main.rs`, `crates/app/src/composition.rs`; wire registry/impact/health adapters by config, run seed through application UoW, keep deployment secrets out of arguments/logs (FR-006, FR-017, FR-CON-32, AC-ADM-008, AC-ADM-033).
-- [ ] T365 [US2] Verify checkpoint: run `cargo nextest run` (and `--profile integration` where relevant); all green; commit. Confirm AC-ADM-008–015/037–042 on fakes AND real adapters; AC-ADM-046 is domain/preview-only here, with publication-policy acceptance in US3 in `specs/001-admin-foundation/tasks.md`; lifetime real counts may honestly remain unavailable until owning contexts exist (FR-CON-32, FR-CON-37, P41).
+- [ ] T365 [US2] Verify checkpoint: Run the checkpoint commands; all green; report evidence and stop. The owner commits. Commands include `cargo nextest run` (and `--profile integration` where relevant). Confirm AC-ADM-008–015/037–042 on fakes AND real adapters; AC-ADM-046 is domain/preview-only here, with publication-policy acceptance in US3 in `specs/001-admin-foundation/tasks.md`; lifetime real counts may honestly remain unavailable until owning contexts exist (FR-CON-32, FR-CON-37, P41).
 
 ## Phase 5: User Story 3 — Publish, Schedule and Roll Back Changes (P1)
 
@@ -686,7 +724,7 @@ existing suite; the T386 application service owns the scheduling decision.
 - [ ] T405 [US3] Make pass: T404 implement `crates/web/src/console/publications.rs`, `crates/web/src/console/mod.rs`, `crates/web/templates/console/publication.html`, `crates/web/templates/console/version.html`, both console Fluent files; rollback enters a new draft, not direct publish (FR-013, FR-014, FR-021, FR-CON-08, AC-ADM-019, AC-ADM-021, AC-ADM-045). Render the driven terminal cancellation/history and another-admin rescheduling action using existing services and Fluent FA/EN keys.
 - [ ] T406 [US3] Write failing test: [integration] `app_worker_selects_real_or_fake_dependencies_and_recovers_due_work` in `crates/app/tests/integration_worker.rs`; expect the prepared app worker command to miss configuration-based readiness/publication/UoW wiring, resume incorrectly or bypass fake-production guards (FR-013, FR-037, FR-CON-05, AC-ADM-018, AC-ADM-045). Exercise worker cancellation for each invalid scheduling-admin state/epoch, active execution and separate approver, correct audit attribution and no retry of cancelled work.
 - [ ] T407 [US3] Make pass: T406 wire only the completed worker service loop in crates/app/src/main.rs and crates/app/src/composition.rs; the app crate selects adapters, the worker crate calls services only in `crates/app/src/worker.rs`; edit only this behavior and its module registration (FR-013, FR-037, FR-CON-05, AC-ADM-018, AC-ADM-045). Wire the existing AdminRepository, PublicationRepository, AuditRepository and UoW into ScheduledPublish for current authority checks/cancellation; system_worker identity is trusted composition, not client input.
-- [ ] T408 [US3] Verify checkpoint: run `cargo nextest run` (and `--profile integration` where relevant); all green; commit. Validate AC-ADM-016–020/044–046 (AC-ADM-046 proves published policy only, not downstream deletion execution) on fakes AND real adapters in `specs/001-admin-foundation/tasks.md` (FR-CON-05, FR-CON-07, FR-CON-08, FR-CON-37).
+- [ ] T408 [US3] Verify checkpoint: Run the checkpoint commands; all green; report evidence and stop. The owner commits. Commands include `cargo nextest run` (and `--profile integration` where relevant). Validate AC-ADM-016–020/044–046 (AC-ADM-046 proves published policy only, not downstream deletion execution) on fakes AND real adapters in `specs/001-admin-foundation/tasks.md` (FR-CON-05, FR-CON-07, FR-CON-08, FR-CON-37).
 
 ## Phase 6: User Story 4 — Investigate an Attributable, Protected History (P1)
 
@@ -724,7 +762,7 @@ are successful security-test assertions, never intentionally red tests left unfi
 - [ ] T435 [US4] Make pass: T434 implement only allowlisted app tracing and wire crates/app/src/main.rs without request/body/cookie/vendor URL Debug output in `crates/app/src/telemetry.rs`; edit only this behavior and its module registration (FR-024, FR-CON-37, AC-ADM-024, AC-ADM-025).
 - [ ] T436 [US4] Write failing test: [http] `problem_responses_never_echo_secret_canaries` in `crates/web/tests/problem_redaction.rs`; expect a JSON/HTML error to expose injected secret canaries or claim successful change after audit/store failure (FR-024, FR-CON-37, AC-ADM-024, AC-ADM-025).
 - [ ] T437 [US4] Make pass: T436 implement only sanitized web error mapping with RFC9457 JSON and localized HTML errors in `crates/web/src/api/problem.rs`; edit only this behavior and its module registration (FR-024, FR-CON-37, AC-ADM-024, AC-ADM-025).
-- [ ] T438 [US4] Verify checkpoint: run `cargo nextest run` (and `--profile integration` where relevant); all green; commit. Confirm AC-ADM-021–025 on fakes AND real adapters and record restricted-role/trigger results in `specs/001-admin-foundation/tasks.md` (FR-CON-01, FR-CON-37).
+- [ ] T438 [US4] Verify checkpoint: Run the checkpoint commands; all green; report evidence and stop. The owner commits. Commands include `cargo nextest run` (and `--profile integration` where relevant). Confirm AC-ADM-021–025 on fakes AND real adapters and record restricted-role/trigger results in `specs/001-admin-foundation/tasks.md` (FR-CON-01, FR-CON-37).
 
 ## Phase 7: User Story 5 — Work in Either Language and Any Theme (P1)
 
@@ -752,7 +790,7 @@ real rendered contrast supplements token calculations, never replaces them.
 - [ ] T455 [US5] Regression test: [http] `foundation_tasks_are_keyboard_and_assistive_accessible` in `crates/web/tests/accessibility.rs`; run the delivered instantiated-view semantic inventory after its focused primitives pass; browser/device acceptance is additional, not inferred from markup (FR-029, FR-UX-08, AC-ADM-030).
 - [ ] T456 [US5] Write failing test: [http] `foundation_tasks_work_without_optional_enhancements` in `crates/web/tests/progressive_management.rs`; run draft/preview/approve/publish/rollback/recovery without HX-Request or optional scripts; expect missing full-page forms, validation preservation or security parity (FR-031, FR-UX-08, AC-ADM-032).
 - [ ] T457 [US5] Make pass: T456 complete full-page/partial negotiation in `crates/web/src/console/changes.rs`, `crates/web/src/console/publications.rs`, `crates/web/src/console/settings.rs`, `crates/web/templates/console/change.html`, `crates/web/templates/console/setting.html`; Vary HX-Request where appropriate, no different approval rules (FR-031, FR-UX-08, AC-ADM-032).
-- [ ] T458 [US5] Verify checkpoint: run `cargo nextest run` (and `--profile integration` where relevant); all green; commit. Confirm AC-ADM-026–032/047 with fake and real composition in `specs/001-admin-foundation/tasks.md`; all delivered screens use the same matrix (FR-CON-11, FR-UX-01, FR-UX-07, FR-UX-08, FR-UX-20).
+- [ ] T458 [US5] Verify checkpoint: Run the checkpoint commands; all green; report evidence and stop. The owner commits. Commands include `cargo nextest run` (and `--profile integration` where relevant). Confirm AC-ADM-026–032/047 with fake and real composition in `specs/001-admin-foundation/tasks.md`; all delivered screens use the same matrix (FR-CON-11, FR-UX-01, FR-UX-07, FR-UX-08, FR-UX-20).
 
 ## Phase 8: User Story 6 — Inspect Disabled Capabilities Before Enablement (P2)
 
@@ -769,7 +807,7 @@ fixture-delivered/pass through the same workflow; production flags remain OFF/no
 - [ ] T464 [US6] Acceptance test: [integration] `real_flag_workflow_preserves_off_and_history_when_readiness_blocks` in `crates/infra-postgres/tests/integration_flag_workflow.rs`; with the prepared real fixture, require the already driven workflow to preserve OFF/history/blocked reasons for unknown/not-delivered readiness; fixture setup failures are blockers, not behavioral red (FR-017, FR-018, FR-019, FR-020, FR-CON-32, AC-ADM-033, AC-ADM-034, AC-ADM-035, AC-ADM-036).
 - [ ] T465 [US6] Write failing test: [http] `flag_register_shows_six_off_states_and_truthful_readiness` in `crates/web/tests/flags.rs`; expect absent list/draft/history forms, managed descriptions, impact/health/result/status and blocked-enable explanation across FA/EN/themes (FR-017, FR-018, FR-019, FR-020, FR-CON-32, AC-ADM-033, AC-ADM-034, AC-ADM-035, AC-ADM-036).
 - [ ] T466 [US6] Make pass: T465 implement `crates/web/src/console/flags.rs`, `crates/web/src/console/mod.rs`, `crates/web/templates/console/flags.html`, `crates/web/templates/partials/flag_row.html`, both console Fluent files; add flags to US5 matrix inventory, no optional-capability routes or controls (FR-017, FR-018, FR-019, FR-020, FR-CON-32, AC-ADM-033, AC-ADM-034, AC-ADM-035, AC-ADM-036).
-- [ ] T467 [US6] Verify checkpoint: run `cargo nextest run` (and `--profile integration` where relevant); all green; commit. Confirm AC-ADM-033–036 on fakes AND real adapters in `specs/001-admin-foundation/tasks.md`; flag registration never counts as P0-OFF capability completion (FR-CON-32, FR-CON-37).
+- [ ] T467 [US6] Verify checkpoint: Run the checkpoint commands; all green; report evidence and stop. The owner commits. Commands include `cargo nextest run` (and `--profile integration` where relevant). Confirm AC-ADM-033–036 on fakes AND real adapters in `specs/001-admin-foundation/tasks.md`; flag registration never counts as P0-OFF capability completion (FR-CON-32, FR-CON-37).
 
 ## Phase 9: Polish & Cross-Cutting Gates
 
@@ -799,7 +837,7 @@ honest full-product release blockers. Never fabricate wallet/media/generation co
 - [ ] T488 Make pass: T487 update `docs/development.md`, `specs/001-admin-foundation/quickstart.md`, create `specs/001-admin-foundation/checklists/acceptance.md`; document tested fake/real console commands, seed/security-policy setup, actual-device/assistive/token-freeze evidence requirements; leave evidence unclaimed until observed (FR-006, FR-017, FR-029, FR-CON-32, FR-UX-08, AC-ADM-008, AC-ADM-030, AC-ADM-033).
 - [ ] T489 Write failing test: [integration] `deployment_uses_release_binary_and_restricted_runtime_identity` in `scripts/tests/test_deployment.py`; expect missing reproducible image, migration/runtime command distinction or test features/keys in release layers (FR-001, FR-024, FR-CON-01, FR-CON-37).
 - [ ] T490 Make pass: T489 create `deploy/Dockerfile`, update `deploy/compose.yml` for separately invoked migration/seed/serve/worker commands and protected runtime configuration; no automatic fake fallback or vendor calls in image tests (FR-001, FR-024, FR-CON-01, FR-CON-37).
-- [ ] T491 Verify checkpoint: run `cargo nextest run` (and `--profile integration` where relevant); all green; commit. Run dual-backend E2E/axe, fmt/clippy/deny, architecture/traceability, kernel coverage, SQLx/OpenAPI diffs and record actual evidence in `specs/001-admin-foundation/tasks.md`, `specs/001-admin-foundation/checklists/acceptance.md`; full-product release remains blocked by undelivered owning features (FR-CON-01, FR-CON-32, FR-CON-37, FR-UX-20, GR1, GR2, GR3, GR4, GR5, GR6, GR7, GR8, GR9). Run `python3 scripts/check-test-traceability.py --mode final`: require actual trait/fake/real adapter/shared fake-and-real runners/direct mock interactions for all sixteen ports, both SmsSender adapters and real/fake feature graphs; fail missing evidence, never waive it because partial mode passed.
+- [ ] T491 Verify checkpoint: Run the checkpoint commands; all green; report evidence and stop. The owner commits. Commands include `cargo nextest run` (and `--profile integration` where relevant). Run dual-backend E2E/axe, fmt/clippy/deny, architecture/traceability, kernel coverage, SQLx/OpenAPI diffs and record actual evidence in `specs/001-admin-foundation/tasks.md`, `specs/001-admin-foundation/checklists/acceptance.md`; full-product release remains blocked by undelivered owning features (FR-CON-01, FR-CON-32, FR-CON-37, FR-UX-20, GR1, GR2, GR3, GR4, GR5, GR6, GR7, GR8, GR9). Run `python3 scripts/check-test-traceability.py --mode final`: require actual trait/fake/real adapter/shared fake-and-real runners/direct mock interactions for all sixteen ports, both SmsSender adapters and real/fake feature graphs; fail missing evidence, never waive it because partial mode passed.
 
 ## Dependencies & Execution Order
 
@@ -821,8 +859,8 @@ Setup (1) → Foundation (2) → US1 access/audit base (3)
 - Before any real adapter in a story, finish that port's fake contract AND all service red/green
   pairs in that story. Kernel transaction/system adapters are foundational, not permission to
   write later admin PostgreSQL code before that story's fake-first tests.
-- A checkpoint runs only after every preceding pair is green. Checkpoint commits are execution
-  instructions, not authorization for this generation command to run builds or commit code.
+- A checkpoint runs only after every preceding pair is green. Run the checkpoint commands;
+  all green; report evidence and stop. The owner commits.
 - Physical device/assistive acceptance and production credentials/assets are external evidence
   gates: blocked evidence is recorded as blocked, never represented by passing mocks.
 

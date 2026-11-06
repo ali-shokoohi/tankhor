@@ -83,9 +83,16 @@ inventory; it need not enumerate every future binary in an already-present famil
 
 For each run, the idempotent setup script:
 
-1. Identifies repository fixture scope and, in CI, exact job/run scope.
+1. Identifies repository fixture scope from the canonical repository root (stable
+   `tankhor-<root-hash>` project ID). Local scope is `local`; when CI is present, require
+   nonempty, single-line GITHUB_RUN_ID, GITHUB_RUN_ATTEMPT and GITHUB_JOB and derive exact
+   `ci-<run-id>-<attempt>-<job>` scope. State is under `target/fixtures/<scope>` in that root.
 2. Acquires a setup lock, claims a live-run lease and starts/reuses one detached PostgreSQL
-   16 container carrying exact ownership labels.
+   16 container carrying exact ownership labels. Identify the live nextest owner by walking
+   the setup process's `/proc` ancestry for executable basename exactly `cargo-nextest`;
+   never substitute the setup child's PID or accept a prefix/lookalike name. Refuse an
+   absent or unverifiable owner. T019 drives this scope/owner policy and lease claims;
+   T020 implements it. T021 only wires the tested behavior into shared setup.
 3. Uses dynamic loopback ports and refuses unrelated/developer/production containers.
 4. Waits for PostgreSQL connectivity, not just container existence.
 5. Provisions cluster-global fixture roles once idempotently; per-test migrations do not

@@ -354,6 +354,17 @@ the selected 1.98.1 satisfies it. Enable SQLx checked-query macros explicitly if
 are disabled. Use tokio 1.x, Fluent bundles, proptest, scraper, insta, wiremock and tracing;
 resolve compatible patches into Cargo.lock during the first test-driven workspace build.
 
+### Dependency policy exceptions
+
+Owner approval: **2026-11-06**; implemented policy is in `deny.toml`. Re-check all entries
+at **every `cargo update`** using cargo-deny and the metadata architecture checker.
+
+| Exception / affected crate or policy | Why accepted / scope | Approval | Review trigger and evidence |
+| --- | --- | --- | --- |
+| RUSTSEC-2026-0440 · `astral-tokio-tar` 0.6.4 | Unmaintained transitive fixture tooling, not a vulnerability waiver; no patched version. Testcontainers core 0.27.3 and 0.28.0 require it; modules 0.15.0 requires the approved 0.27.x core family. | Owner, 2026-11-06 | Upstream fix or compatible maintained replacement available; re-check at every `cargo update`. `cargo tree -i astral-tokio-tar` confirms only Testcontainers → testkit paths. |
+| `tonic` → `axum` wrapper | Allow tonic's internal HTTP dependency for Testcontainers' Bollard Docker client, without relaxing kernel/context transitive I/O bans. | Owner, 2026-11-06 | Re-check at every `cargo update` or Docker transport change. `cargo tree -i axum` observed axum 0.8.9 ← tonic 0.14.9 ← bollard/bollard-buildkit-proto/tonic-prost ← testcontainers 0.27.3 ← testkit, directly or through modules 0.15.0. No kernel/context root reaches axum: `cargo tree -p kernel --all-features` lists kernel only; context crates are not present yet. Repeat inverse-tree and full architecture validation as crates arrive. |
+| Licence allowlist | MIT, Apache-2.0, Apache-2.0 WITH LLVM-exception, BSD-2-Clause, BSD-3-Clause, ISC, Unicode-3.0, Zlib, CC0-1.0, 0BSD, MPL-2.0, CDLA-Permissive-2.0 cover the approved graph. No per-crate licence exceptions (`exceptions = []`); confidence threshold 0.8; unpublished private workspace crates ignored. | Owner, 2026-11-06 | Re-check at every `cargo update`, dependency addition or licence change; all other identifiers remain denied. |
+
 Newer utoipa 6/utoipa-axum 0.3/Swagger 10 and Testcontainers core 0.28 exist but are not mixed
 into this family without an intentional compatibility change. Metadata verification is not
 a successful compile/run claim.
