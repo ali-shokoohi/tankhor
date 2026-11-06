@@ -2,6 +2,13 @@
 
 These rules apply in every session and every Spec Kit command. If anything here conflicts with the constitution (`.specify/memory/constitution.md`), the constitution wins — stop and report the conflict.
 
+## 0. Precedence over global rules
+
+This file overrides `~/.config/opencode/AGENTS.md` for this repository wherever they differ:
+- The stop report (section 9) and red/green test evidence (section 2) are mandatory, even under "no recap / no closing summary".
+- Quiet flags and head/tail are fine, but always show the failing test's assertion/panic lines and the final pass/fail summary.
+- Code-graph tools (codebase-memory-mcp) are preferred for navigation. After editing files, confirm the index is fresh before relying on graph results; for files created in this session, read them directly.
+
 ## 1. Sources of truth
 
 1. Read `docs/README.md` first. Only files marked **authoritative** there decide anything:
