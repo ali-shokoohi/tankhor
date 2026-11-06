@@ -89,7 +89,7 @@ Stop and report immediately when: the requested scope is finished; a red fails f
 | Mutation | `cargo mutants -p wallet` · `cargo mutants -p generation` |
 | Local stack | `docker compose -f deploy/compose.yml up -d` |
 
-Toolchain: rustc 1.96.1 · cargo-nextest 0.9.150 (pinned; setup scripts are experimental) · cargo-deny 0.20.2 · sqlx-cli 0.9.0.
+Toolchain: rustc 1.98.1 · cargo-nextest 0.9.151 (pinned; setup scripts are experimental) · cargo-deny 0.20.2 · sqlx-cli 0.9.0.
 
 ## 9. Report format at every stop
 
