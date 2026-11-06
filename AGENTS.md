@@ -50,7 +50,7 @@ This file overrides `~/.config/opencode/AGENTS.md` for this repository wherever 
 ## 4. Web, API and brand
 
 - **HTML:** axum + askama + htmx with progressive enhancement (every interaction also works as a full-page request). `lang`/`dir` from locale; CSS logical properties; every string from Fluent with keys in both `fa` and `en`. No CDN assets.
-- **JSON:** only under `/api/v1`, registered via `OpenApiRouter` with `#[utoipa::path]`; errors as `application/problem+json`; regenerate `docs/openapi.json` (the only file under `docs/` you may write).
+- **JSON:** only under `/api/v1`, registered via `OpenApiRouter` with `#[utoipa::path]`; errors as `application/problem+json`; regenerate `docs/openapi.json`. The only files under `docs/` you may write are `docs/openapi.json` (generated, never hand-edited) and `docs/development.md` (developer toolchain/setup guide, written only by the tasks that name it, e.g. T001, T009, T488).
 - **Security:** CSRF on every form and htmx request; strict CSP; bounded request bodies; private media only via short-lived signed URLs.
 - **Visual values** come only from `crates/web/design/tokens.toml`; no hex colours anywhere else; contrast is tested against WCAG 2.2 AA.
 - **Naming:** the product is **Tankhor / تن‌خور** (with ZWNJ). Never "Taneh"/«تنه». Use «تن‌خور» only as the brand name, never as a common noun or a description of how clothes fit.
@@ -65,7 +65,7 @@ This file overrides `~/.config/opencode/AGENTS.md` for this repository wherever 
 
 ## 6. What you must not do
 
-- Edit `spec.md`, `plan.md`, `contracts/`, `data-model.md`, the constitution or `docs/` during implementation (only tick checkboxes in `tasks.md`). Spec problems → stop and report with task ID.
+- Edit `spec.md`, `plan.md`, `contracts/`, `data-model.md`, the constitution or `docs/` during implementation (only tick checkboxes in `tasks.md`; the `docs/openapi.json` and `docs/development.md` exceptions in section 4 apply). Spec problems → stop and report with task ID.
 - Write stubs, placeholders, `TODO`/`FIXME`, `todo!()`, `unimplemented!()`, dead code, or ship anything unbuilt behind a flag.
 - Commit, tag, push or rewrite git history — the owner reviews and commits.
 - Ask a product question and then guess the answer — stop and ask.
