@@ -8,6 +8,7 @@ This file overrides `~/.config/opencode/AGENTS.md` for this repository wherever 
 - The stop report (section 9) and red/green test evidence (section 2) are mandatory, even under "no recap / no closing summary".
 - Quiet flags and head/tail are fine, but always show the failing test's assertion/panic lines and the final pass/fail summary.
 - Code-graph tools (codebase-memory-mcp) are preferred for navigation. After editing files, confirm the index is fresh before relying on graph results; for files created in this session, read them directly.
+- For structural questions (callers, call chains, change impact, routes, dead code), delegate to @graph instead of grep+read loops.
 
 ## 1. Sources of truth
 
