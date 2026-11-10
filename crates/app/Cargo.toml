@@ -1,0 +1,30 @@
+[package]
+name = "app"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[features]
+default = []
+dev-fakes = ["dep:testkit", "testkit/fakes", "admin/mocks", "kernel/mocks"]
+
+[dependencies]
+admin = { path = "../admin" }
+axum.workspace = true
+kernel = { path = "../kernel" }
+serde_json.workspace = true
+testkit = { path = "../testkit", default-features = false, optional = true }
+thiserror.workspace = true
+tokio.workspace = true
+web = { path = "../web" }
+
+[dev-dependencies]
+serde_json.workspace = true
+
+[[test]]
+name = "foundation_fake_serve"
+required-features = ["dev-fakes"]
+
+[lints]
+workspace = true

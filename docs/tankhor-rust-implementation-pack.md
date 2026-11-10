@@ -30,7 +30,7 @@ Versions marked ✔ were checked on docs.rs on 3 Nov 2026. Others: add with `car
 | Database | PostgreSQL 16+ via `sqlx` (features `postgres`, `runtime-tokio`, `tls-rustls`, `migrate`, `uuid`, `time`, `json`) | 0.9.0 ✔ | Compile-time checked SQL; offline mode always on in 0.9 |
 | Job queue | Own table + `FOR UPDATE SKIP LOCKED` + transactional outbox | — | Debit, unit and job must commit in one transaction (L6) |
 | Object storage | `aws-sdk-s3` against MinIO/any S3-compatible store | 1.x | Signed URLs, private buckets |
-| OpenAPI | `utoipa` 5 + `utoipa-axum` + `utoipa-swagger-ui` (feature `axum`) | utoipa 5, swagger-ui 9.0.2 ✔ | Spec generated from handler annotations |
+| OpenAPI | `utoipa = "6.0"` + `utoipa-axum = "0.3"` + `utoipa-swagger-ui = { version = "10.0.2", default-features = false, features = ["axum", "vendored"] }` | utoipa 6.0, utoipa-axum 0.3, swagger-ui 10.0.2 ✔ | Spec generated from handler annotations (owner-approved 2026-11-08: 6.0/0.3/10.0.2 avoids `zip 3.0.0` RUSTSEC-2026-0367/0368/0369/0429 and unmaintained `paste` RUSTSEC-2024-0436 with zero `cargo deny` exceptions) |
 | Admin passkeys | `webauthn-rs` | — | WebAuthn (Q23) |
 | Admin TOTP | `totp-rs` | — | TOTP fallback (Q23) |
 | Validation | `validator` or hand-written newtypes | — | Prefer newtypes that can't hold invalid values |

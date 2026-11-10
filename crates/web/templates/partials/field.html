@@ -1,0 +1,20 @@
+<div class="tk-field">
+  <label class="tk-label" for="{{ field.id }}">{{ field.label }}</label>
+  <input
+    class="tk-control"
+    id="{{ field.id }}"
+    name="{{ field.name }}"
+    type="text"
+    value="{{ field.value }}"
+    {% if field.required %}required{% endif %}
+    {% match field.error %}
+    {% when Some with (_) %}aria-invalid="true" aria-describedby="{{ field.id }}-error"
+    {% when None %}
+    {% endmatch %}
+  >
+  {% match field.error %}
+  {% when Some with (err) %}
+  <p class="tk-field-error" id="{{ field.id }}-error" role="alert">{{ err }}</p>
+  {% when None %}
+  {% endmatch %}
+</div>

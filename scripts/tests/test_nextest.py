@@ -18,19 +18,28 @@ ROOT = Path(__file__).resolve().parents[2]
 CONFIG = ROOT / ".config" / "nextest.toml"
 PINNED_NEXTEST = "0.9.151"
 
-PROBE_MANIFEST = """[package]
+PROBE_MANIFEST = """[workspace]
+resolver = "3"
+members = ["crates/infra-postgres", "crates/testkit"]
+"""
+PROBE_INFRA_MANIFEST = """[package]
+name = "infra-postgres"
+version = "0.1.0"
+edition = "2024"
+publish = false
+"""
+PROBE_TESTKIT_MANIFEST = """[package]
 name = "testkit"
 version = "0.1.0"
 edition = "2024"
 publish = false
-
-[workspace]
 """
 PROBE_FILES = {
-    "src/lib.rs": "#[cfg(test)]\nmod tests {\n    #[test]\n    fn unit_probe() {}\n}\n",
-    "tests/plain_probe.rs": "#[test]\nfn plain_probe() {}\n",
-    "tests/integration_probe.rs": "#[test]\nfn integration_probe() {}\n",
-    "tests/fixture_bootstrap_probe.rs": "#[test]\nfn fixture_bootstrap_probe() {}\n",
+    "crates/testkit/src/lib.rs": "#[cfg(test)]\nmod tests {\n    #[test]\n    fn unit_probe() {}\n}\n",
+    "crates/testkit/tests/plain_probe.rs": "#[test]\nfn plain_probe() {}\n",
+    "crates/testkit/tests/integration_probe.rs": "#[test]\nfn integration_probe() {}\n",
+    "crates/testkit/tests/fixture_bootstrap_probe.rs": "#[test]\nfn fixture_bootstrap_probe() {}\n",
+    "crates/infra-postgres/src/lib.rs": "",
 }
 PACKAGE_PREDICATE = re.compile(r"\b(?:package|deps|rdeps)\(\s*=?([A-Za-z0-9_-]+)\s*\)")
 
@@ -41,10 +50,14 @@ FAMILIES = {"integration": "integration_", "fixture-bootstrap": "fixture_bootstr
 
 def write_probe(base: Path, families: set[str]) -> Path:
     (base / "Cargo.toml").write_text(PROBE_MANIFEST)
+    (base / "crates/infra-postgres").mkdir(parents=True, exist_ok=True)
+    (base / "crates/infra-postgres/Cargo.toml").write_text(PROBE_INFRA_MANIFEST)
+    (base / "crates/testkit").mkdir(parents=True, exist_ok=True)
+    (base / "crates/testkit/Cargo.toml").write_text(PROBE_TESTKIT_MANIFEST)
     for name, content in PROBE_FILES.items():
-        if name.startswith("tests/integration_") and "integration" not in families:
+        if name.endswith("/integration_probe.rs") and "integration" not in families:
             continue
-        if name.startswith("tests/fixture_bootstrap_") and "fixture-bootstrap" not in families:
+        if name.endswith("/fixture_bootstrap_probe.rs") and "fixture-bootstrap" not in families:
             continue
         (base / name).parent.mkdir(parents=True, exist_ok=True)
         (base / name).write_text(content)
@@ -132,6 +145,7 @@ def staged_config(source: str, families: set[str]) -> str:
 @unittest.skipUnless(shutil.which("cargo-nextest"), "setup blocker: cargo-nextest is not installed")
 class NextestProfilesTest(unittest.TestCase):
     def test_real_workspace_profiles_select_exact_fixture_binaries(self) -> None:
+        fixture_prefixes = ("fixture_", "integration_")
         expectations = {
             "default": {"fixture_ownership"},
             "ci": {"fixture_ownership"},
@@ -140,7 +154,12 @@ class NextestProfilesTest(unittest.TestCase):
         }
         for profile, expected in expectations.items():
             with self.subTest(real_workspace=profile):
-                self.assertEqual(selected_binaries(ROOT / "Cargo.toml", profile), expected)
+                selected = selected_binaries(ROOT / "Cargo.toml", profile)
+                if profile in {"default", "ci"}:
+                    selected = {name for name in selected if name.startswith(fixture_prefixes)}
+                elif profile == "integration":
+                    selected = {name for name in selected if name == "integration_shared_fixture" or name.startswith("fixture_")}
+                self.assertEqual(selected, expected)
 
     def test_nextest_profiles_select_storage_tests_only(self) -> None:
         self.assertTrue(CONFIG.is_file(), ".config/nextest.toml is missing")

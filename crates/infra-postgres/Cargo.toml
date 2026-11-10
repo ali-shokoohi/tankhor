@@ -1,0 +1,18 @@
+[package]
+name = "infra-postgres"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+async-trait.workspace = true
+kernel = { path = "../kernel" }
+sqlx.workspace = true
+
+[dev-dependencies]
+testkit = { path = "../testkit", features = ["contracts"] }
+tokio.workspace = true

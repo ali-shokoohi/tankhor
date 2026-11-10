@@ -1,0 +1,19 @@
+[package]
+name = "infra-system"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+async-trait.workspace = true
+kernel = { path = "../kernel" }
+time.workspace = true
+uuid.workspace = true
+
+[dev-dependencies]
+testkit = { path = "../testkit", features = ["contracts"] }
+tokio = { workspace = true, features = ["macros", "rt"] }

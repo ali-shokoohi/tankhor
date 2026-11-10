@@ -1,0 +1,216 @@
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("/static/vendor/vazirmatn.woff2") format("woff2-variations"),
+       url("/static/vendor/vazirmatn.woff2") format("woff2");
+  font-weight: 400 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background-color: var(--tk-color-background);
+  color: var(--tk-color-text-primary);
+  font-family: "Vazirmatn", Arial, Tahoma, sans-serif;
+  font-size: var(--tk-type-body-size);
+  font-weight: var(--tk-type-body-weight);
+  line-height: var(--tk-type-body-line-height);
+}
+
+body.tk-console {
+  margin-block: 0;
+  margin-inline: 0;
+  min-block-size: 100vh;
+  background-color: var(--tk-color-background);
+  color: var(--tk-color-text-primary);
+}
+
+.tk-skip-link {
+  position: absolute;
+  inset-block-start: var(--tk-space-8);
+  inset-inline-start: var(--tk-space-8);
+  padding-block: var(--tk-space-8);
+  padding-inline: var(--tk-space-16);
+  background-color: var(--tk-color-action);
+  color: var(--tk-color-on-action);
+  border: 2px solid var(--tk-color-border-control);
+  border-radius: var(--tk-radius-control);
+  min-block-size: var(--tk-target-touch-min);
+  text-decoration: none;
+  transform: translateY(-200%);
+  transition: transform var(--tk-motion-control-feedback) ease;
+}
+
+.tk-skip-link:focus {
+  transform: translateY(0);
+  outline: 2px solid var(--tk-color-border-control);
+  outline-offset: 2px;
+}
+
+.tk-shell-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--tk-space-16);
+  padding-block: var(--tk-space-16);
+  padding-inline: var(--tk-space-24);
+  background-color: var(--tk-color-surface);
+  border-block-end: 1px solid var(--tk-color-border);
+}
+
+.tk-brand-mark {
+  font-size: var(--tk-type-section-small-size);
+  font-weight: var(--tk-type-section-small-weight);
+  line-height: var(--tk-type-section-small-line-height);
+  color: var(--tk-color-text-primary);
+}
+
+.tk-shell-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--tk-space-12);
+}
+
+.tk-nav-link {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--tk-target-touch-min);
+  padding-block: var(--tk-space-8);
+  padding-inline: var(--tk-space-12);
+  color: var(--tk-color-text-primary);
+  text-decoration: none;
+  border-radius: var(--tk-radius-control);
+}
+
+.tk-nav-link:focus-visible,
+.tk-control:focus-visible,
+.tk-button:focus-visible {
+  outline: 2px solid var(--tk-color-border-control);
+  outline-offset: 2px;
+}
+
+.tk-preferences-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--tk-space-12);
+}
+
+.tk-preference-group,
+.tk-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tk-space-4);
+}
+
+.tk-label {
+  font-size: var(--tk-type-caption-size);
+  font-weight: var(--tk-type-control-weight);
+  line-height: var(--tk-type-caption-line-height);
+  color: var(--tk-color-text-secondary);
+}
+
+.tk-control {
+  min-block-size: var(--tk-target-touch-min);
+  padding-block: var(--tk-space-8);
+  padding-inline: var(--tk-space-12);
+  background-color: var(--tk-color-surface);
+  color: var(--tk-color-text-primary);
+  border: 1px solid var(--tk-color-border-control);
+  border-radius: var(--tk-radius-control);
+  font-family: inherit;
+  font-size: var(--tk-type-control-size);
+  font-weight: var(--tk-type-control-weight);
+  line-height: var(--tk-type-control-line-height);
+}
+
+.tk-control[aria-invalid="true"] {
+  border-color: var(--tk-color-danger);
+}
+
+.tk-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: var(--tk-target-primary-button);
+  min-inline-size: var(--tk-target-touch-min);
+  padding-block: var(--tk-space-8);
+  padding-inline: var(--tk-space-16);
+  border-radius: var(--tk-radius-control);
+  border: 1px solid var(--tk-color-border-control);
+  font-family: inherit;
+  font-size: var(--tk-type-control-size);
+  font-weight: var(--tk-type-control-weight);
+  line-height: var(--tk-type-control-line-height);
+  cursor: pointer;
+  transition: background-color var(--tk-motion-control-feedback) ease;
+}
+
+.tk-button-primary {
+  background-color: var(--tk-color-action);
+  color: var(--tk-color-on-action);
+}
+
+.tk-button-secondary {
+  background-color: var(--tk-color-surface-muted);
+  color: var(--tk-color-text-primary);
+}
+
+.tk-shell-main {
+  max-inline-size: 72rem;
+  margin-block: 0;
+  margin-inline: auto;
+  padding-block: var(--tk-space-32);
+  padding-inline: var(--tk-space-24);
+}
+
+.tk-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tk-space-16);
+  padding-block: var(--tk-space-24);
+  padding-inline: var(--tk-space-24);
+  background-color: var(--tk-color-surface);
+  border: 1px solid var(--tk-color-border);
+  border-radius: var(--tk-radius-panel);
+}
+
+.tk-heading-1 {
+  margin-block: 0;
+  margin-inline: 0;
+  font-size: var(--tk-type-section-large-size);
+  font-weight: var(--tk-type-section-large-weight);
+  line-height: var(--tk-type-section-large-line-height);
+  color: var(--tk-color-text-primary);
+}
+
+.tk-status-copy {
+  margin-block: 0;
+  margin-inline: 0;
+  color: var(--tk-color-text-secondary);
+}
+
+.tk-field-error {
+  margin-block: 0;
+  margin-inline: 0;
+  font-size: var(--tk-type-caption-size);
+  line-height: var(--tk-type-caption-line-height);
+  color: var(--tk-color-danger);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

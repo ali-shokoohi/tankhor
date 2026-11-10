@@ -1,0 +1,198 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Tankhor API",
+    "description": "Versioned JSON API endpoints for Tankhor.",
+    "license": {
+      "name": "LicenseRef-Proprietary"
+    },
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/v1/health": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "summary": "Checks sanitized storage and seed readiness through the application [`get_health`] service.",
+        "operationId": "get_health_handler",
+        "responses": {
+          "200": {
+            "description": "Service store and foundational seed are ready",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Required store or foundational seed is unavailable",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/openapi.json": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "summary": "Serves the frozen `OpenAPI` 3.1 JSON document generated from the `/api/v1` router.",
+        "operationId": "get_openapi_json_handler",
+        "responses": {
+          "200": {
+            "description": "Frozen OpenAPI 3.1 specification for /api/v1",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpenApiDocument"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Administrator authentication required in production",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HealthResponse": {
+        "type": "object",
+        "description": "Sanitized readiness payload returned when required storage and seed state are ready.",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "Readiness status string (`\"ok\"` when ready)."
+          }
+        }
+      },
+      "OpenApiDocument": {
+        "type": "object",
+        "description": "Finite top-level schema representation for the `OpenAPI` 3.1 endpoint.",
+        "required": [
+          "openapi",
+          "info",
+          "paths"
+        ],
+        "properties": {
+          "components": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "description": "Shared component schemas and security schemes."
+          },
+          "info": {
+            "$ref": "#/components/schemas/OpenApiInfoSummary",
+            "description": "Top-level API metadata block."
+          },
+          "openapi": {
+            "type": "string",
+            "description": "`OpenAPI` specification version string (e.g. `\"3.1.0\"`)."
+          },
+          "paths": {
+            "type": "object",
+            "description": "Map of documented versioned path items."
+          },
+          "tags": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "object"
+            },
+            "description": "Tag metadata entries."
+          }
+        }
+      },
+      "OpenApiInfoSummary": {
+        "type": "object",
+        "description": "Finite non-recursive schema bridge describing the top-level `OpenAPI` 3.1 document shape.",
+        "required": [
+          "title",
+          "version"
+        ],
+        "properties": {
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Optional human-readable API description."
+          },
+          "title": {
+            "type": "string",
+            "description": "Human-readable API title."
+          },
+          "version": {
+            "type": "string",
+            "description": "Semantic API specification version."
+          }
+        }
+      },
+      "ProblemDetails": {
+        "type": "object",
+        "description": "Sanitized RFC 9457 problem document returned by JSON API endpoints.",
+        "required": [
+          "type",
+          "title",
+          "status",
+          "detail",
+          "instance"
+        ],
+        "properties": {
+          "detail": {
+            "type": "string",
+            "description": "Sanitized human-readable explanation specific to this occurrence."
+          },
+          "instance": {
+            "type": "string",
+            "description": "Opaque URI reference identifying the specific occurrence or request path."
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "description": "HTTP status code generated for this occurrence of the problem.",
+            "minimum": 0
+          },
+          "title": {
+            "type": "string",
+            "description": "Short, human-readable summary of the problem type."
+          },
+          "type": {
+            "type": "string",
+            "description": "Stable URI reference identifying the problem type (`urn:tankhor:problem:<slug>`)."
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "system",
+      "description": "Foundational readiness and OpenAPI schema endpoints"
+    }
+  ]
+}

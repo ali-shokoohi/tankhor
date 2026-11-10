@@ -1,0 +1,32 @@
+[package]
+name = "web"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+admin = { path = "../admin" }
+askama.workspace = true
+askama_web.workspace = true
+axum.workspace = true
+fluent-bundle.workspace = true
+fluent-syntax.workspace = true
+kernel = { path = "../kernel" }
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+unic-langid.workspace = true
+utoipa.workspace = true
+utoipa-axum.workspace = true
+utoipa-swagger-ui.workspace = true
+
+[dev-dependencies]
+scraper.workspace = true
+testkit = { path = "../testkit", features = ["fakes"] }
+tokio.workspace = true
+tower.workspace = true
+
+[lints]
+workspace = true

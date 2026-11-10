@@ -1,0 +1,228 @@
+# Authoritative Tankhor visual identity tokens (Technical Specification §12.1–§12.4).
+# Single source of truth for CSS custom properties and automated WCAG 2.2 AA verification.
+
+[meta]
+brand_fa = "تن‌خور"
+brand_en = "Tankhor"
+palette_status = "provisional_brown_baseline"
+
+[colors.light]
+background = "#F8FAFC"
+surface = "#FFFFFF"
+surfaceMuted = "#EEF4F8"
+textPrimary = "#18232D"
+textSecondary = "#506273"
+brandVelvet = "#4A2F27"
+curtainBase = "#4A2F27"
+sky = "#BDE4F7"
+action = "#185B7A"
+onAction = "#FFFFFF"
+border = "#CCD6DF"
+borderControl = "#185B7A"
+onCurtain = "#F1F5F9"
+success = "#146C43"
+warning = "#8A4B08"
+danger = "#B42318"
+
+[colors.dark]
+background = "#101820"
+surface = "#18232D"
+surfaceMuted = "#22323F"
+textPrimary = "#F1F5F9"
+textSecondary = "#BCCAD6"
+brandVelvet = "#D6B5A8"
+curtainBase = "#4A2F27"
+sky = "#274E66"
+action = "#A7DBF3"
+onAction = "#102B3B"
+border = "#506273"
+borderControl = "#A7DBF3"
+onCurtain = "#F1F5F9"
+success = "#80D8A6"
+warning = "#F3C278"
+danger = "#FFB4AB"
+
+[typography]
+font_stack = ["Vazirmatn", "Arial", "Tahoma", "sans-serif"]
+
+[typography.scale.hero_desktop]
+size_px = 48
+weight = 600
+line_height = 1.4
+status = "proposed"
+
+[typography.scale.hero_mobile]
+size_px = 32
+weight = 600
+line_height = 1.4
+status = "proposed"
+
+[typography.scale.section_large]
+size_px = 28
+weight = 600
+line_height = 1.5
+status = "proposed"
+
+[typography.scale.section_small]
+size_px = 24
+weight = 600
+line_height = 1.5
+status = "proposed"
+
+[typography.scale.body]
+size_px = 16
+weight = 400
+line_height = 1.8
+status = "proposed"
+
+[typography.scale.control]
+size_px = 16
+weight = 500
+line_height = 1.6
+status = "proposed"
+
+[typography.scale.caption]
+size_px = 14
+weight = 400
+line_height = 1.7
+status = "proposed"
+
+[spacing]
+scale_px = [4, 8, 12, 16, 24, 32, 48, 64]
+
+[radii]
+control_px = 8
+panel_px = 16
+
+[targets]
+primary_button_height_px = 48
+touch_target_min_px = 44
+viewport_widths_px = [360, 768, 1024, 1440]
+
+[icons]
+canvas_px = 24
+stroke_min_px = 1.5
+stroke_max_px = 2.0
+
+[motion.control_feedback]
+duration_ms = 180
+status = "proposed"
+
+[motion.curtain_continuity]
+duration_ms = 500
+status = "proposed"
+
+[contrast]
+decorative_only_tokens = ["border"]
+
+[[contrast.text_pairs]]
+name = "body_on_background"
+foreground = "textPrimary"
+background = "background"
+size_role = "normal"
+
+[[contrast.text_pairs]]
+name = "body_on_surface"
+foreground = "textPrimary"
+background = "surface"
+size_role = "normal"
+
+[[contrast.text_pairs]]
+name = "body_on_surface_muted"
+foreground = "textPrimary"
+background = "surfaceMuted"
+size_role = "normal"
+
+[[contrast.text_pairs]]
+name = "body_on_sky"
+foreground = "textPrimary"
+background = "sky"
+size_role = "normal"
+
+[[contrast.text_pairs]]
+name = "secondary_on_background"
+foreground = "textSecondary"
+background = "background"
+size_role = "normal"
+
+[[contrast.text_pairs]]
+name = "secondary_on_surface"
+foreground = "textSecondary"
+background = "surface"
+size_role = "normal"
+
+[[contrast.text_pairs]]
+name = "secondary_on_surface_muted"
+foreground = "textSecondary"
+background = "surfaceMuted"
+size_role = "normal"
+
+[[contrast.text_pairs]]
+name = "brand_on_surface"
+foreground = "brandVelvet"
+background = "surface"
+size_role = "normal"
+
+[[contrast.text_pairs]]
+name = "action_link_on_surface"
+foreground = "action"
+background = "surface"
+size_role = "normal"
+
+[[contrast.text_pairs]]
+name = "on_action_button"
+foreground = "onAction"
+background = "action"
+size_role = "normal"
+
+[[contrast.text_pairs]]
+name = "on_curtain"
+foreground = "onCurtain"
+background = "curtainBase"
+size_role = "normal"
+
+[[contrast.text_pairs]]
+name = "success_on_surface"
+foreground = "success"
+background = "surface"
+size_role = "normal"
+
+[[contrast.text_pairs]]
+name = "warning_on_surface"
+foreground = "warning"
+background = "surface"
+size_role = "normal"
+
+[[contrast.text_pairs]]
+name = "danger_on_surface"
+foreground = "danger"
+background = "surface"
+size_role = "normal"
+
+[[contrast.text_pairs]]
+name = "hero_heading_on_background"
+foreground = "textPrimary"
+background = "background"
+size_role = "large"
+
+[[contrast.control_boundaries]]
+name = "control_on_background"
+token = "borderControl"
+against = "background"
+
+[[contrast.control_boundaries]]
+name = "control_on_surface"
+token = "borderControl"
+against = "surface"
+
+[[contrast.control_boundaries]]
+name = "control_on_surface_muted"
+token = "borderControl"
+against = "surfaceMuted"
+
+[[contrast.prohibited_pairs]]
+name = "small_white_text_on_light_sky"
+theme = "light"
+foreground = "surface"
+background = "sky"
+size_role = "normal"

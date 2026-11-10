@@ -17,7 +17,7 @@
         {"name": "Architecture", "run": "python3 scripts/check-architecture.py"},
         {"name": "Completed-work traceability", "run": "python3 scripts/check-test-traceability.py --mode partial"},
         {"name": "Repository checks", "run": "python3 -m unittest discover -s scripts/tests"},
-        {"name": "Fast tests", "run": "cargo nextest run --profile ci"},
+        {"name": "Fast tests", "run": "cargo nextest run --profile ci --features app/dev-fakes,testkit/fakes,admin/mocks,kernel/mocks"},
         {"name": "Present adapter inventory", "run": "cargo metadata --no-deps --format-version 1 | python3 -c 'import json,sys; names={p[\"name\"] for p in json.load(sys.stdin)[\"packages\"]}; [print(name+\": \"+(\"present\" if name in names else \"not present; no runtime coverage claimed\")) for name in (\"infra-postgres\",\"infra-auth\",\"infra-sms\",\"wallet\",\"generation\")]'"},
         {"name": "Fixture bootstrap", "run": "cargo nextest run --profile fixture-bootstrap -p testkit"},
         {"name": "Shared integration", "run": "cargo nextest run --profile integration"},

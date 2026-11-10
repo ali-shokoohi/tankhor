@@ -69,9 +69,13 @@ is not rejected merely because its persisted schedule is now past.
 **Language/Version**: Rust stable 1.98.1, edition 2024; pin toolchain, rustfmt, clippy and
 llvm-tools-preview. Single Cargo.lock and shared workspace dependency/lint declarations.
 
-**Primary Dependencies**: tokio 1.x; axum 0.8.9; askama/askama_web 0.16 with `axum-0.8`;
-Fluent bundles; vendored htmx 2.x; SQLx 0.9.0; utoipa 5.5/utoipa-axum 0.2/Swagger UI 9.0.2
-(`axum,vendored`); webauthn-rs 0.6.2; totp-rs 6.0.0; aes-gcm 0.11.1; reqwest in infra-sms
+**Primary Dependencies**: tokio 1.x; axum 0.8.9 (`=0.8.9`); askama/askama_web 0.16 with `axum-0.8`;
+Fluent bundles; vendored htmx 2.x; SQLx 0.9.0; `utoipa = "6.0"`, `utoipa-axum = "0.3"`,
+`utoipa-swagger-ui = { version = "10.0.2", default-features = false, features = ["axum", "vendored"] }`
+(owner-approved 2026-11-08: `utoipa-swagger-ui 9.0.2` pulls `zip 3.0.0` with
+`RUSTSEC-2026-0367/0368/0369/0429` and `utoipa-axum 0.2` pulls unmaintained `paste`
+`RUSTSEC-2024-0436`; the `6.0`/`0.3`/`10.0.2` family passes `cargo deny` with zero exceptions);
+webauthn-rs 0.6.2; totp-rs 6.0.0; aes-gcm 0.11.1; reqwest in infra-sms
 only; uuid, time, serde, thiserror, async-trait and sha2 as appropriate pure libraries;
 pure chrono/chrono-tz with pinned embedded IANA rules for local scheduling resolution.
 Research R12–R13 verifies metadata/protocols; the first TDD build resolves exact compatible

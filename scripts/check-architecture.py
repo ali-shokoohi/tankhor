@@ -152,6 +152,7 @@ def check(metadata: dict) -> list[str]:
                     is_adapter(dep_name)
                     or dep_name in ENTRY_POINTS
                     or dep_name == COMPOSITION_ROOT
+                    or dep_name == "testkit"
                 ):
                     violations.append(
                         f"{name}: must not depend on {dep_name} via {render(graph, path)}"

@@ -7,13 +7,47 @@ publish.workspace = true
 
 [features]
 default = []
-fakes = []
+contracts = []
+fakes = ["contracts"]
 
 [dependencies]
+admin = { path = "../admin" }
+async-trait.workspace = true
+kernel = { path = "../kernel" }
 sqlx.workspace = true
 testcontainers.workspace = true
 testcontainers-modules.workspace = true
+time.workspace = true
 tokio.workspace = true
+uuid.workspace = true
+
+[dev-dependencies]
+admin = { path = "../admin", features = ["mocks"] }
+kernel = { path = "../kernel", features = ["mocks"] }
+
+[[test]]
+name = "application_health"
+required-features = ["fakes"]
+
+[[test]]
+name = "application_health_uow"
+required-features = ["fakes"]
+
+[[test]]
+name = "clock_fake"
+required-features = ["fakes"]
+
+[[test]]
+name = "health_probe_fake"
+required-features = ["fakes"]
+
+[[test]]
+name = "id_generator_fake"
+required-features = ["fakes"]
+
+[[test]]
+name = "unit_of_work_fake"
+required-features = ["fakes"]
 
 [lints]
 workspace = true

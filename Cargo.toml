@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["crates/kernel", "crates/testkit"]
+members = ["crates/admin", "crates/app", "crates/infra-postgres", "crates/infra-system", "crates/kernel", "crates/testkit", "crates/web"]
 
 [workspace.package]
 edition = "2024"
@@ -8,10 +8,28 @@ rust-version = "1.98.1"
 publish = false
 
 [workspace.dependencies]
-sqlx = { version = "=0.9.0", default-features = false, features = ["runtime-tokio", "tls-rustls-ring", "postgres"] }
+async-trait = "0.1"
+askama = { version = "0.16", default-features = false, features = ["derive", "std", "urlencode"] }
+askama_web = { version = "0.16", default-features = false, features = ["axum-0.8"] }
+axum = "=0.8.9"
+fluent-bundle = "0.16"
+fluent-syntax = "0.12"
+mockall = "0.15"
+scraper = "0.29"
+tower = { version = "0.5", default-features = false, features = ["util"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sqlx = { version = "=0.9.0", default-features = false, features = ["macros", "migrate", "postgres", "runtime-tokio", "tls-rustls-ring"] }
 testcontainers = { version = "=0.27.3", default-features = false, features = ["reusable-containers"] }
 testcontainers-modules = { version = "=0.15.0", default-features = false, features = ["postgres"] }
+thiserror = "2"
+time = { version = "0.3", features = ["formatting", "macros", "parsing", "serde"] }
 tokio = { version = "1", features = ["macros", "rt-multi-thread", "process", "time", "sync", "net", "io-util", "signal"] }
+unic-langid = "0.9"
+utoipa = "6.0"
+utoipa-axum = "0.3"
+utoipa-swagger-ui = { version = "10.0.2", default-features = false, features = ["axum", "vendored"] }
+uuid = { version = "1", default-features = false, features = ["serde", "std", "v7"] }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

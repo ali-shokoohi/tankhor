@@ -347,8 +347,9 @@ without accepted-step tracking; logging generic reqwest errors containing provid
 
 **Decision:** Retain the implementation pack's compatible release family. Metadata verified
 available/not-yanked releases are axum 0.8.9, askama 0.16.0 (0.16.1 compatible patch available),
-askama_web 0.16.0 with `axum-0.8`, SQLx 0.9.0, utoipa 5.5.0, utoipa-axum 0.2.0,
-utoipa-swagger-ui 9.0.2 with `axum,vendored`, mockall 0.15.0 and testcontainers-modules 0.15.0
+askama_web 0.16.0 with `axum-0.8`, SQLx 0.9.0, `utoipa = "6.0"`, `utoipa-axum = "0.3"`,
+`utoipa-swagger-ui = { version = "10.0.2", default-features = false, features = ["axum", "vendored"] }`
+(with `axum = "=0.8.9"`), mockall 0.15.0 and testcontainers-modules 0.15.0
 with `postgres,minio` and compatible core 0.27.x (0.27.3 verified). SQLx requires Rust ≥1.94;
 the selected 1.98.1 satisfies it. Enable SQLx checked-query macros explicitly if defaults
 are disabled. Use tokio 1.x, Fluent bundles, proptest, scraper, insta, wiremock and tracing;
@@ -365,9 +366,13 @@ at **every `cargo update`** using cargo-deny and the metadata architecture check
 | `tonic` → `axum` wrapper | Allow tonic's internal HTTP dependency for Testcontainers' Bollard Docker client, without relaxing kernel/context transitive I/O bans. | Owner, 2026-11-06 | Re-check at every `cargo update` or Docker transport change. `cargo tree -i axum` observed axum 0.8.9 ← tonic 0.14.9 ← bollard/bollard-buildkit-proto/tonic-prost ← testcontainers 0.27.3 ← testkit, directly or through modules 0.15.0. No kernel/context root reaches axum: `cargo tree -p kernel --all-features` lists kernel only; context crates are not present yet. Repeat inverse-tree and full architecture validation as crates arrive. |
 | Licence allowlist | MIT, Apache-2.0, Apache-2.0 WITH LLVM-exception, BSD-2-Clause, BSD-3-Clause, ISC, Unicode-3.0, Zlib, CC0-1.0, 0BSD, MPL-2.0, CDLA-Permissive-2.0 cover the approved graph. No per-crate licence exceptions (`exceptions = []`); confidence threshold 0.8; unpublished private workspace crates ignored. | Owner, 2026-11-06 | Re-check at every `cargo update`, dependency addition or licence change; all other identifiers remain denied. |
 
-Newer utoipa 6/utoipa-axum 0.3/Swagger 10 and Testcontainers core 0.28 exist but are not mixed
-into this family without an intentional compatibility change. Metadata verification is not
-a successful compile/run claim.
+Owner decision (2026-11-08): upgraded the OpenAPI family to `utoipa = "6.0"`,
+`utoipa-axum = "0.3"`, `utoipa-swagger-ui = { version = "10.0.2", default-features = false, features = ["axum", "vendored"] }`
+with `axum = "=0.8.9"` (reason: `utoipa-swagger-ui 9.0.2` pulls `zip 3.0.0` with
+`RUSTSEC-2026-0367/0368/0369/0429` and `utoipa-axum 0.2` pulls unmaintained `paste`
+`RUSTSEC-2024-0436`; the `6.0`/`0.3`/`10.0.2` family passes `cargo deny` with zero exceptions).
+Testcontainers core 0.28 exists but is not mixed into this family without an intentional
+compatibility change. Metadata verification is not a successful compile/run claim.
 
 Use Playwright with axe as test-only tooling. WebKit emulation is not actual iOS Safari;
 real iOS Safari and Android Chrome release checks remain necessary. Nextest `default` is
@@ -387,9 +392,9 @@ as physical iOS coverage; interpreting execution profiles as Cargo compilation p
 - https://crates.io/api/v1/crates/axum/0.8.9
 - https://docs.rs/askama_web/0.16.0/askama_web/
 - https://crates.io/api/v1/crates/sqlx/0.9.0
-- https://crates.io/api/v1/crates/utoipa/5.5.0
-- https://crates.io/api/v1/crates/utoipa-axum/0.2.0/dependencies
-- https://docs.rs/utoipa-swagger-ui/9.0.2/utoipa_swagger_ui/
+- https://crates.io/api/v1/crates/utoipa/6.0.0
+- https://crates.io/api/v1/crates/utoipa-axum/0.3.0/dependencies
+- https://docs.rs/utoipa-swagger-ui/10.0.2/utoipa_swagger_ui/
 - https://docs.rs/mockall/0.15.0/mockall/#async-traits
 - https://crates.io/api/v1/crates/testcontainers-modules/0.15.0/dependencies
 - https://nexte.st/docs/configuration/

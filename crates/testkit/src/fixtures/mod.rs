@@ -1,5 +1,6 @@
 //! Isolated test-service infrastructure.
 
+pub mod database;
 pub mod lease;
 pub mod ownership;
 pub mod postgres;
