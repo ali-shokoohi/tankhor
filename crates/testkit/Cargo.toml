@@ -34,6 +34,18 @@ name = "session_store_fake"
 required-features = ["fakes"]
 
 [[test]]
+name = "rate_limit_repository_fake"
+required-features = ["fakes"]
+
+[[test]]
+name = "admin_authenticator_fake"
+required-features = ["fakes"]
+
+[[test]]
+name = "sms_sender_fake"
+required-features = ["fakes"]
+
+[[test]]
 name = "otp_challenge_repository_fake"
 required-features = ["fakes"]
 

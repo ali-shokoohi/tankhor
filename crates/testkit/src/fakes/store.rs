@@ -9,6 +9,10 @@ use kernel::ports::unit_of_work::{StoreId, TxHandle};
 /// Transactional working-set snapshot shared by all in-memory fake repositories.
 #[derive(Clone, Debug, Default)]
 pub struct FakeState {
+    pub rate_limits: BTreeMap<
+        admin::ports::rate_limit_repository::RateLimitKey,
+        super::rate_limit_repository::RateLimitBucket,
+    >,
     pub admin_otps: BTreeMap<kernel::ids::ChallengeId, admin::domain::otp_state::OtpState>,
     pub otp_submissions: BTreeMap<
         kernel::ids::ChallengeId,
