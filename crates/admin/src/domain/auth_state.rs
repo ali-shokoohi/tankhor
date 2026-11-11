@@ -76,6 +76,7 @@ enum Status {
 pub struct AuthState {
     id: ChallengeId,
     binding: AuthBinding,
+    primary_verified_at: OffsetDateTime,
     created_at: OffsetDateTime,
     expires_at: OffsetDateTime,
     status: Status,
@@ -96,6 +97,7 @@ impl TryFrom<AuthInput> for AuthState {
         Ok(Self {
             id: input.id,
             binding: input.binding,
+            primary_verified_at: input.primary_verified_at.ok_or_else(denied)?,
             created_at: input.created_at,
             expires_at: input.expires_at,
             status: Status::Pending,
@@ -112,6 +114,21 @@ impl AuthState {
     #[must_use]
     pub const fn binding(&self) -> &AuthBinding {
         &self.binding
+    }
+
+    #[must_use]
+    pub const fn primary_verified_at(&self) -> OffsetDateTime {
+        self.primary_verified_at
+    }
+
+    #[must_use]
+    pub const fn created_at(&self) -> OffsetDateTime {
+        self.created_at
+    }
+
+    #[must_use]
+    pub const fn expires_at(&self) -> OffsetDateTime {
+        self.expires_at
     }
 
     /// # Errors

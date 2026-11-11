@@ -2,12 +2,13 @@
 
 use super::admin_repository::IdentityDigest;
 use crate::domain::{
+    admin_state::SecurityEpoch,
     auth_state::{AuthBinding, BindingDigest},
     otp_state::OtpDigest,
     secrets::SecretBytes,
 };
 use kernel::{
-    error::DomainError,
+    error::{DomainError, ErrorCode},
     ids::{AdminId, ChallengeId, CredentialId},
 };
 use time::OffsetDateTime;
@@ -31,6 +32,29 @@ pub struct CeremonyContext {
     pub primary_verified_at: OffsetDateTime,
     pub created_at: OffsetDateTime,
     pub expires_at: OffsetDateTime,
+}
+
+/// Stable protection identity for an enrolled TOTP secret, not an access grant.
+/// Browser/session/proof identifiers belong only to the independently checked ceremony.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TotpCredentialBinding {
+    pub owner: AdminId,
+    pub credential: CredentialId,
+    pub epoch: SecurityEpoch,
+}
+
+impl TryFrom<&CeremonyContext> for TotpCredentialBinding {
+    type Error = DomainError;
+
+    fn try_from(context: &CeremonyContext) -> Result<Self, Self::Error> {
+        Ok(Self {
+            owner: context.binding.target,
+            credential: context
+                .credential
+                .ok_or_else(|| DomainError::unauthorised(ErrorCode::AuthenticationRequired))?,
+            epoch: context.binding.epoch,
+        })
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -99,6 +123,12 @@ pub struct TotpCheck {
 /// nonempty lists mean authentication. TOTP uses RFC6238 SHA1, 6 digits, 30 seconds,
 /// ±1 step and independent 160-bit secrets. Return the matched step for caller CAS;
 /// neither crypto verification nor SMS acceptance prevents replay by itself.
+/// TOTP secret envelopes authenticate `TotpCredentialBinding`, not enrollment's
+/// browser/session/challenge or expiry. Verification checks the current ceremony's
+/// stage and time independently; the application validates its primary proof,
+/// complete binding, eligibility, epoch, credential revision/revocation and replay
+/// CAS. Persistent decryptability never authorizes a ceremony. Provisioning remains
+/// ceremony-bound and subject to the one-time `SessionStore` presentation gate.
 #[cfg_attr(any(test, feature = "mocks"), mockall::automock)]
 #[async_trait::async_trait]
 pub trait AdminAuthenticator: Send + Sync {

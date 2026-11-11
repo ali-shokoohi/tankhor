@@ -1,0 +1,289 @@
+//! T166: confirmation consumes identity authorization and ceremony in one audited `UoW`.
+use admin::{
+    application::enrollment::{FinishPasskeyEnrollment, FinishPasskeyEnrollmentInput},
+    domain::{
+        audit::{Actor, AuditAction, AuditMetadata, Factor, ReasonCode, Subject},
+        auth_state::{AuthInput, AuthStage, AuthState, BindingDigest},
+    },
+    ports::{
+        admin_authenticator::{MockAdminAuthenticator, VerifiedPasskey},
+        admin_credential_repository::{CredentialMaterial, MockAdminCredentialRepository},
+        admin_repository::MockAdminRepository,
+        audit_repository::MockAuditRepository,
+        session_store::{MockSessionStore, PendingRecord},
+    },
+};
+use kernel::{
+    error::{DomainError, ErrorCode},
+    ports::{
+        clock::MockClock,
+        id_generator::MockIdGenerator,
+        unit_of_work::{MockUnitOfWork, StoreId, TxHandle},
+    },
+};
+use std::sync::{Arc, Mutex};
+#[path = "support/enrollment_fixture.rs"]
+mod fixture;
+
+fn pending() -> PendingRecord {
+    let mut binding = fixture::check().binding;
+    binding.stage = AuthStage::Passkey;
+    binding.credential_revision = Some(1);
+    PendingRecord::new(
+        fixture::check().reference,
+        AuthState::try_from(AuthInput {
+            id: fixture::pending().state().id(),
+            binding,
+            primary_verified_at: Some(fixture::now()),
+            created_at: fixture::now(),
+            expires_at: fixture::pending().state().expires_at(),
+        })
+        .unwrap(),
+        Some(fixture::secret("protected-state")),
+        None,
+    )
+    .unwrap()
+}
+#[tokio::test]
+async fn passkey_enrollment_confirms_bound_factor_once_port_interactions() {
+    for outcome in ["valid", "invalid", "absent", "audit"] {
+        drive(outcome).await;
+    }
+}
+#[tokio::test]
+async fn audit_enrollment_has_complete_safe_fields_once() {
+    drive("valid").await;
+    drive("audit").await;
+}
+
+#[expect(
+    clippy::too_many_lines,
+    reason = "strict complete enrollment transaction driver including audit abort"
+)]
+async fn drive(outcome: &str) {
+    let authorized = outcome != "absent";
+    let valid = authorized && outcome != "invalid";
+    let success = outcome == "valid";
+    let events = Arc::new(Mutex::new(Vec::new()));
+    let store = StoreId::new();
+    let mut uow = MockUnitOfWork::new();
+    let log = events.clone();
+    uow.expect_begin()
+        .times(if valid { 2 } else { 1 })
+        .returning(move |mode| {
+            log.lock().unwrap().push("begin");
+            Ok(TxHandle::new(store, mode, ()))
+        });
+    let log = events.clone();
+    uow.expect_commit()
+        .times(usize::from(authorized) + usize::from(success))
+        .returning(move |mut tx| {
+            tx.take::<()>(store)?;
+            log.lock().unwrap().push("commit");
+            Ok(())
+        });
+    let log = events.clone();
+    uow.expect_rollback()
+        .times(usize::from(!authorized || outcome == "audit"))
+        .returning(move |mut tx| {
+            tx.take::<()>(store)?;
+            log.lock().unwrap().push("rollback");
+            Ok(())
+        });
+    let mut admins = MockAdminRepository::new();
+    let log = events.clone();
+    admins.expect_get().times(1).returning(move |_, _| {
+        log.lock().unwrap().push("authority");
+        Ok(Some(fixture::target(authorized)))
+    });
+    let log = events.clone();
+    admins
+        .expect_lock()
+        .times(usize::from(valid))
+        .returning(move |_, ids| {
+            assert_eq!(ids, vec![fixture::target(true).id()]);
+            log.lock().unwrap().push("recheck");
+            Ok(vec![fixture::target(true)])
+        });
+    let log = events.clone();
+    admins
+        .expect_consume_enrollment()
+        .times(usize::from(valid))
+        .returning(move |_, target, expected, now| {
+            assert_eq!(target, fixture::target(true).id());
+            assert_eq!(&expected, fixture::target(true).enrollment().unwrap());
+            assert_eq!(now, fixture::now());
+            log.lock().unwrap().push("authorization-cas");
+            Ok(())
+        });
+    let log = events.clone();
+    admins
+        .expect_restore()
+        .times(usize::from(valid))
+        .returning(move |_, target, epoch| {
+            assert_eq!(target, fixture::target(true).id());
+            assert_eq!(epoch, fixture::target(true).epoch());
+            log.lock().unwrap().push("activate");
+            Ok(())
+        });
+    let mut sessions = MockSessionStore::new();
+    let log = events.clone();
+    sessions
+        .expect_read_pending()
+        .times(usize::from(authorized) + usize::from(valid))
+        .returning(move |_, check| {
+            assert_eq!(&check.binding, pending().state().binding());
+            log.lock().unwrap().push("proof");
+            pending().view(&check, &fixture::target(true))
+        });
+    sessions
+        .expect_verification_state()
+        .times(usize::from(authorized))
+        .returning(|_, _| Ok(fixture::secret("protected-state")));
+    let log = events.clone();
+    sessions
+        .expect_consume_pending()
+        .times(usize::from(valid))
+        .returning(move |_, _| {
+            log.lock().unwrap().push("proof-cas");
+            Ok(())
+        });
+    let log = events.clone();
+    sessions
+        .expect_insert()
+        .times(usize::from(valid))
+        .returning(move |_, session| {
+            let mut active = fixture::target(true);
+            active.restore(active.epoch()).unwrap();
+            assert!(session.state.check_access(&active, fixture::now()).is_ok());
+            assert_eq!(session.state.factor(), Some(Factor::Passkey));
+            log.lock().unwrap().push("session");
+            Ok(())
+        });
+    let mut credentials = MockAdminCredentialRepository::new();
+    let log = events.clone();
+    credentials
+        .expect_insert()
+        .times(usize::from(valid))
+        .returning(move |_, record| {
+            assert_eq!(record.state().admin_id(), fixture::target(true).id());
+            assert_eq!(record.state().revision(), 1);
+            assert_eq!(
+                record.material(),
+                &CredentialMaterial::Passkey {
+                    credential_id: fixture::secret("credential-id"),
+                    credential: fixture::secret("updated-credential")
+                }
+            );
+            log.lock().unwrap().push("credential");
+            Ok(())
+        });
+    let mut crypto = MockAdminAuthenticator::new();
+    let log = events.clone();
+    crypto
+        .expect_finish_passkey()
+        .times(usize::from(authorized))
+        .returning(move |request| {
+            assert_eq!(log.lock().unwrap().last(), Some(&"commit"));
+            assert!(request.request.credentials.is_empty());
+            assert_eq!(
+                request.request.context.binding,
+                pending().state().binding().clone()
+            );
+            assert_eq!(request.protected_state, fixture::secret("protected-state"));
+            log.lock().unwrap().push("verify");
+            if valid {
+                Ok(VerifiedPasskey {
+                    credential_id: fixture::secret("credential-id"),
+                    credential: fixture::secret("updated-credential"),
+                })
+            } else {
+                Err(DomainError::unauthorised(ErrorCode::AuthenticationRequired))
+            }
+        });
+    crypto
+        .expect_issue_token()
+        .times(usize::from(valid))
+        .returning(|_| Ok(fixture::secret("opaque-session")));
+    crypto
+        .expect_token_digest()
+        .times(usize::from(valid))
+        .returning(|_, _| Ok(BindingDigest::new([8; 32])));
+    let mut audit = MockAuditRepository::new();
+    let log = events.clone();
+    audit
+        .expect_append()
+        .times(usize::from(valid))
+        .returning(move |_, entry| {
+            assert_eq!(entry.action(), AuditAction::EnrollmentConfirmed);
+            assert_eq!(entry.actor(), Actor::Admin(fixture::target(true).id()));
+            assert_eq!(entry.subject(), Subject::Admin(fixture::target(true).id()));
+            assert_eq!(entry.occurred_at(), fixture::now());
+            assert_eq!(entry.reason(), ReasonCode::Authentication);
+            assert_eq!(
+                entry.metadata(),
+                &AuditMetadata::Enrollment {
+                    before: admin::domain::admin_state::Eligibility::Invited,
+                    after: admin::domain::admin_state::Eligibility::Active,
+                    factor: Factor::Passkey,
+                }
+            );
+            assert!(!format!("{entry:?}").contains("updated-credential"));
+            log.lock().unwrap().push("audit");
+            if success {
+                Ok(())
+            } else {
+                Err(DomainError::unavailable(ErrorCode::PrerequisiteUnavailable))
+            }
+        });
+    let mut clock = MockClock::new();
+    clock.expect_now().returning(|| Ok(fixture::now()));
+    let mut ids = MockIdGenerator::new();
+    ids.expect_next_session_id()
+        .times(usize::from(valid))
+        .returning(|| Ok(fixture::check().binding.session));
+    ids.expect_next_audit_id()
+        .times(usize::from(valid))
+        .returning(|| Ok("019a53a0-0000-7000-8000-000000000012".parse().unwrap()));
+    let mut proof = fixture::check();
+    proof.binding = pending().state().binding().clone();
+    let result = FinishPasskeyEnrollment {
+        uow: &uow,
+        admins: &admins,
+        credentials: &credentials,
+        sessions: &sessions,
+        audit: &audit,
+        authenticator: &crypto,
+        clock: &clock,
+        ids: &ids,
+        policy: &fixture::policy(),
+    }
+    .execute(FinishPasskeyEnrollmentInput {
+        proof,
+        credential: "019a53a0-0000-7000-8000-000000000010".parse().unwrap(),
+        response: fixture::secret("response"),
+    })
+    .await;
+    assert_eq!(result.is_ok(), success);
+    let mut expected = vec!["begin", "authority"];
+    if authorized {
+        expected.extend(["proof", "commit", "verify"]);
+        if valid {
+            expected.extend([
+                "begin",
+                "recheck",
+                "proof",
+                "proof-cas",
+                "authorization-cas",
+                "credential",
+                "activate",
+                "session",
+                "audit",
+                if success { "commit" } else { "rollback" },
+            ]);
+        }
+    } else {
+        expected.push("rollback");
+    }
+    assert_eq!(*events.lock().unwrap(), expected);
+}

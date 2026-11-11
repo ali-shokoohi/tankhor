@@ -238,6 +238,24 @@ pub async fn admin_authenticator_contract<H: AdminAuthenticatorContractHarness>(
     let enrollment = port.begin_totp(totp_context.clone()).await.unwrap();
     assert!(!enrollment.envelope.expose().is_empty());
     assert!(!enrollment.protected_provisioning.expose().is_empty());
+    let provisioning = port
+        .unprotect(
+            ProtectionContext::Ceremony(totp_context.clone()),
+            enrollment.protected_provisioning.clone(),
+        )
+        .await
+        .unwrap();
+    assert!(!provisioning.expose().is_empty());
+    let mut foreign_presentation = totp_context.clone();
+    foreign_presentation.binding.browser = BindingDigest::new([91; 32]);
+    assert!(
+        port.unprotect(
+            ProtectionContext::Ceremony(foreign_presentation),
+            enrollment.protected_provisioning.clone(),
+        )
+        .await
+        .is_err()
+    );
     let (code, step) = h.totp_proof(&enrollment.envelope, context.created_at);
     let check = TotpCheck {
         context: totp_context,
@@ -248,6 +266,29 @@ pub async fn admin_authenticator_contract<H: AdminAuthenticatorContractHarness>(
     assert_eq!(port.verify_totp(check.clone()).await.unwrap(), step);
     // Replay CAS belongs to the application/repository, not this stateless verifier.
     assert_eq!(port.verify_totp(check.clone()).await.unwrap(), step);
+    // Persistent credentials survive a separate, independently authorized ceremony.
+    let mut signin = check.clone();
+    signin.context.binding.purpose = AuthPurpose::SignIn;
+    signin.context.binding.browser = BindingDigest::new([71; 32]);
+    signin.context.binding.session =
+        SessionId::from_str("019a53a0-0000-7000-8000-000000000071").unwrap();
+    signin.context.challenge =
+        ChallengeId::from_str("019a53a0-0000-7000-8000-000000000072").unwrap();
+    assert_eq!(port.verify_totp(signin.clone()).await.unwrap(), step);
+    let mut foreign = signin.clone();
+    foreign.context.binding.target =
+        AdminId::from_str("019a53a0-0000-7000-8000-000000000073").unwrap();
+    assert_eq!(
+        port.verify_totp(foreign).await.unwrap_err().code(),
+        ErrorCode::AuthenticationRequired
+    );
+    let mut foreign = signin;
+    foreign.context.credential =
+        Some(CredentialId::from_str("019a53a0-0000-7000-8000-000000000074").unwrap());
+    assert_eq!(
+        port.verify_totp(foreign).await.unwrap_err().code(),
+        ErrorCode::AuthenticationRequired
+    );
     let mut bad = check.clone();
     bad.code = bytes("bad-totp");
     assert_eq!(

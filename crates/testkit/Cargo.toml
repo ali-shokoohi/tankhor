@@ -26,6 +26,42 @@ admin = { path = "../admin", features = ["mocks"] }
 kernel = { path = "../kernel", features = ["mocks"] }
 
 [[test]]
+name = "fake_list_admins"
+required-features = ["fakes"]
+
+[[test]]
+name = "fake_invite_admin"
+required-features = ["fakes"]
+
+[[test]]
+name = "fake_finish_totp_enrollment"
+required-features = ["fakes"]
+
+[[test]]
+name = "fake_finish_passkey_enrollment"
+required-features = ["fakes"]
+
+[[test]]
+name = "fake_begin_passkey_enrollment"
+required-features = ["fakes"]
+
+[[test]]
+name = "fake_totp"
+required-features = ["fakes"]
+
+[[test]]
+name = "fake_passkey"
+required-features = ["fakes"]
+
+[[test]]
+name = "fake_request_admin_otp"
+required-features = ["fakes"]
+
+[[test]]
+name = "fake_verify_admin_otp"
+required-features = ["fakes"]
+
+[[test]]
 name = "admin_credential_repository_fake"
 required-features = ["fakes"]
 
@@ -83,3 +119,6 @@ required-features = ["fakes"]
 
 [lints]
 workspace = true
+[[test]]
+name = "fake_begin_totp_enrollment"
+required-features = ["fakes"]

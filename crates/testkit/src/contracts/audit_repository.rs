@@ -39,10 +39,27 @@ fn admin(number: u16) -> AdminId {
 fn entry(number: u16, actor: u16, seconds: i64, action: AuditAction) -> AuditEntry {
     let at = OffsetDateTime::UNIX_EPOCH + Duration::seconds(seconds);
     let (subject, reason, metadata) = match action {
-        AuditAction::SignedIn => (
+        AuditAction::SignedIn | AuditAction::EnrollmentStarted => (
             Subject::Admin(admin(actor)),
             ReasonCode::Authentication,
             AuditMetadata::Factor(Factor::Passkey),
+        ),
+        AuditAction::EnrollmentConfirmed => (
+            Subject::Admin(admin(actor)),
+            ReasonCode::Authentication,
+            AuditMetadata::Enrollment {
+                before: admin::domain::admin_state::Eligibility::Invited,
+                after: admin::domain::admin_state::Eligibility::Active,
+                factor: Factor::Passkey,
+            },
+        ),
+        AuditAction::Invited => (
+            Subject::Admin(admin(actor + 1)),
+            ReasonCode::AdminAddition,
+            AuditMetadata::Invitation {
+                before: None,
+                after: admin::domain::admin_state::Eligibility::Invited,
+            },
         ),
         AuditAction::Recovered => (
             Subject::Admin(admin(2)),

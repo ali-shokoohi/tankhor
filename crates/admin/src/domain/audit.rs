@@ -18,6 +18,9 @@ pub enum Actor {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum AuditAction {
     SignedIn,
+    EnrollmentStarted,
+    EnrollmentConfirmed,
+    Invited,
     Recovered,
     Published,
     ScheduledCancelled,
@@ -47,6 +50,7 @@ pub enum Executor {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ReasonCode {
     Authentication,
+    AdminAddition,
     AdminRecovery,
     AdminRevoked,
     ScheduledPublication,
@@ -57,6 +61,7 @@ impl ReasonCode {
     pub const fn as_str(self) -> &'static str {
         match self {
             Self::Authentication => "authentication",
+            Self::AdminAddition => "admin_addition",
             Self::AdminRecovery => "admin_recovery",
             Self::AdminRevoked => "admin_revoked",
             Self::ScheduledPublication => "scheduled_publication",
@@ -68,6 +73,7 @@ impl ReasonCode {
     pub const fn message_key(self) -> &'static str {
         match self {
             Self::Authentication => "console-reason-authentication",
+            Self::AdminAddition => "console-reason-admin-addition",
             Self::AdminRecovery => "console-reason-admin-recovery",
             Self::AdminRevoked => "console-reason-admin-revoked",
             Self::ScheduledPublication => "console-reason-scheduled-publication",
@@ -81,6 +87,7 @@ impl FromStr for ReasonCode {
     fn from_str(value: &str) -> Result<Self, Self::Err> {
         match value {
             "authentication" => Ok(Self::Authentication),
+            "admin_addition" => Ok(Self::AdminAddition),
             "admin_recovery" => Ok(Self::AdminRecovery),
             "admin_revoked" => Ok(Self::AdminRevoked),
             "scheduled_publication" => Ok(Self::ScheduledPublication),
@@ -94,7 +101,19 @@ impl FromStr for ReasonCode {
 pub enum AuditMetadata {
     None,
     Factor(Factor),
-    Eligibility { before: bool, after: bool },
+    Invitation {
+        before: Option<crate::domain::admin_state::Eligibility>,
+        after: crate::domain::admin_state::Eligibility,
+    },
+    Enrollment {
+        before: crate::domain::admin_state::Eligibility,
+        after: crate::domain::admin_state::Eligibility,
+        factor: Factor,
+    },
+    Eligibility {
+        before: bool,
+        after: bool,
+    },
     Scheduled(ScheduledMetadata),
 }
 
@@ -199,8 +218,36 @@ impl TryFrom<AuditInput> for AuditEntry {
             metadata: input.metadata,
         };
         let valid = match (&entry.action, &entry.subject, &entry.metadata) {
-            (AuditAction::SignedIn, Subject::Admin(target), AuditMetadata::Factor(_)) => {
-                entry.actor == Actor::Admin(*target) && entry.reason == ReasonCode::Authentication
+            (
+                AuditAction::SignedIn | AuditAction::EnrollmentStarted,
+                Subject::Admin(target),
+                AuditMetadata::Factor(_),
+            ) => entry.actor == Actor::Admin(*target) && entry.reason == ReasonCode::Authentication,
+            (
+                AuditAction::EnrollmentConfirmed,
+                Subject::Admin(target),
+                AuditMetadata::Enrollment { before, after, .. },
+            ) => {
+                entry.actor == Actor::Admin(*target)
+                    && entry.reason == ReasonCode::Authentication
+                    && matches!(
+                        before,
+                        crate::domain::admin_state::Eligibility::Invited
+                            | crate::domain::admin_state::Eligibility::Recovering
+                    )
+                    && *after == crate::domain::admin_state::Eligibility::Active
+            }
+            (
+                AuditAction::Invited,
+                Subject::Admin(target),
+                AuditMetadata::Invitation {
+                    before: None,
+                    after,
+                },
+            ) => {
+                entry.actor != Actor::Admin(*target)
+                    && entry.reason == ReasonCode::AdminAddition
+                    && *after == crate::domain::admin_state::Eligibility::Invited
             }
             (AuditAction::Recovered, Subject::Admin(_), AuditMetadata::Eligibility { .. }) => {
                 entry.reason == ReasonCode::AdminRecovery

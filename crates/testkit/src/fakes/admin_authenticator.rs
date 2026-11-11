@@ -9,8 +9,8 @@ use admin::{
     ports::{
         admin_authenticator::{
             AdminAuthenticator, CeremonyContext, IssuedOtp, PasskeyChallenge, PasskeyFinish,
-            PasskeyStart, ProtectionContext, TokenPurpose, TotpCheck, TotpEnrollment,
-            VerifiedPasskey,
+            PasskeyStart, ProtectionContext, TokenPurpose, TotpCheck, TotpCredentialBinding,
+            TotpEnrollment, VerifiedPasskey,
         },
         admin_repository::IdentityDigest,
     },
@@ -29,7 +29,7 @@ struct Fixtures {
     envelopes: Vec<(ProtectionContext, SecretBytes, SecretBytes)>,
     otps: Vec<(ChallengeId, IssuedOtp)>,
     passkeys: Vec<(PasskeyStart, PasskeyChallenge, SecretBytes)>,
-    totps: Vec<(CeremonyContext, TotpEnrollment)>,
+    totps: Vec<(TotpCredentialBinding, TotpEnrollment)>,
 }
 impl Fixtures {
     fn opaque(&mut self, kind: &str) -> SecretBytes {
@@ -111,9 +111,11 @@ impl FakeAdminAuthenticator {
         now: OffsetDateTime,
     ) -> Result<(SecretBytes, u64), DomainError> {
         let fixtures = self.fixtures.lock().expect("fixture mutex poisoned");
-        if fixtures.totps.iter().any(|(context, enrollment)| {
-            &enrollment.envelope == envelope && valid_context(context, now)
-        }) && now == time::macros::datetime!(2026-01-01 00:00 UTC)
+        if fixtures
+            .totps
+            .iter()
+            .any(|(_, enrollment)| &enrollment.envelope == envelope)
+            && now == time::macros::datetime!(2026-01-01 00:00 UTC)
         {
             Ok((
                 bytes("654321"),
@@ -269,7 +271,16 @@ impl AdminAuthenticator for FakeAdminAuthenticator {
             envelope: fixtures.opaque("totp-envelope"),
             protected_provisioning: fixtures.opaque("totp-provisioning"),
         };
-        fixtures.totps.push((context, enrollment.clone()));
+        let provisioning = fixtures.opaque("provisioning-secret");
+        fixtures.envelopes.push((
+            ProtectionContext::Ceremony(context.clone()),
+            provisioning,
+            enrollment.protected_provisioning.clone(),
+        ));
+        fixtures.totps.push((
+            TotpCredentialBinding::try_from(&context)?,
+            enrollment.clone(),
+        ));
         Ok(enrollment)
     }
     async fn verify_totp(&self, request: TotpCheck) -> Result<u64, DomainError> {
@@ -281,10 +292,10 @@ impl AdminAuthenticator for FakeAdminAuthenticator {
         let (code, step) = self.totp_fixture(&request.envelope, request.now)?;
         let fixtures = self.fixtures.lock().expect("fixture mutex poisoned");
         if request.code == code
-            && fixtures
-                .totps
-                .iter()
-                .any(|(c, e)| e.envelope == request.envelope && *c == request.context)
+            && fixtures.totps.iter().any(|(binding, e)| {
+                e.envelope == request.envelope
+                    && TotpCredentialBinding::try_from(&request.context).as_ref() == Ok(binding)
+            })
         {
             Ok(step)
         } else {

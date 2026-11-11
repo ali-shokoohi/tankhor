@@ -97,6 +97,12 @@ impl TryFrom<OtpInput> for OtpState {
 }
 
 impl OtpState {
+    /// Server-only keyed verifier material; never a client response value.
+    #[must_use]
+    pub const fn digest(&self) -> &OtpDigest {
+        &self.digest
+    }
+
     #[must_use]
     pub const fn id(&self) -> ChallengeId {
         self.id
