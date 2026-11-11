@@ -26,6 +26,26 @@ admin = { path = "../admin", features = ["mocks"] }
 kernel = { path = "../kernel", features = ["mocks"] }
 
 [[test]]
+name = "admin_credential_repository_fake"
+required-features = ["fakes"]
+
+[[test]]
+name = "session_store_fake"
+required-features = ["fakes"]
+
+[[test]]
+name = "otp_challenge_repository_fake"
+required-features = ["fakes"]
+
+[[test]]
+name = "admin_repository_fake"
+required-features = ["fakes"]
+
+[[test]]
+name = "audit_repository_fake"
+required-features = ["fakes"]
+
+[[test]]
 name = "application_health"
 required-features = ["fakes"]
 

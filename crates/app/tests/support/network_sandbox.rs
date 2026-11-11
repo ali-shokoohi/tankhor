@@ -116,7 +116,10 @@ PY
     /// execs `program` with `args` so the child process has loopback access only and zero
     /// external network routes, plus inherits direct signal delivery via `exec`.
     #[must_use]
-    #[allow(clippy::unused_self)]
+    #[expect(
+        clippy::unused_self,
+        reason = "Only a verified sandbox instance may construct sandboxed child commands"
+    )]
     pub fn command(&self, program: &str, args: &[&str]) -> Command {
         let mut cmd = Command::new("unshare");
         cmd.args([

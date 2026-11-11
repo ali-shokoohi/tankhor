@@ -9,7 +9,10 @@ use tower::ServiceExt;
 use web::api::health_api_router;
 
 #[tokio::test]
-#[allow(clippy::too_many_lines)]
+#[expect(
+    clippy::too_many_lines,
+    reason = "Ready and unavailable responses are checked against the same health schema scenario"
+)]
 async fn health_and_problem_responses_match_schema() {
     // 1. Seeded fake store -> 200 OK {"status": "ok"} under /api/v1/health.
     let seeded_store = FakeStore::new();

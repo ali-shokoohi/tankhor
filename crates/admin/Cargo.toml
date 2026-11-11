@@ -13,9 +13,11 @@ mocks = ["dep:mockall"]
 async-trait.workspace = true
 kernel = { path = "../kernel" }
 mockall = { workspace = true, optional = true }
+time.workspace = true
 
 [dev-dependencies]
 mockall.workspace = true
+proptest.workspace = true
 tokio.workspace = true
 
 [lints]

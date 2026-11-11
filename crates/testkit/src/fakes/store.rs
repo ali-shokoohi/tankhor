@@ -9,6 +9,21 @@ use kernel::ports::unit_of_work::{StoreId, TxHandle};
 /// Transactional working-set snapshot shared by all in-memory fake repositories.
 #[derive(Clone, Debug, Default)]
 pub struct FakeState {
+    pub admin_otps: BTreeMap<kernel::ids::ChallengeId, admin::domain::otp_state::OtpState>,
+    pub otp_submissions: BTreeMap<
+        kernel::ids::ChallengeId,
+        admin::ports::otp_challenge_repository::SubmissionCategory,
+    >,
+    pub otp_heads: BTreeMap<kernel::ids::ChallengeId, kernel::ids::ChallengeId>,
+    pub admin_sessions: BTreeMap<[u8; 32], admin::ports::session_store::SessionRecord>,
+    pub admin_pending: BTreeMap<[u8; 32], admin::ports::session_store::PendingRecord>,
+    pub admin_credentials: BTreeMap<
+        kernel::ids::CredentialId,
+        admin::ports::admin_credential_repository::CredentialRecord,
+    >,
+    pub admins: BTreeMap<kernel::ids::AdminId, admin::domain::admin_state::AdminState>,
+    pub admin_identities: BTreeMap<[u8; 32], kernel::ids::AdminId>,
+    pub audit_entries: BTreeMap<kernel::ids::AuditId, admin::domain::audit::AuditEntry>,
     pub scratch: BTreeMap<String, String>,
     pub repositories_scratch: BTreeMap<String, BTreeMap<String, String>>,
     pub health_ready: bool,

@@ -11,7 +11,10 @@ use web::api::docs::build_api_and_docs_router;
 use web::api::openapi::SchemaAccessPolicy;
 
 #[tokio::test]
-#[allow(clippy::too_many_lines)]
+#[expect(
+    clippy::too_many_lines,
+    reason = "The complete Swagger asset traversal verifies one no-external-requests scenario"
+)]
 async fn swagger_makes_no_external_asset_or_validator_requests() {
     let store = FakeStore::new();
     store.seed(|state| {

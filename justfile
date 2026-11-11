@@ -4,3 +4,6 @@ test-tools:
 
 test-down: test-tools
     bash scripts/test-down.sh
+
+test:
+    cargo nextest run --features app/dev-fakes,testkit/fakes,admin/mocks,kernel/mocks

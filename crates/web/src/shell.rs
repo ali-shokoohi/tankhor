@@ -82,7 +82,10 @@ pub struct FieldViewModel {
 /// Askama template view for the foundational console layout.
 #[derive(Debug, Clone, Template)]
 #[template(path = "console/layout.html")]
-#[allow(clippy::struct_excessive_bools)]
+#[expect(
+    clippy::struct_excessive_bools,
+    reason = "Askama renders independent selected states derived from locale and theme"
+)]
 pub struct ShellView {
     html_lang: &'static str,
     html_dir: &'static str,

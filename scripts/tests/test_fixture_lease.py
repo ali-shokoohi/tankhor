@@ -131,6 +131,58 @@ fn main() {
         self.assertNotEqual(result.returncode, 0, "setup without nextest must refuse an owner")
         self.assertEqual(result.stdout, "", "must not substitute the setup process as owner")
 
+    def test_sigkill_owner_reclaims_stale_lease_and_releases_setup_lock(self):
+        subprocess.run(["cargo", "build", "-q", "-p", "testkit", "--bin", "fixture-runner"],
+                       cwd=ROOT, check=True)
+        with tempfile.TemporaryDirectory(prefix="tankhor-crashed-lease-") as directory:
+            base = Path(directory)
+            base.chmod(0o700)
+            first = subprocess.Popen(
+                ["python3", "-c",
+                 "import fcntl,sys; sys.stdin.readline(); "
+                 "f=open(sys.argv[1], 'rb'); fcntl.flock(f, fcntl.LOCK_EX); "
+                 "print('locked', flush=True); sys.stdin.read()",
+                 str(base / "setup.lock")],
+                stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True,
+            )
+            second = subprocess.Popen(["sleep", "60"])
+            try:
+                environment = dict(os.environ, FIXTURE_STATE_DIR=str(base),
+                                   FIXTURE_PROJECT="repository-a", FIXTURE_RUN="local")
+
+                def claim(owner):
+                    return subprocess.run(
+                        [str(RUNNER), "lease-claim"], cwd=ROOT,
+                        env=dict(environment, FIXTURE_OWNER_PID=str(owner.pid)),
+                        capture_output=True, text=True, timeout=10,
+                    )
+
+                self.assertEqual(claim(first).returncode, 0)
+                lease = base / "live-run.lease"
+                recorded = lease.read_bytes()
+                self.assertNotEqual(claim(second).returncode, 0,
+                                    "a live independent owner must still block a claim")
+                self.assertEqual(lease.read_bytes(), recorded)
+                # Make the soon-to-crash owner hold the actual setup file lock too.
+                first.stdin.write("lock\n")
+                first.stdin.flush()
+                self.assertEqual(first.stdout.readline().strip(), "locked")
+                self.assertNotEqual(claim(first).returncode, 0,
+                                    "setup lock must remain exclusive before the crash")
+                first.kill()
+                first.wait(timeout=5)
+                reclaimed = claim(second)
+                self.assertEqual(reclaimed.returncode, 0,
+                                 "SIGKILL must release the lock and permit dead-owner reclaim: "
+                                 + reclaimed.stderr)
+                self.assertNotEqual(lease.read_bytes(), recorded)
+                self.assertEqual(lease.read_text().splitlines()[2], str(second.pid))
+            finally:
+                for process in (first, second):
+                    if process.poll() is None:
+                        process.kill()
+                    process.communicate(timeout=5)
+
     def test_local_shared_server_rejects_concurrent_independent_runs(self):
         subprocess.run(["cargo", "build", "-q", "-p", "testkit", "--bin", "fixture-runner"],
                        cwd=ROOT, check=True)

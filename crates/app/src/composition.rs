@@ -55,7 +55,10 @@ pub fn compose_foundation(config: &AppConfig) -> Result<FoundationComposition, C
 }
 
 #[cfg(feature = "dev-fakes")]
-#[allow(clippy::unnecessary_wraps)]
+#[expect(
+    clippy::unnecessary_wraps,
+    reason = "Fake-enabled and fake-disabled builds share the same fallible composition signature"
+)]
 fn compose_fake_foundation() -> Result<FoundationComposition, CompositionError> {
     use testkit::fakes::health_probe::FakeHealthProbe;
     use testkit::fakes::store::FakeStore;

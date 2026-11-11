@@ -18,7 +18,10 @@ use web::middleware::concurrency_limit::{
 };
 
 #[tokio::test]
-#[allow(clippy::too_many_lines)]
+#[expect(
+    clippy::too_many_lines,
+    reason = "One permit lifecycle scenario covers saturation cancellation errors and successful completion"
+)]
 async fn concurrency_limit_rejects_excess_and_releases_permits() {
     let catalog = Arc::new(ConsoleCatalog::load_authoritative().unwrap());
     let fa_busy = catalog

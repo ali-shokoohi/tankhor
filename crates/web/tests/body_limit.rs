@@ -15,7 +15,10 @@ use web::middleware::body_limit::{BodyLimitState, enforce_body_limit_middleware}
 use web::security::{CsrfContext, CsrfProtectionState, enforce_csrf_middleware};
 
 #[tokio::test]
-#[allow(clippy::too_many_lines)]
+#[expect(
+    clippy::too_many_lines,
+    reason = "Boundary and oversized requests share handler counters to prove pre-application rejection"
+)]
 async fn oversized_body_never_reaches_application() {
     let catalog = ConsoleCatalog::load_authoritative().unwrap();
     let fa_expected_error = catalog

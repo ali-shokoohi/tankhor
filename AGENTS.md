@@ -80,7 +80,7 @@ Stop and report immediately when: the requested scope is finished; a red fails f
 | --- | --- |
 | Format | `cargo fmt --check` |
 | Lint | `cargo clippy --all-targets --all-features -- -D warnings` |
-| Unit / mock / fake / HTTP | `cargo nextest run` (or `-p <crate>`) |
+| Unit / mock / fake / HTTP | `just test` |
 | Integration (Docker) | `cargo nextest run --profile integration` |
 | Dependency rules | `cargo deny check` |
 | SQL metadata | `cargo sqlx prepare --workspace` |

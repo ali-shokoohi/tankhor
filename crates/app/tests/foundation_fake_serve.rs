@@ -10,7 +10,10 @@ use serde_json::Value;
 use support::network_sandbox::OutboundNetworkSandbox;
 
 #[test]
-#[allow(clippy::too_many_lines)]
+#[expect(
+    clippy::too_many_lines,
+    reason = "The sandboxed process lifecycle and foundation smoke assertions form one end-to-end scenario"
+)]
 fn fake_foundation_shell_and_health_start_without_network() {
     // 1. Verify host sandbox capability first (setup blocker if host lacks unshare/loopback).
     let sandbox = OutboundNetworkSandbox::prepare_verified()

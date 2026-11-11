@@ -1,5 +1,11 @@
 //! Asynchronous typed `UUIDv7` identifier generator port.
-#![cfg_attr(any(test, feature = "mocks"), allow(clippy::struct_field_names))]
+#![cfg_attr(
+    any(test, feature = "mocks"),
+    expect(
+        clippy::struct_field_names,
+        reason = "Mockall generates one expectation field per typed identifier method"
+    )
+)]
 
 use crate::error::DomainError;
 use crate::ids::{

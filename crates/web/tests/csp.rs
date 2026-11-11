@@ -30,7 +30,10 @@ fn parse_csp_directives(header_value: &str) -> HashMap<String, Vec<String>> {
 }
 
 #[tokio::test]
-#[allow(clippy::too_many_lines)]
+#[expect(
+    clippy::too_many_lines,
+    reason = "One CSP scenario checks headers and executable markup across all foundation surfaces"
+)]
 async fn csp_allows_only_local_console_scripts() {
     let store = FakeStore::new();
     store.seed(|state| {
