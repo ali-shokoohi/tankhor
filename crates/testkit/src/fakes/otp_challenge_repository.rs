@@ -7,7 +7,7 @@ use admin::{
 };
 use kernel::{
     error::{DomainError, ErrorCode},
-    ids::ChallengeId,
+    ids::{AdminId, ChallengeId},
     ports::unit_of_work::TxHandle,
 };
 
@@ -28,6 +28,18 @@ fn denied() -> DomainError {
 
 #[async_trait::async_trait]
 impl OtpChallengeRepository for FakeOtpChallengeRepository {
+    async fn revoke_all(&self, tx: &mut TxHandle, target: AdminId) -> Result<(), DomainError> {
+        self.store.with_write(tx, |state| {
+            for otp in state
+                .admin_otps
+                .values_mut()
+                .filter(|otp| otp.binding().target == target)
+            {
+                otp.revoke();
+            }
+            Ok(())
+        })
+    }
     async fn issue(
         &self,
         tx: &mut TxHandle,

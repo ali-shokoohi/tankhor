@@ -5,6 +5,7 @@ use kernel::{
 use testkit::{
     contracts::otp_challenge_repository::{
         OtpChallengeRepositoryContractHarness, otp_challenge_repository_contract,
+        target_wide_otp_revocation_contract,
     },
     fakes::{
         admin_repository::FakeAdminRepository,
@@ -16,6 +17,16 @@ struct Harness {
     uow: FakeUnitOfWork,
     repository: FakeOtpChallengeRepository,
     admins: FakeAdminRepository,
+}
+#[tokio::test]
+async fn target_wide_persisted_otp_revocation() {
+    let store = FakeStore::new();
+    target_wide_otp_revocation_contract(&Harness {
+        uow: FakeUnitOfWork::new(store.clone()),
+        repository: FakeOtpChallengeRepository::new(store.clone()),
+        admins: FakeAdminRepository::new(store),
+    })
+    .await;
 }
 #[async_trait::async_trait]
 impl OtpChallengeRepositoryContractHarness for Harness {

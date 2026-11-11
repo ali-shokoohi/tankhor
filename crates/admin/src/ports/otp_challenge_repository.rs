@@ -1,7 +1,11 @@
 //! FR-002, FR-CON-02, Q09: digest-only OTP persistence under the caller's `UoW`.
 
 use crate::domain::otp_state::{OtpBinding, OtpDigest, OtpState};
-use kernel::{error::DomainError, ids::ChallengeId, ports::unit_of_work::TxHandle};
+use kernel::{
+    error::DomainError,
+    ids::{AdminId, ChallengeId},
+    ports::unit_of_work::TxHandle,
+};
 use time::OffsetDateTime;
 
 /// Safe transport outcome only: neither delivery nor identity verification.
@@ -31,6 +35,10 @@ pub struct OtpCheck {
 #[cfg_attr(any(test, feature = "mocks"), mockall::automock)]
 #[async_trait::async_trait]
 pub trait OtpChallengeRepository: Send + Sync {
+    /// Invalidate all persisted pending challenges for this target, across browser,
+    /// purpose and epoch bindings, in the caller transaction. Idempotent; preserve
+    /// terminal history, challenge heads, failure counts and rate-limit budgets.
+    async fn revoke_all(&self, tx: &mut TxHandle, target: AdminId) -> Result<(), DomainError>;
     async fn issue(
         &self,
         tx: &mut TxHandle,

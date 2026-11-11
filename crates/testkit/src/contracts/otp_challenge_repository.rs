@@ -64,6 +64,201 @@ fn check(n: u8, failures: u32) -> OtpCheck {
     }
 }
 
+/// FR-004, AC-ADM-043: recovery invalidates persisted challenges, not just epochs.
+///
+/// # Panics
+/// Panics if any target binding survives, another target changes, or rollback is lost.
+pub async fn target_wide_otp_revocation_contract<H: OtpChallengeRepositoryContractHarness>(h: &H) {
+    seed_revocation(h).await;
+    verify_revocation(h).await;
+    verify_revocation_handles(h).await;
+    verify_revocation_before_consume(h).await;
+}
+
+async fn seed_revocation<H: OtpChallengeRepositoryContractHarness>(h: &H) {
+    let target = || AdminId::from_str("019a53a0-0000-7000-8000-000000000009").unwrap();
+    let other = AdminId::from_str("019a53a0-0000-7000-8000-000000000002").unwrap();
+    let r = h.repository();
+    let mut tx = h.uow().begin(TransactionMode::ReadWrite).await.unwrap();
+    for (admin, digest) in [(target(), 9), (other, 2)] {
+        h.admins()
+            .invite(
+                &mut tx,
+                AdminState::new(admin, Eligibility::Active, SecurityEpoch::new(4)),
+                IdentityDigest::new([digest; 32]),
+            )
+            .await
+            .unwrap();
+    }
+    for n in 41..=44 {
+        let mut value = input(n, 0);
+        value.binding.target = target();
+        value.binding.browser = BindingDigest::new([n; 32]);
+        if n == 42 {
+            value.binding.purpose =
+                AuthPurpose::Enrollment(admin::domain::admin_state::EnrollmentPurpose::Recovery);
+        }
+        if n == 43 {
+            value.binding.epoch = SecurityEpoch::new(3);
+        }
+        if n == 44 {
+            value.binding.target = other;
+        }
+        let binding = value.binding.clone();
+        r.issue(&mut tx, OtpState::try_from(value).unwrap(), None)
+            .await
+            .unwrap();
+        r.record_failure(
+            &mut tx,
+            OtpCheck {
+                id: id(n),
+                binding,
+                expected_failed_attempts: 0,
+                now: now(),
+            },
+        )
+        .await
+        .unwrap();
+    }
+    h.uow().commit(tx).await.unwrap();
+}
+
+async fn verify_revocation<H: OtpChallengeRepositoryContractHarness>(h: &H) {
+    let target = || AdminId::from_str("019a53a0-0000-7000-8000-000000000009").unwrap();
+    let r = h.repository();
+    let mut tx = h.uow().begin(TransactionMode::ReadWrite).await.unwrap();
+    let original = r.lock(&mut tx, id(41)).await.unwrap().unwrap();
+    let unaffected = r.lock(&mut tx, id(44)).await.unwrap().unwrap();
+    r.revoke_all(&mut tx, target()).await.unwrap();
+    for n in 41..=43 {
+        let state = r.lock(&mut tx, id(n)).await.unwrap().unwrap();
+        let mut expected = state.clone();
+        expected.revoke();
+        assert_eq!(state, expected, "persisted target OTP must be revoked");
+        assert_eq!(state.failed_attempts(), 1);
+    }
+    assert_eq!(
+        r.lock(&mut tx, id(44)).await.unwrap(),
+        Some(unaffected.clone())
+    );
+    h.uow().rollback(tx).await.unwrap();
+
+    let mut tx = h.uow().begin(TransactionMode::ReadWrite).await.unwrap();
+    assert_eq!(r.lock(&mut tx, id(41)).await.unwrap(), Some(original));
+    r.revoke_all(&mut tx, target()).await.unwrap();
+    r.revoke_all(&mut tx, target()).await.unwrap();
+    h.uow().commit(tx).await.unwrap();
+
+    let mut tx = h.uow().begin(TransactionMode::ReadWrite).await.unwrap();
+    for n in 41..=43 {
+        let state = r.lock(&mut tx, id(n)).await.unwrap().unwrap();
+        let proof = OtpCheck {
+            id: id(n),
+            binding: state.binding().clone(),
+            expected_failed_attempts: 1,
+            now: now(),
+        };
+        assert!(
+            r.consume_once(&mut tx, proof.clone(), OtpDigest::new([n; 32]))
+                .await
+                .is_err()
+        );
+        assert!(r.record_failure(&mut tx, proof).await.is_err());
+        let mut replacement = input(n + 10, 1);
+        replacement.binding = state.binding().clone();
+        assert!(
+            r.issue(
+                &mut tx,
+                OtpState::try_from(replacement.clone()).unwrap(),
+                Some(id(n))
+            )
+            .await
+            .is_err()
+        );
+        replacement.failed_attempts = 0;
+        assert!(
+            r.issue(&mut tx, OtpState::try_from(replacement).unwrap(), None)
+                .await
+                .is_err()
+        );
+        r.record_submission(&mut tx, id(n), SubmissionCategory::Accepted)
+            .await
+            .unwrap();
+        assert_eq!(r.lock(&mut tx, id(n)).await.unwrap(), Some(state));
+    }
+    assert_eq!(r.lock(&mut tx, id(44)).await.unwrap(), Some(unaffected));
+    h.uow().rollback(tx).await.unwrap();
+}
+
+async fn verify_revocation_handles<H: OtpChallengeRepositoryContractHarness>(h: &H) {
+    let target = || AdminId::from_str("019a53a0-0000-7000-8000-000000000009").unwrap();
+    let r = h.repository();
+    let mut foreign = h.begin_foreign().await.unwrap();
+    assert_eq!(
+        r.revoke_all(&mut foreign, target())
+            .await
+            .unwrap_err()
+            .code(),
+        ErrorCode::ForeignTransactionHandle
+    );
+    drop(foreign);
+    let mut readonly = h.uow().begin(TransactionMode::ReadOnly).await.unwrap();
+    assert_eq!(
+        r.revoke_all(&mut readonly, target())
+            .await
+            .unwrap_err()
+            .code(),
+        ErrorCode::ReadOnlyTransaction
+    );
+    h.uow().rollback(readonly).await.unwrap();
+    let mut finished = TxHandle::new(
+        kernel::ports::unit_of_work::StoreId::new(),
+        TransactionMode::ReadWrite,
+        (),
+    );
+    finished.take::<()>(finished.store_id()).unwrap();
+    assert_eq!(
+        r.revoke_all(&mut finished, target())
+            .await
+            .unwrap_err()
+            .code(),
+        ErrorCode::FinishedTransactionHandle
+    );
+}
+
+async fn verify_revocation_before_consume<H: OtpChallengeRepositoryContractHarness>(h: &H) {
+    let other = AdminId::from_str("019a53a0-0000-7000-8000-000000000002").unwrap();
+    let r = h.repository();
+    let mut revocation = h.uow().begin(TransactionMode::ReadWrite).await.unwrap();
+    r.revoke_all(&mut revocation, other).await.unwrap();
+    let revoke = async {
+        h.uow().commit(revocation).await.unwrap();
+    };
+    let consume = async {
+        let mut tx = h.uow().begin(TransactionMode::ReadWrite).await.unwrap();
+        let state = r.lock(&mut tx, id(44)).await.unwrap().unwrap();
+        let result = r
+            .consume_once(
+                &mut tx,
+                OtpCheck {
+                    id: id(44),
+                    binding: state.binding().clone(),
+                    expected_failed_attempts: 1,
+                    now: now(),
+                },
+                OtpDigest::new([44; 32]),
+            )
+            .await;
+        h.uow().commit(tx).await.unwrap();
+        result
+    };
+    let ((), result) = tokio::join!(revoke, consume);
+    assert!(
+        result.is_err(),
+        "authentication following revocation must refuse stale OTP"
+    );
+}
+
 /// # Panics
 /// Panics on lost budgets, changed retry identity, replay or transaction violations.
 pub async fn otp_challenge_repository_contract<H: OtpChallengeRepositoryContractHarness>(h: &H) {
@@ -90,6 +285,7 @@ pub async fn otp_challenge_repository_contract<H: OtpChallengeRepositoryContract
     verify_resend(h).await;
     verify_consumption_race(h).await;
     verify_handles(h).await;
+    target_wide_otp_revocation_contract(h).await;
 }
 
 async fn verify_attempts<H: OtpChallengeRepositoryContractHarness>(h: &H) {

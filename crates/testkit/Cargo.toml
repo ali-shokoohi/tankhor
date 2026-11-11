@@ -26,6 +26,18 @@ admin = { path = "../admin", features = ["mocks"] }
 kernel = { path = "../kernel", features = ["mocks"] }
 
 [[test]]
+name = "fake_sign_out"
+required-features = ["fakes"]
+
+[[test]]
+name = "fake_console_access"
+required-features = ["fakes"]
+
+[[test]]
+name = "fake_recover_admin"
+required-features = ["fakes"]
+
+[[test]]
 name = "fake_list_admins"
 required-features = ["fakes"]
 
@@ -119,6 +131,59 @@ required-features = ["fakes"]
 
 [lints]
 workspace = true
+
+[[test]]
+name = "mock_begin_passkey_enrollment"
+required-features = ["fakes"]
+
+[[test]]
+name = "mock_begin_totp_enrollment"
+required-features = ["fakes"]
+
+[[test]]
+name = "mock_finish_passkey_enrollment"
+required-features = ["fakes"]
+
+[[test]]
+name = "mock_finish_totp_enrollment"
+required-features = ["fakes"]
+
+[[test]]
+name = "mock_invite_admin"
+required-features = ["fakes"]
+
+[[test]]
+name = "mock_list_admins"
+required-features = ["fakes"]
+
+[[test]]
+name = "mock_passkey"
+required-features = ["fakes"]
+
+[[test]]
+name = "mock_sign_out"
+required-features = ["fakes"]
+
+[[test]]
+name = "mock_console_access"
+required-features = ["fakes"]
+
+[[test]]
+name = "mock_recover_admin"
+required-features = ["fakes"]
+
+[[test]]
+name = "mock_request_admin_otp"
+required-features = ["fakes"]
+
+[[test]]
+name = "mock_totp"
+required-features = ["fakes"]
+
+[[test]]
+name = "mock_verify_admin_otp"
+required-features = ["fakes"]
+
 [[test]]
 name = "fake_begin_totp_enrollment"
 required-features = ["fakes"]
