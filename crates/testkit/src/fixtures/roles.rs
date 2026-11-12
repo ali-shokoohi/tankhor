@@ -62,7 +62,11 @@ pub async fn provision_roles(
         runtime: read_password(&credentials.join("runtime"))?,
         preparation: read_password(&credentials.join("preparation"))?,
     };
-    let options = administrator.clone().disable_statement_logging();
+    // Cluster-global role locks must share one database lock namespace, not each test database.
+    let options = administrator
+        .clone()
+        .database("postgres")
+        .disable_statement_logging();
     let mut connection = PgConnection::connect_with(&options)
         .await
         .map_err(|_| RoleError)?;

@@ -67,12 +67,43 @@ This file overrides `~/.config/opencode/AGENTS.md` for this repository wherever 
 
 - Edit `spec.md`, `plan.md`, `contracts/`, `data-model.md`, the constitution or `docs/` during implementation (only tick checkboxes in `tasks.md`; the `docs/openapi.json` and `docs/development.md` exceptions in section 4 apply). Spec problems → stop and report with task ID.
 - Write stubs, placeholders, `TODO`/`FIXME`, `todo!()`, `unimplemented!()`, dead code, or ship anything unbuilt behind a flag.
-- Commit, tag, push or rewrite git history — the owner reviews and commits.
+- Commit, tag or push without explicit owner confirmation in the current conversation covering the specific operations and scope. Confirmation applies only to that scope and does not waive review, tests or other quality gates; otherwise the owner reviews and commits.
+- Rewrite git history.
 - Ask a product question and then guess the answer — stop and ask.
 
 ## 7. Stop conditions
 
-Stop and report immediately when: the requested scope is finished; a red fails for the wrong reason and can't be fixed within the task; sources conflict or information is missing; a new dependency is needed; or the session is getting long (finish the current red/green pair cleanly first).
+Stop and report when:
+
+- The requested task scope has been completed.
+- A RED test fails for an unintended reason that cannot be corrected within the current task.
+- Authoritative sources conflict or required information is missing.
+- A new dependency or an owner-level architectural/product decision is required.
+- A verified execution or context-capacity limit makes safe continuation impossible.
+
+**Session length alone is NOT a stop condition.**
+
+Do not stop merely because:
+- The session feels long.
+- Several TDD groups have been completed.
+- A checkpoint has passed.
+- The context window has grown but sufficient usable capacity remains.
+- A routine implementation decision is required.
+
+For capacity-related stops:
+
+1. Use an actual, reliable capacity or execution-limit signal.
+2. Do not infer context exhaustion from elapsed time, task count, or subjective judgment.
+3. If safe continuation is still possible, finish the current complete RED/GREEN group.
+4. Run required validation and update only verified task checkboxes.
+5. Report the specific limit encountered and the available evidence.
+6. Stop only when safe continuation is no longer possible.
+
+If no reliable capacity signal is available, do not claim context exhaustion.
+
+Continue autonomously between completed TDD groups without requesting routine owner approval.
+
+Never bypass other mandatory stop conditions.
 
 ## 8. Commands
 

@@ -26,6 +26,30 @@ admin = { path = "../admin", features = ["mocks"] }
 kernel = { path = "../kernel", features = ["mocks"] }
 
 [[test]]
+name = "fake_bootstrap_admin"
+required-features = ["fakes"]
+
+[[test]]
+name = "fake_get_enrollment"
+required-features = ["fakes"]
+
+[[test]]
+name = "mock_bootstrap_admin"
+required-features = ["fakes"]
+
+[[test]]
+name = "mock_get_enrollment"
+required-features = ["fakes"]
+
+[[test]]
+name = "mock_prepare_access_form"
+required-features = ["fakes"]
+
+[[test]]
+name = "fake_prepare_access_form"
+required-features = ["fakes"]
+
+[[test]]
 name = "fake_sign_out"
 required-features = ["fakes"]
 
