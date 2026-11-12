@@ -14,6 +14,9 @@ use utoipa_swagger_ui::{Config, SwaggerUi};
 
 use crate::api::openapi::{OPENAPI_JSON_PATH, SchemaAccessPolicy, build_api_router};
 use crate::api::problem::{ProblemDetails, ProblemResponse};
+use crate::console::ConsoleServices;
+use crate::console::guard::{AdminGuard, require_admin};
+use crate::security::CookieSecurityPolicy;
 
 /// Canonical Swagger UI path prefix.
 pub const SWAGGER_DOCS_PATH: &str = "/api/docs";
@@ -39,6 +42,19 @@ pub fn swagger_docs_router(schema_policy: SchemaAccessPolicy) -> Router {
             },
         )),
     }
+}
+
+/// Builds production documentation behind the current-admin application guard.
+pub fn build_api_and_docs_router_admin(
+    probe: Arc<dyn HealthProbe>,
+    services: ConsoleServices,
+    cookies: CookieSecurityPolicy,
+) -> (Router, OpenApiSpec) {
+    let guard = AdminGuard::new(services.clone(), cookies);
+    let (api_router, doc) = crate::api::openapi::build_api_router_admin(probe, services, cookies);
+    let swagger = swagger_docs_router(SchemaAccessPolicy::NonProductionOpen)
+        .layer(middleware::from_fn_with_state(guard, require_admin));
+    (api_router.merge(swagger), doc)
 }
 
 /// Composes the `/api/v1` router and the vendored `/api/docs` Swagger UI router.

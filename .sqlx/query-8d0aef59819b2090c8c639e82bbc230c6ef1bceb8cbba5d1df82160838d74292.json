@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE admin_otp_challenges SET revoked_at = NOW()\n             WHERE admin_id = $1 AND consumed_at IS NULL\n               AND superseded_at IS NULL AND revoked_at IS NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "8d0aef59819b2090c8c639e82bbc230c6ef1bceb8cbba5d1df82160838d74292"
+}

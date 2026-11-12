@@ -22,6 +22,9 @@ use utoipa_axum::routes;
 use crate::api::ApiDoc;
 use crate::api::health::{self, HealthApiState};
 use crate::api::problem::{ProblemDetails, ProblemResponse};
+use crate::console::ConsoleServices;
+use crate::console::guard::{AdminGuard, require_admin};
+use crate::security::CookieSecurityPolicy;
 
 /// Canonical `/api/v1/openapi.json` URI path.
 pub const OPENAPI_JSON_PATH: &str = "/api/v1/openapi.json";
@@ -159,4 +162,35 @@ pub fn build_api_router(
         schema_policy,
     };
     (router.with_state(state), doc)
+}
+
+/// Builds the production API with only the schema route behind current-admin middleware.
+///
+/// # Panics
+///
+/// Panics only if `serde_json` fails to serialize the static [`OpenApiSpec`] metadata.
+pub fn build_api_router_admin(
+    probe: Arc<dyn HealthProbe>,
+    services: ConsoleServices,
+    cookies: CookieSecurityPolicy,
+) -> (Router, OpenApiSpec) {
+    let (health_router, _) = OpenApiRouter::with_openapi(ApiDoc::openapi())
+        .routes(routes!(health::get_health_handler))
+        .split_for_parts();
+    let (schema_router, _) = OpenApiRouter::with_openapi(ApiDoc::openapi())
+        .routes(routes!(get_openapi_json_handler))
+        .split_for_parts();
+    let doc = build_openapi_document();
+    let schema_router = schema_router.route_layer(axum::middleware::from_fn_with_state(
+        AdminGuard::new(services, cookies),
+        require_admin,
+    ));
+    let frozen_json =
+        serde_json::to_string_pretty(&doc).expect("OpenAPI document serialization is infallible");
+    let state = ApiRouterState {
+        health: HealthApiState::new(probe),
+        frozen_openapi_json: Arc::new(frozen_json),
+        schema_policy: SchemaAccessPolicy::NonProductionOpen,
+    };
+    (health_router.merge(schema_router).with_state(state), doc)
 }

@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE admin_session_states\n             SET revoked_at = created_at, provisioning_key_id = NULL,\n                 provisioning_nonce = NULL, provisioning_ciphertext = NULL\n             WHERE admin_id = $1 AND consumed_at IS NULL AND superseded_at IS NULL\n               AND revoked_at IS NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "9f4bcbecab4ff4072bbd9b25477ffe9fa873bd8c859db47551e5b4bda5b1d403"
+}

@@ -1,6 +1,7 @@
 //! Tankhor web delivery layer (bilingual HTML shell, design tokens, and `/api/v1` transport).
 
 pub mod api;
+pub mod console;
 pub mod design;
 pub mod i18n;
 pub mod middleware;

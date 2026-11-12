@@ -1,0 +1,25 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO admins (\n                 id, phone_key_id, phone_nonce, phone_ciphertext, phone_lookup_digest,\n                 eligibility, security_epoch, created_by, created_at,\n                 enrollment_purpose, enrollment_authorizer, enrollment_authorized_at,\n                 enrollment_expires_at, enrollment_epoch, enrollment_status\n             ) VALUES (\n                 $1, 'identity-only', $2, $3, $4, $5, CAST($6 AS TEXT)::NUMERIC, $1,\n                 '1970-01-01T00:00:00Z', $7, $8, $9, $10, CAST($11 AS TEXT)::NUMERIC, $12\n             )",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Bytea",
+        "Bytea",
+        "Bytea",
+        "Text",
+        "Text",
+        "Text",
+        "Uuid",
+        "Timestamptz",
+        "Timestamptz",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "509726d218578d90ccf9e15a2116cafb5096e6a1084f7d984900bfa65ad33488"
+}

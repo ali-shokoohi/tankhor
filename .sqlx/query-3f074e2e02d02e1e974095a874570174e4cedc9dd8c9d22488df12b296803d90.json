@@ -1,0 +1,27 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO admin_session_states (\n                 id, reference_digest, admin_id, browser_digest, session_id, purpose, phase,\n                 security_epoch, primary_verified_at, created_at, expires_at, credential_revision,\n                 verification_key_id, verification_nonce, verification_ciphertext,\n                 provisioning_key_id, provisioning_nonce, provisioning_ciphertext\n             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8::text::numeric, $9, $10, $11,\n                       $12::text::numeric,\n                       CASE WHEN $13::bytea IS NULL THEN NULL ELSE 'opaque-v1' END,\n                       CASE WHEN $13::bytea IS NULL THEN NULL ELSE '\\x00'::bytea END, $13,\n                       CASE WHEN $14::bytea IS NULL THEN NULL ELSE 'opaque-v1' END,\n                       CASE WHEN $14::bytea IS NULL THEN NULL ELSE '\\x00'::bytea END, $14)\n             ON CONFLICT DO NOTHING",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Bytea",
+        "Uuid",
+        "Bytea",
+        "Uuid",
+        "Text",
+        "Text",
+        "Text",
+        "Timestamptz",
+        "Timestamptz",
+        "Timestamptz",
+        "Text",
+        "Bytea",
+        "Bytea"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "3f074e2e02d02e1e974095a874570174e4cedc9dd8c9d22488df12b296803d90"
+}

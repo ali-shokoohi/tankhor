@@ -9,10 +9,16 @@ publish.workspace = true
 workspace = true
 
 [dependencies]
+admin = { path = "../admin" }
 async-trait.workspace = true
 kernel = { path = "../kernel" }
 sqlx.workspace = true
+time.workspace = true
+uuid.workspace = true
 
 [dev-dependencies]
-testkit = { path = "../testkit", features = ["contracts"] }
+infra-auth = { path = "../infra-auth" }
+infra-sms = { path = "../infra-sms" }
+testkit = { path = "../testkit", features = ["fakes"] }
 tokio.workspace = true
+wiremock.workspace = true

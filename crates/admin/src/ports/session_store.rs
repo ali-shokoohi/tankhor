@@ -88,6 +88,18 @@ impl PendingRecord {
         &self.state
     }
 
+    /// Server-only encrypted verifier envelope for adapter persistence.
+    #[must_use]
+    pub const fn verification_envelope(&self) -> Option<&SecretBytes> {
+        self.verification.as_ref()
+    }
+
+    /// Server-only encrypted provisioning envelope for adapter persistence.
+    #[must_use]
+    pub const fn provisioning_envelope(&self) -> Option<&SecretBytes> {
+        self.provisioning.as_ref()
+    }
+
     /// # Errors
     /// Refuses a wrong reference, binding, current authority, or expired/terminal state.
     pub fn view(

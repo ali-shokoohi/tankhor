@@ -13,7 +13,12 @@ dev-fakes = ["dep:testkit", "testkit/fakes", "admin/mocks", "kernel/mocks"]
 admin = { path = "../admin" }
 axum.workspace = true
 kernel = { path = "../kernel" }
+infra-auth = { path = "../infra-auth" }
+infra-postgres = { path = "../infra-postgres" }
+infra-sms = { path = "../infra-sms" }
+infra-system = { path = "../infra-system" }
 serde_json.workspace = true
+time.workspace = true
 testkit = { path = "../testkit", default-features = false, optional = true }
 thiserror.workspace = true
 tokio.workspace = true
@@ -24,6 +29,14 @@ serde_json.workspace = true
 
 [[test]]
 name = "foundation_fake_serve"
+required-features = ["dev-fakes"]
+
+[[test]]
+name = "integration_access_composition"
+required-features = ["dev-fakes"]
+
+[[test]]
+name = "integration_provision_admin"
 required-features = ["dev-fakes"]
 
 [lints]

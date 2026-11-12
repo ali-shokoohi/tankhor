@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO admin_credentials (\n                 id, admin_id, kind, security_epoch, credential_revision,\n                 webauthn_credential_id, webauthn_public_key,\n                 totp_key_id, totp_nonce, totp_ciphertext\n             ) SELECT $1, $2, $3, $4::text::numeric, $5::text::numeric, $6, $7,\n                      CASE WHEN $8::bytea IS NULL THEN NULL ELSE 'opaque-v1' END,\n                      CASE WHEN $8::bytea IS NULL THEN NULL ELSE '\\x00'::bytea END,\n                      $8\n             FROM admins WHERE id = $2 AND security_epoch = $4::text::numeric\n             ON CONFLICT DO NOTHING",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Text",
+        "Text",
+        "Bytea",
+        "Bytea",
+        "Bytea"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "9ce299715d1c29f3adedb65901ed1c2d5b0dc5ffa7e427cbfc911ce229eda99c"
+}

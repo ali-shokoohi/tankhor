@@ -153,6 +153,11 @@ pub async fn enforce_csrf_middleware(
 pub enum CookieKind {
     /// Short-lived primary-factor / enrollment / ceremony cookie.
     PrimaryCeremony,
+    /// Restricted proof after primary verification; never a console session.
+    PrimaryProof,
+    /// Restricted passkey ceremony capability.
+    PasskeyCeremony,
+    TotpCeremony,
     /// Full verified two-factor administrator session cookie.
     AdminSession,
 }
@@ -163,8 +168,14 @@ impl CookieKind {
     pub const fn cookie_name(self, policy: CookieSecurityPolicy) -> &'static str {
         match (self, policy.use_host_prefix) {
             (Self::PrimaryCeremony, true) => "__Host-tankhor_admin_ceremony",
+            (Self::PrimaryProof, true) => "__Host-tankhor_admin_proof",
+            (Self::PasskeyCeremony, true) => "__Host-tankhor_admin_passkey",
+            (Self::TotpCeremony, true) => "__Host-tankhor_admin_totp",
             (Self::AdminSession, true) => "__Host-tankhor_admin_session",
             (Self::PrimaryCeremony, false) => "tankhor_dev_admin_ceremony",
+            (Self::PrimaryProof, false) => "tankhor_dev_admin_proof",
+            (Self::PasskeyCeremony, false) => "tankhor_dev_admin_passkey",
+            (Self::TotpCeremony, false) => "tankhor_dev_admin_totp",
             (Self::AdminSession, false) => "tankhor_dev_admin_session",
         }
     }

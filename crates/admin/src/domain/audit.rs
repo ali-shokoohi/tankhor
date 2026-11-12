@@ -127,6 +127,18 @@ pub struct ScheduledMetadata {
     executed_at: OffsetDateTime,
 }
 
+impl ScheduledMetadata {
+    #[must_use]
+    pub const fn scheduled_at(&self) -> OffsetDateTime {
+        self.scheduled_at
+    }
+
+    #[must_use]
+    pub const fn executed_at(&self) -> OffsetDateTime {
+        self.executed_at
+    }
+}
+
 impl AuditMetadata {
     #[must_use]
     pub const fn scheduled(

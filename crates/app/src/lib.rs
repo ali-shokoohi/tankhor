@@ -7,5 +7,6 @@ pub mod composition;
 pub mod config;
 pub mod foundation;
 pub mod openapi;
+pub mod provision_admin;
 pub mod serve;
 pub mod transport_policy;

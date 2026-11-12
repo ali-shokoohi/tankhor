@@ -30,6 +30,15 @@ struct ActivePostgresTx {
 }
 
 impl PostgresUnitOfWork {
+    /// Constructs a lazy PostgreSQL pool without opening a database connection.
+    ///
+    /// # Errors
+    /// Returns an error when the database URL or pool configuration is invalid.
+    pub fn connect_lazy(database_url: &str) -> Result<Self, sqlx::Error> {
+        let pool = sqlx::postgres::PgPoolOptions::new().connect_lazy(database_url)?;
+        Ok(Self::new(pool))
+    }
+
     /// Constructs a [`PostgresUnitOfWork`] owning a new logical [`StoreId`].
     #[must_use]
     pub fn new(pool: PgPool) -> Self {

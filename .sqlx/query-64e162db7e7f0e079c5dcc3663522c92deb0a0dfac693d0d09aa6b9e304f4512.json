@@ -1,0 +1,150 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT s.id, s.admin_id, s.security_epoch::text AS \"epoch!\",\n                    s.primary_verified, s.authenticated_factor, s.issued_at, s.expires_at,\n                    s.idle_timeout_seconds, s.last_activity_at, s.revoked_at,\n                    a.eligibility, a.security_epoch::text AS \"admin_epoch!\"\n             FROM admin_sessions s JOIN admins a ON a.id = s.admin_id\n             WHERE s.token_digest = $1 FOR UPDATE OF s, a",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "admin_sessions",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "admin_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "admin_sessions",
+            "name": "admin_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "epoch!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "primary_verified",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "admin_sessions",
+            "name": "primary_verified"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "authenticated_factor",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "admin_sessions",
+            "name": "authenticated_factor"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "issued_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "admin_sessions",
+            "name": "issued_at"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "expires_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "admin_sessions",
+            "name": "expires_at"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "idle_timeout_seconds",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "admin_sessions",
+            "name": "idle_timeout_seconds"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "last_activity_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "admin_sessions",
+            "name": "last_activity_at"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "revoked_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "admin_sessions",
+            "name": "revoked_at"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "eligibility",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "admins",
+            "name": "eligibility"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "admin_epoch!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Bytea"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      null,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      null
+    ]
+  },
+  "hash": "64e162db7e7f0e079c5dcc3663522c92deb0a0dfac693d0d09aa6b9e304f4512"
+}

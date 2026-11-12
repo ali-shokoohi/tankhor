@@ -1,0 +1,25 @@
+[package]
+name = "infra-sms"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+admin = { path = "../admin" }
+async-trait.workspace = true
+kernel = { path = "../kernel" }
+reqwest.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+time.workspace = true
+
+[dev-dependencies]
+async-trait.workspace = true
+serde_json.workspace = true
+testkit = { path = "../testkit" }
+tokio.workspace = true
+wiremock.workspace = true

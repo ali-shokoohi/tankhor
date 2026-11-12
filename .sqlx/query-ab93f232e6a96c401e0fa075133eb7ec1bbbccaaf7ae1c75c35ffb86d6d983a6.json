@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE admins SET enrollment_status = 'consumed'\n             WHERE id = $1 AND security_epoch = CAST($2 AS TEXT)::NUMERIC\n               AND eligibility = $3 AND enrollment_purpose = $4\n               AND enrollment_authorizer = $5 AND enrollment_authorized_at = $6\n               AND enrollment_expires_at = $7 AND enrollment_epoch = CAST($2 AS TEXT)::NUMERIC\n               AND enrollment_status = 'pending' AND enrollment_authorized_at <= $8\n               AND enrollment_expires_at > $8",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Text",
+        "Uuid",
+        "Timestamptz",
+        "Timestamptz",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ab93f232e6a96c401e0fa075133eb7ec1bbbccaaf7ae1c75c35ffb86d6d983a6"
+}

@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="{{ lang }}" dir="{{ dir }}">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{{ heading }}</title></head>
+<body><main>
+<h1>{{ heading }}</h1>
+<output id="passkey-options">{{ public_options }}</output>
+<p id="passkey-status" role="status" aria-live="polite"></p>
+<form method="post" action="/console/sign-in/passkey/finish">
+  <input type="hidden" name="credential" value="{{ credential }}">
+  <input type="hidden" name="target" value="{{ target }}">
+  <input type="hidden" name="session" value="{{ session }}">
+  <input type="hidden" name="epoch" value="{{ epoch }}">
+  <input type="hidden" name="credential_revision" value="{{ credential_revision }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf }}">
+  <input type="hidden" name="lang" value="{{ lang }}">
+  <input type="hidden" name="response" value="">
+  <button type="submit">{{ heading }}</button>
+</form>
+</main><script src="/console/static/passkey.js" defer></script></body>
+</html>

@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="{{ lang }}" dir="{{ dir }}">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{{ heading }}</title></head>
+<body><main>
+<h1>{{ heading }}</h1>
+<noscript><p role="note">{{ guidance }}</p></noscript>
+{% if passkey_available %}
+<form method="post" action="/console/enrol/passkey/begin">
+  {% if let Some(csrf) = csrf %}<input type="hidden" name="csrf_token" value="{{ csrf }}">{% endif %}
+  <input type="hidden" name="target" value="{{ target }}"><input type="hidden" name="session" value="{{ session }}">
+  <input type="hidden" name="epoch" value="{{ epoch }}"><input type="hidden" name="purpose" value="{{ purpose }}"><input type="hidden" name="lang" value="{{ lang }}">
+  <button type="submit">{{ passkey }}</button>
+</form>
+{% endif %}
+{% if totp_available %}
+<form method="post" action="/console/enrol/totp/begin">
+  {% if let Some(csrf) = csrf %}<input type="hidden" name="csrf_token" value="{{ csrf }}">{% endif %}
+  <input type="hidden" name="target" value="{{ target }}"><input type="hidden" name="session" value="{{ session }}">
+  <input type="hidden" name="epoch" value="{{ epoch }}"><input type="hidden" name="purpose" value="{{ purpose }}"><input type="hidden" name="lang" value="{{ lang }}">
+  <button type="submit">{{ totp }}</button>
+</form>
+{% endif %}
+</main></body>
+</html>

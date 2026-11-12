@@ -1,0 +1,167 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, admin_id, browser_digest, purpose, security_epoch::text AS \"epoch!\",\n                code_digest, issued_at, expires_at, failed_attempts, max_attempts,\n                consumed_at, superseded_at, revoked_at\n         FROM admin_otp_challenges WHERE id = $1 FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "admin_otp_challenges",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "admin_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "admin_otp_challenges",
+            "name": "admin_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "browser_digest",
+        "type_info": "Bytea",
+        "origin": {
+          "Table": {
+            "table": "admin_otp_challenges",
+            "name": "browser_digest"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "purpose",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "admin_otp_challenges",
+            "name": "purpose"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "epoch!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "code_digest",
+        "type_info": "Bytea",
+        "origin": {
+          "Table": {
+            "table": "admin_otp_challenges",
+            "name": "code_digest"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "issued_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "admin_otp_challenges",
+            "name": "issued_at"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "expires_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "admin_otp_challenges",
+            "name": "expires_at"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "failed_attempts",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "admin_otp_challenges",
+            "name": "failed_attempts"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "max_attempts",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "admin_otp_challenges",
+            "name": "max_attempts"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "consumed_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "admin_otp_challenges",
+            "name": "consumed_at"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "superseded_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "admin_otp_challenges",
+            "name": "superseded_at"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "revoked_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "admin_otp_challenges",
+            "name": "revoked_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      null,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "a588b2e146a7a42fe04694bbfba094eadd3141c1905530dd28207034b29e9089"
+}

@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="{{ lang }}" dir="{{ dir }}">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{{ heading }}</title></head>
+<body><main>
+<h1>{{ heading }}</h1>
+<output id="provisioning">{{ provisioning }}</output>
+<form method="post" action="/console/enrol/totp/finish">
+  <input type="hidden" name="credential" value="{{ credential }}">
+  <input type="hidden" name="target" value="{{ target }}"><input type="hidden" name="session" value="{{ session }}">
+  <input type="hidden" name="epoch" value="{{ epoch }}"><input type="hidden" name="credential_revision" value="1">
+  <input type="hidden" name="purpose" value="{{ purpose }}"><input type="hidden" name="csrf_token" value="{{ csrf }}">
+  <input type="hidden" name="lang" value="{{ lang }}">
+  <label>{{ heading }}<input type="text" name="code" inputmode="numeric" autocomplete="one-time-code" required></label>
+  <button type="submit">{{ heading }}</button>
+</form>
+</main></body>
+</html>

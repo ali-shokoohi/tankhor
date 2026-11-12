@@ -16,14 +16,16 @@ use admin::ports::health_probe::HealthProbe;
 use axum::Router;
 use axum::middleware;
 use kernel::locale::Locale;
-use web::api::docs::build_api_and_docs_router;
+use web::api::docs::{build_api_and_docs_router, build_api_and_docs_router_admin};
 use web::api::openapi::SchemaAccessPolicy;
+use web::console::{ConsoleServices, access_router};
 use web::i18n::{ConsoleCatalog, I18nError};
 use web::middleware::body_limit::{BodyLimitState, enforce_body_limit_middleware};
 use web::middleware::concurrency_limit::{
     ConcurrencyLimitState, enforce_concurrency_limit_middleware,
 };
 use web::middleware::csp::apply_csp_middleware;
+use web::security::CookieSecurityPolicy;
 use web::security::{CsrfProtectionState, SecurityPolicyError, enforce_csrf_middleware};
 use web::shell::shell_router;
 
@@ -52,6 +54,7 @@ pub fn build_foundation_router(
     transport_policy: TransportPolicy,
     expected_origin: &str,
     health_probe: Arc<dyn HealthProbe>,
+    access_services: ConsoleServices,
 ) -> Result<Router, FoundationError> {
     let csrf_catalog = ConsoleCatalog::load_authoritative()?;
     let shell_catalog = ConsoleCatalog::load_authoritative()?;
@@ -65,11 +68,26 @@ pub fn build_foundation_router(
 
     let csrf_state = CsrfProtectionState::new(expected_origin, csrf_catalog, Locale::Fa)?;
     let console = shell_router(shell_catalog).layer(middleware::from_fn_with_state(
-        csrf_state,
+        csrf_state.clone(),
         enforce_csrf_middleware,
     ));
+    let cookies = if environment == RuntimeEnvironment::Production {
+        CookieSecurityPolicy::production()
+    } else {
+        CookieSecurityPolicy::loopback_insecure_dev()
+    };
+    let access = access_router(
+        access_services.clone(),
+        ConsoleCatalog::load_authoritative()?,
+        csrf_state,
+        cookies,
+    );
 
-    let (api_and_docs, _doc) = build_api_and_docs_router(health_probe, schema_policy);
+    let (api_and_docs, _doc) = if environment == RuntimeEnvironment::Production {
+        build_api_and_docs_router_admin(health_probe, access_services, cookies)
+    } else {
+        build_api_and_docs_router(health_probe, schema_policy)
+    };
 
     let body_limit_state = BodyLimitState::new(
         transport_policy.max_body_bytes(),
@@ -80,6 +98,7 @@ pub fn build_foundation_router(
         ConcurrencyLimitState::new(transport_policy.max_inflight(), shared_catalog, Locale::Fa);
 
     let router = console
+        .merge(access)
         .merge(api_and_docs)
         .layer(middleware::from_fn_with_state(
             body_limit_state,

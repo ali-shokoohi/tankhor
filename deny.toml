@@ -17,6 +17,7 @@ unmaintained = "all"
 # maintained Testcontainers dependency graph is available. Other advisories remain enforced.
 ignore = [
     { id = "RUSTSEC-2026-0440", reason = "Owner-approved testcontainers 0.27.3 fixture-tooling exception: astral-tokio-tar is unmaintained; no patched version. Review on compatible maintained replacement availability." },
+    { id = "RUSTSEC-2023-0071", reason = "Owner-approved scoped exception, 2026-11-12: WebAuthn reaches RSA only for public-key signature verification; no server RSA private-key decryption or signing exists. crypto-glue 0.2.2 cannot select patched rsa 0.10.0 because its removed sha2 feature is requested. Remove on a compatible crypto-glue release using rsa >=0.10.0." },
 ]
 
 [licenses]

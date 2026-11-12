@@ -10,14 +10,14 @@ CREATE TABLE admins (
     eligibility TEXT NOT NULL CHECK (
         eligibility IN ('invited', 'active', 'recovering', 'deactivated', 'revoked')
     ),
-    security_epoch BIGINT NOT NULL CHECK (security_epoch >= 0),
+    security_epoch NUMERIC(20,0) NOT NULL CHECK (security_epoch BETWEEN 0 AND 18446744073709551615),
     created_by UUID NOT NULL,
     created_at TIMESTAMPTZ NOT NULL,
     enrollment_purpose TEXT CHECK (enrollment_purpose IN ('addition', 'recovery')),
     enrollment_authorizer UUID,
     enrollment_authorized_at TIMESTAMPTZ,
     enrollment_expires_at TIMESTAMPTZ,
-    enrollment_epoch BIGINT CHECK (enrollment_epoch >= 0),
+    enrollment_epoch NUMERIC(20,0) CHECK (enrollment_epoch BETWEEN 0 AND 18446744073709551615),
     enrollment_status TEXT CHECK (enrollment_status IN ('pending', 'consumed', 'revoked')),
     CONSTRAINT admins_enrollment_complete CHECK (
         num_nonnulls(
@@ -29,13 +29,16 @@ CREATE TABLE admins (
         enrollment_expires_at IS NULL OR enrollment_expires_at > enrollment_authorized_at
     ),
     CONSTRAINT admins_enrollment_epoch_current CHECK (
-        enrollment_epoch IS NULL OR enrollment_epoch = security_epoch
+        enrollment_epoch IS NULL
+        OR enrollment_status <> 'pending'
+        OR enrollment_epoch = security_epoch
     ),
     CONSTRAINT admins_enrollment_not_self CHECK (
         enrollment_authorizer IS NULL OR enrollment_authorizer <> id
     ),
     CONSTRAINT admins_enrollment_matches_eligibility CHECK (
         enrollment_purpose IS NULL
+        OR enrollment_status <> 'pending'
         OR (eligibility = 'invited' AND enrollment_purpose = 'addition')
         OR (eligibility = 'recovering' AND enrollment_purpose = 'recovery')
     )
@@ -50,9 +53,9 @@ CREATE TABLE admin_credentials (
     totp_key_id TEXT,
     totp_nonce BYTEA,
     totp_ciphertext BYTEA,
-    credential_revision BIGINT NOT NULL CHECK (credential_revision > 0),
-    security_epoch BIGINT NOT NULL CHECK (security_epoch >= 0),
-    last_totp_step BIGINT CHECK (last_totp_step >= 0),
+    credential_revision NUMERIC(20,0) NOT NULL CHECK (credential_revision BETWEEN 1 AND 18446744073709551615),
+    security_epoch NUMERIC(20,0) NOT NULL CHECK (security_epoch BETWEEN 0 AND 18446744073709551615),
+    last_totp_step NUMERIC(20,0) CHECK (last_totp_step BETWEEN 0 AND 18446744073709551615),
     revoked_at TIMESTAMPTZ,
     CONSTRAINT admin_credentials_kind_material_xor CHECK (
         (
@@ -97,13 +100,18 @@ CREATE TABLE admin_sessions (
     id UUID PRIMARY KEY,
     token_digest BYTEA NOT NULL UNIQUE CHECK (octet_length(token_digest) = 32),
     admin_id UUID NOT NULL REFERENCES admins(id) ON DELETE RESTRICT,
-    security_epoch BIGINT NOT NULL CHECK (security_epoch >= 0),
-    authenticated_factor TEXT NOT NULL CHECK (authenticated_factor IN ('passkey', 'totp')),
+    security_epoch NUMERIC(20,0) NOT NULL CHECK (security_epoch BETWEEN 0 AND 18446744073709551615),
+    primary_verified BOOLEAN NOT NULL DEFAULT TRUE,
+    authenticated_factor TEXT CHECK (authenticated_factor IN ('passkey', 'totp')),
     issued_at TIMESTAMPTZ NOT NULL,
     expires_at TIMESTAMPTZ NOT NULL,
+    idle_timeout_seconds BIGINT NOT NULL DEFAULT 120 CHECK (idle_timeout_seconds > 0),
     last_activity_at TIMESTAMPTZ NOT NULL,
     revoked_at TIMESTAMPTZ,
     CONSTRAINT admin_sessions_finite_expiry CHECK (expires_at > issued_at),
+    CONSTRAINT admin_sessions_complete_authentication CHECK (
+        primary_verified = (authenticated_factor IS NOT NULL)
+    ),
     CONSTRAINT admin_sessions_activity_not_before_issue CHECK (last_activity_at >= issued_at)
 );
 
@@ -119,14 +127,14 @@ CREATE TABLE admin_session_states (
     session_id UUID NOT NULL,
     purpose TEXT NOT NULL CHECK (purpose IN ('sign_in', 'addition', 'recovery')),
     phase TEXT NOT NULL CHECK (phase IN ('primary_verified', 'passkey', 'totp')),
-    security_epoch BIGINT NOT NULL CHECK (security_epoch >= 0),
+    security_epoch NUMERIC(20,0) NOT NULL CHECK (security_epoch BETWEEN 0 AND 18446744073709551615),
     primary_verified_at TIMESTAMPTZ NOT NULL,
     created_at TIMESTAMPTZ NOT NULL,
     expires_at TIMESTAMPTZ NOT NULL,
     consumed_at TIMESTAMPTZ,
     superseded_at TIMESTAMPTZ,
     revoked_at TIMESTAMPTZ,
-    credential_revision BIGINT CHECK (credential_revision > 0),
+    credential_revision NUMERIC(20,0) CHECK (credential_revision BETWEEN 1 AND 18446744073709551615),
     verification_key_id TEXT,
     verification_nonce BYTEA,
     verification_ciphertext BYTEA,
@@ -190,7 +198,7 @@ CREATE TABLE admin_otp_challenges (
     admin_id UUID NOT NULL REFERENCES admins(id) ON DELETE RESTRICT,
     browser_digest BYTEA NOT NULL CHECK (octet_length(browser_digest) = 32),
     purpose TEXT NOT NULL CHECK (purpose IN ('sign_in', 'addition', 'recovery')),
-    security_epoch BIGINT NOT NULL CHECK (security_epoch >= 0),
+    security_epoch NUMERIC(20,0) NOT NULL CHECK (security_epoch BETWEEN 0 AND 18446744073709551615),
     code_digest BYTEA NOT NULL CHECK (octet_length(code_digest) = 32),
     issued_at TIMESTAMPTZ NOT NULL,
     expires_at TIMESTAMPTZ NOT NULL,

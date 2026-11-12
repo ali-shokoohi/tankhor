@@ -9,7 +9,7 @@ use std::net::SocketAddr;
 
 use tokio::net::TcpListener;
 
-use crate::composition::{CompositionError, compose_foundation};
+use crate::composition::{CompositionError, compose_access, compose_foundation};
 use crate::config::{AppConfig, ConfigError};
 use crate::foundation::{FoundationError, build_foundation_router};
 use crate::transport_policy::{TransportPolicy, TransportPolicyError};
@@ -70,6 +70,7 @@ pub async fn run_from_env() -> Result<(), ServeError> {
 
     // 2. Compose application-wide adapters (no external connections in fake mode).
     let composition = compose_foundation(&config)?;
+    let access = compose_access(&config)?;
 
     // 3. Bind listener and derive expected origin if not explicitly provided.
     let listener = TcpListener::bind(bind_addr).await?;
@@ -83,6 +84,7 @@ pub async fn run_from_env() -> Result<(), ServeError> {
         transport_policy,
         &expected_origin,
         composition.health_probe(),
+        access.services(),
     )?;
 
     // Announce bound address and flush stdout immediately so process supervisors/tests observe readiness.

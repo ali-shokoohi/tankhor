@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE admin_otp_challenges SET consumed_at = $8\n             WHERE id = $1 AND admin_id = $2 AND browser_digest = $3 AND purpose = $4\n               AND security_epoch = $5::text::numeric AND failed_attempts = $6\n               AND failed_attempts < max_attempts AND issued_at <= $7 AND expires_at > $7\n               AND code_digest = $9 AND consumed_at IS NULL\n               AND superseded_at IS NULL AND revoked_at IS NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Bytea",
+        "Text",
+        "Text",
+        "Int4",
+        "Timestamptz",
+        "Timestamptz",
+        "Bytea"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d9cb467a10efee9f63da002b84ca6775c2145a3f72772e439b318440cfb59bd1"
+}

@@ -2,6 +2,7 @@
 
 pub mod bootstrap_admin;
 pub mod console_access;
+pub mod console_services;
 pub mod enrollment;
 pub mod get_enrollment;
 pub mod health;

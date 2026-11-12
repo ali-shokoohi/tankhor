@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE admin_credentials SET last_totp_step = $4::text::numeric\n             WHERE id = $1 AND kind = 'totp' AND security_epoch = $2::text::numeric\n               AND credential_revision = $3::text::numeric AND revoked_at IS NULL\n               AND (last_totp_step IS NULL OR last_totp_step < $4::text::numeric)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d31c3b817edcc1c07ef2935957cbac41ab1a5507ea63fa34682d2c9c062535df"
+}

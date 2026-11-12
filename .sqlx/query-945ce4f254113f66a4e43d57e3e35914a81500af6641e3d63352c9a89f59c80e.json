@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE admins SET eligibility = 'active'\n             WHERE id = $1 AND security_epoch = CAST($2 AS TEXT)::NUMERIC",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "945ce4f254113f66a4e43d57e3e35914a81500af6641e3d63352c9a89f59c80e"
+}

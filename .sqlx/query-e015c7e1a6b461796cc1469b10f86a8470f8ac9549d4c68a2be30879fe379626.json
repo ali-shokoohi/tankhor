@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE admins SET eligibility = $4, security_epoch = CAST($3 AS TEXT)::NUMERIC,\n                    enrollment_status = CASE WHEN enrollment_status IS NULL\n                        THEN NULL ELSE 'revoked' END\n             WHERE id = $1 AND security_epoch = CAST($2 AS TEXT)::NUMERIC\n               AND CAST($3 AS TEXT)::NUMERIC > security_epoch",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "e015c7e1a6b461796cc1469b10f86a8470f8ac9549d4c68a2be30879fe379626"
+}

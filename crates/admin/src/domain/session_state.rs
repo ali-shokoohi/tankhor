@@ -80,6 +80,18 @@ impl SessionState {
     pub const fn last_activity_at(&self) -> OffsetDateTime {
         self.last_activity_at
     }
+    #[must_use]
+    pub const fn issued_at(&self) -> OffsetDateTime {
+        self.issued_at
+    }
+    #[must_use]
+    pub const fn expires_at(&self) -> OffsetDateTime {
+        self.expires_at
+    }
+    #[must_use]
+    pub const fn idle_timeout(&self) -> Duration {
+        self.idle_timeout
+    }
 
     /// # Errors
     /// Refuses incomplete authentication, wrong/ineligible admin, stale epoch,

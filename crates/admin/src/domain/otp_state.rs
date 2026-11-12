@@ -123,6 +123,16 @@ impl OtpState {
         self.failed_attempts
     }
 
+    #[must_use]
+    pub const fn max_attempts(&self) -> u32 {
+        self.max_attempts
+    }
+
+    #[must_use]
+    pub const fn issued_at(&self) -> OffsetDateTime {
+        self.issued_at
+    }
+
     /// # Errors
     /// Rejects terminal state, a changed binding or any reset/changed attempt budget.
     pub fn supersede_with(&mut self, next: &Self) -> Result<(), DomainError> {

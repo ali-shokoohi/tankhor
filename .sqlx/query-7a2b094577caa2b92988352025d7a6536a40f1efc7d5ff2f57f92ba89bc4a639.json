@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO admin_otp_challenges (\n                 id, admin_id, browser_digest, purpose, security_epoch, code_digest,\n                 issued_at, expires_at, failed_attempts, max_attempts,\n                 submission_category, predecessor_id\n             ) VALUES ($1, $2, $3, $4, $5::text::numeric, $6, $7, $8, $9, $10,\n                       'unknown', $11)\n             ON CONFLICT DO NOTHING",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Bytea",
+        "Text",
+        "Text",
+        "Bytea",
+        "Timestamptz",
+        "Timestamptz",
+        "Int4",
+        "Int4",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7a2b094577caa2b92988352025d7a6536a40f1efc7d5ff2f57f92ba89bc4a639"
+}

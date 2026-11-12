@@ -1,0 +1,114 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, eligibility, security_epoch::text AS \"epoch!\",\n                enrollment_purpose, enrollment_authorizer, enrollment_authorized_at,\n                enrollment_expires_at, enrollment_epoch::text AS enrollment_epoch,\n                enrollment_status\n         FROM admins WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "admins",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "eligibility",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "admins",
+            "name": "eligibility"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "epoch!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "enrollment_purpose",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "admins",
+            "name": "enrollment_purpose"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "enrollment_authorizer",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "admins",
+            "name": "enrollment_authorizer"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "enrollment_authorized_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "admins",
+            "name": "enrollment_authorized_at"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "enrollment_expires_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "admins",
+            "name": "enrollment_expires_at"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "enrollment_epoch",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "enrollment_status",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "admins",
+            "name": "enrollment_status"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      null,
+      true,
+      true,
+      true,
+      true,
+      null,
+      true
+    ]
+  },
+  "hash": "23068cb0f7a754070807d1abf061ed89abcc653c875daa8d6e106c610f6cb987"
+}

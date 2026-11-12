@@ -1,0 +1,296 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT s.id, s.admin_id AS \"admin_id!\",\n                        s.browser_digest, s.session_id, s.purpose, s.phase,\n                        s.security_epoch::text AS \"epoch!\", s.primary_verified_at,\n                        s.created_at, s.expires_at, s.consumed_at, s.superseded_at, s.revoked_at,\n                        s.credential_revision::text AS credential_revision,\n                        s.verification_ciphertext, s.provisioning_ciphertext,\n                        s.provisioning_presented_at, a.eligibility,\n                        a.security_epoch::text AS \"admin_epoch!\",\n                        a.enrollment_purpose, a.enrollment_authorizer,\n                        a.enrollment_authorized_at, a.enrollment_expires_at,\n                        a.enrollment_epoch::text AS enrollment_epoch, a.enrollment_status\n                 FROM admin_session_states s JOIN admins a ON a.id = s.admin_id\n                 WHERE s.reference_digest = $1 FOR UPDATE OF s, a",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "admin_session_states",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "admin_id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "admin_session_states",
+            "name": "admin_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "browser_digest",
+        "type_info": "Bytea",
+        "origin": {
+          "Table": {
+            "table": "admin_session_states",
+            "name": "browser_digest"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "session_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "admin_session_states",
+            "name": "session_id"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "purpose",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "admin_session_states",
+            "name": "purpose"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "phase",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "admin_session_states",
+            "name": "phase"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "epoch!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "primary_verified_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "admin_session_states",
+            "name": "primary_verified_at"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "admin_session_states",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "expires_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "admin_session_states",
+            "name": "expires_at"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "consumed_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "admin_session_states",
+            "name": "consumed_at"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "superseded_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "admin_session_states",
+            "name": "superseded_at"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "revoked_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "admin_session_states",
+            "name": "revoked_at"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "credential_revision",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 14,
+        "name": "verification_ciphertext",
+        "type_info": "Bytea",
+        "origin": {
+          "Table": {
+            "table": "admin_session_states",
+            "name": "verification_ciphertext"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "provisioning_ciphertext",
+        "type_info": "Bytea",
+        "origin": {
+          "Table": {
+            "table": "admin_session_states",
+            "name": "provisioning_ciphertext"
+          }
+        }
+      },
+      {
+        "ordinal": 16,
+        "name": "provisioning_presented_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "admin_session_states",
+            "name": "provisioning_presented_at"
+          }
+        }
+      },
+      {
+        "ordinal": 17,
+        "name": "eligibility",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "admins",
+            "name": "eligibility"
+          }
+        }
+      },
+      {
+        "ordinal": 18,
+        "name": "admin_epoch!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 19,
+        "name": "enrollment_purpose",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "admins",
+            "name": "enrollment_purpose"
+          }
+        }
+      },
+      {
+        "ordinal": 20,
+        "name": "enrollment_authorizer",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "admins",
+            "name": "enrollment_authorizer"
+          }
+        }
+      },
+      {
+        "ordinal": 21,
+        "name": "enrollment_authorized_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "admins",
+            "name": "enrollment_authorized_at"
+          }
+        }
+      },
+      {
+        "ordinal": 22,
+        "name": "enrollment_expires_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "admins",
+            "name": "enrollment_expires_at"
+          }
+        }
+      },
+      {
+        "ordinal": 23,
+        "name": "enrollment_epoch",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 24,
+        "name": "enrollment_status",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "admins",
+            "name": "enrollment_status"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Bytea"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      null,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      null,
+      true,
+      true,
+      true,
+      false,
+      null,
+      true,
+      true,
+      true,
+      true,
+      null,
+      true
+    ]
+  },
+  "hash": "2bcb10f6dd99bf117e8de0626ddf72ca5b290a962e45a165c3d27d3bc4be44c9"
+}

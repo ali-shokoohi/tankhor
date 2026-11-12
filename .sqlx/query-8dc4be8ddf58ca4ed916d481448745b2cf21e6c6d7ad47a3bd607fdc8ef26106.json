@@ -1,0 +1,79 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE admin_rate_limits SET count = count + 1\n                         WHERE scope = $1 AND purpose = $2 AND bucket_digest = $3\n                           AND window_started_at = $4 AND count < 9223372036854775807\n                         RETURNING window_started_at, window_expires_at,\n                                   count, max_attempts, blocked_until",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "window_started_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "admin_rate_limits",
+            "name": "window_started_at"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "window_expires_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "admin_rate_limits",
+            "name": "window_expires_at"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "count",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "admin_rate_limits",
+            "name": "count"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "max_attempts",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "admin_rate_limits",
+            "name": "max_attempts"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "blocked_until",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "admin_rate_limits",
+            "name": "blocked_until"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Bytea",
+        "Timestamptz"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "8dc4be8ddf58ca4ed916d481448745b2cf21e6c6d7ad47a3bd607fdc8ef26106"
+}

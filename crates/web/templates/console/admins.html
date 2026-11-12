@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="{{ lang }}" dir="{{ dir }}">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{{ heading }}</title></head>
+<body><main>
+<h1>{{ heading }}</h1>
+{% if let Some(csrf) = csrf %}
+<form method="post" action="/console/admins/invite">
+  <input type="hidden" name="csrf_token" value="{{ csrf }}">
+  <input type="hidden" name="lang" value="{{ lang }}">
+  <label>{{ invite_phone }}<input type="tel" name="phone" required autocomplete="off"></label>
+  <button type="submit">{{ invite_submit }}</button>
+</form>
+{% endif %}
+{% if admins.is_empty() %}<p>{{ empty }}</p>{% else %}
+<ul>{% for admin in admins %}<li><code>{{ admin }}</code></li>{% endfor %}</ul>
+{% endif %}
+</main></body>
+</html>

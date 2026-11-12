@@ -1,0 +1,19 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO admin_rate_limits (\n                     scope, purpose, bucket_digest, window_started_at, window_expires_at,\n                     count, max_attempts, blocked_until\n                 ) VALUES ($1, $2, $3, $4, $5, 1, $6, NULL)\n                 ON CONFLICT DO NOTHING",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Bytea",
+        "Timestamptz",
+        "Timestamptz",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c13db916ef209f9308f145c1616599c76712b93778ad913e586276e643464060"
+}

@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT submission_category FROM admin_otp_challenges WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "submission_category",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "admin_otp_challenges",
+            "name": "submission_category"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "b7c81f45d9d7726fdd0208cd2ee7a135f38569f3fbfe7320f0da1335b60df6f5"
+}

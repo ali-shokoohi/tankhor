@@ -129,6 +129,10 @@ impl AdminState {
         self.epoch
     }
     #[must_use]
+    pub const fn eligibility(&self) -> Eligibility {
+        self.eligibility
+    }
+    #[must_use]
     pub const fn is_eligible(&self) -> bool {
         matches!(self.eligibility, Eligibility::Active)
     }

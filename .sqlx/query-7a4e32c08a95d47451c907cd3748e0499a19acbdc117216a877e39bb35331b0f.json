@@ -1,0 +1,27 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE admins AS target SET\n                 enrollment_purpose = $2, enrollment_authorizer = $3,\n                 enrollment_authorized_at = $4, enrollment_expires_at = $5,\n                 enrollment_epoch = CAST($6 AS TEXT)::NUMERIC, enrollment_status = 'pending'\n             WHERE target.id = $1\n               AND target.security_epoch = CAST($6 AS TEXT)::NUMERIC\n               AND target.eligibility = $7\n               AND EXISTS (\n                   SELECT 1 FROM admins AS actor\n                   WHERE actor.id = $3 AND actor.eligibility = 'active' AND actor.id <> target.id\n               )\n               AND (\n                   (NOT $8 AND target.enrollment_purpose IS NULL)\n                   OR ($8 AND target.enrollment_purpose = $9\n                       AND target.enrollment_authorizer = $10\n                       AND target.enrollment_authorized_at = $11\n                       AND target.enrollment_expires_at = $12\n                       AND target.enrollment_epoch = CAST($13 AS TEXT)::NUMERIC\n                       AND target.enrollment_status = $14)\n               )",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Uuid",
+        "Timestamptz",
+        "Timestamptz",
+        "Text",
+        "Text",
+        "Bool",
+        "Text",
+        "Uuid",
+        "Timestamptz",
+        "Timestamptz",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7a4e32c08a95d47451c907cd3748e0499a19acbdc117216a877e39bb35331b0f"
+}
