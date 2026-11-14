@@ -4,14 +4,16 @@ use std::io;
 use std::process::ExitCode;
 
 use app::config::AppConfig;
+use app::migrate::migrate_from_env;
 use app::openapi::write_openapi_json;
 use app::provision_admin::provision_from_env;
+use app::seed_foundation::seed_foundation_from_env;
 use app::serve::run_from_env;
 
 fn main() -> ExitCode {
     let mut args = std::env::args().skip(1);
     let Some(command) = args.next() else {
-        eprintln!("usage: app <openapi|serve|provision-admin>");
+        eprintln!("usage: app <openapi|serve|provision-admin|migrate|seed-foundation>");
         return ExitCode::from(2);
     };
 
@@ -22,6 +24,46 @@ fn main() -> ExitCode {
         }
         return match write_openapi_json(io::stdout().lock()) {
             Ok(()) => ExitCode::SUCCESS,
+            Err(err) => {
+                eprintln!("{err}");
+                ExitCode::FAILURE
+            }
+        };
+    }
+
+    if command == "migrate" {
+        let runtime = match tokio::runtime::Builder::new_multi_thread()
+            .enable_all()
+            .build()
+        {
+            Ok(rt) => rt,
+            Err(err) => {
+                eprintln!("failed to initialize async runtime: {err}");
+                return ExitCode::FAILURE;
+            }
+        };
+        return match runtime.block_on(migrate_from_env(args.collect::<Vec<_>>())) {
+            Ok(()) => ExitCode::SUCCESS,
+            Err(err) => {
+                eprintln!("{err}");
+                ExitCode::FAILURE
+            }
+        };
+    }
+
+    if command == "seed-foundation" {
+        let runtime = match tokio::runtime::Builder::new_multi_thread()
+            .enable_all()
+            .build()
+        {
+            Ok(rt) => rt,
+            Err(err) => {
+                eprintln!("failed to initialize async runtime: {err}");
+                return ExitCode::FAILURE;
+            }
+        };
+        return match runtime.block_on(seed_foundation_from_env(args.collect::<Vec<_>>())) {
+            Ok(_) => ExitCode::SUCCESS,
             Err(err) => {
                 eprintln!("{err}");
                 ExitCode::FAILURE

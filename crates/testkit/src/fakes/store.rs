@@ -28,6 +28,20 @@ pub struct FakeState {
     pub admins: BTreeMap<kernel::ids::AdminId, admin::domain::admin_state::AdminState>,
     pub admin_identities: BTreeMap<[u8; 32], kernel::ids::AdminId>,
     pub audit_entries: BTreeMap<kernel::ids::AuditId, admin::domain::audit::AuditEntry>,
+    pub settings: BTreeMap<
+        admin::domain::settings::SettingKey,
+        admin::ports::settings_repository::SettingRecord,
+    >,
+    pub setting_history: BTreeMap<
+        admin::domain::settings::SettingKey,
+        Vec<admin::ports::settings_repository::SettingVersion>,
+    >,
+    pub flags: BTreeMap<admin::domain::flag::FlagKey, admin::ports::flag_repository::FlagRecord>,
+    pub flag_history:
+        BTreeMap<admin::domain::flag::FlagKey, Vec<admin::ports::flag_repository::FlagVersion>>,
+    pub changes: BTreeMap<kernel::ids::ChangeId, admin::domain::change_revision::ChangeDraft>,
+    pub previews: BTreeMap<kernel::ids::PreviewId, admin::domain::change_preview::PreviewReport>,
+    pub approvals: BTreeMap<kernel::ids::ApprovalId, admin::domain::change_approval::Approval>,
     pub scratch: BTreeMap<String, String>,
     pub repositories_scratch: BTreeMap<String, BTreeMap<String, String>>,
     pub health_ready: bool,

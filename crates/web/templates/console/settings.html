@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="{{ lang }}" dir="{{ dir }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ heading }}</title>
+</head>
+<body>
+  <main>
+    <h1>{{ heading }}</h1>
+    <ul class="tk-settings-list">
+      {% for row in rows %}
+      {% include "partials/setting_row.html" %}
+      {% endfor %}
+    </ul>
+  </main>
+</body>
+</html>

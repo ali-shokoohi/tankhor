@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO change_preview_evidence (\n                     preview_id, evidence_index, population, known_count\n                 ) VALUES ($1, $2, $3, $4)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int4",
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "fe1f30d437627e7e46f6b08353ed7f9af1b046cfb52ccef4c4e04d3f8201daec"
+}

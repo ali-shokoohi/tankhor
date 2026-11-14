@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO change_drafts (\n                 id, setting_key, flag_key, baseline_setting_version, baseline_flag_version,\n                 head_revision_id, edit_counter, creator_id, created_at\n             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Int8",
+        "Uuid",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "557b4c9a00e0ba7fd46d438fb2941d4d79ad8bd371acc9c2e59044e5a175663f"
+}

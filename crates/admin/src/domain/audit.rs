@@ -3,7 +3,7 @@
 
 use kernel::{
     error::{DomainError, ErrorCode},
-    ids::{AdminId, AuditId, PublicationId},
+    ids::{AdminId, AuditId, ChangeId, PublicationId, RevisionId, VersionId},
 };
 use std::str::FromStr;
 use time::OffsetDateTime;
@@ -24,6 +24,9 @@ pub enum AuditAction {
     Recovered,
     Published,
     ScheduledCancelled,
+    FoundationSeeded,
+    DraftSaved,
+    Previewed,
 }
 
 /// Typed internal subject references only.
@@ -31,6 +34,7 @@ pub enum AuditAction {
 pub enum Subject {
     Admin(AdminId),
     Publication(PublicationId),
+    Change(ChangeId),
 }
 
 /// Safe authentication-factor name, never its proof/material.
@@ -54,6 +58,9 @@ pub enum ReasonCode {
     AdminRecovery,
     AdminRevoked,
     ScheduledPublication,
+    FoundationSeed,
+    DraftChange,
+    PreviewAssessment,
 }
 
 impl ReasonCode {
@@ -65,6 +72,9 @@ impl ReasonCode {
             Self::AdminRecovery => "admin_recovery",
             Self::AdminRevoked => "admin_revoked",
             Self::ScheduledPublication => "scheduled_publication",
+            Self::FoundationSeed => "foundation_seed",
+            Self::DraftChange => "draft_change",
+            Self::PreviewAssessment => "preview_assessment",
         }
     }
 
@@ -77,6 +87,9 @@ impl ReasonCode {
             Self::AdminRecovery => "console-reason-admin-recovery",
             Self::AdminRevoked => "console-reason-admin-revoked",
             Self::ScheduledPublication => "console-reason-scheduled-publication",
+            Self::FoundationSeed => "console-reason-foundation-seed",
+            Self::DraftChange => "console-reason-draft-change",
+            Self::PreviewAssessment => "console-reason-preview-assessment",
         }
     }
 }
@@ -91,6 +104,9 @@ impl FromStr for ReasonCode {
             "admin_recovery" => Ok(Self::AdminRecovery),
             "admin_revoked" => Ok(Self::AdminRevoked),
             "scheduled_publication" => Ok(Self::ScheduledPublication),
+            "foundation_seed" => Ok(Self::FoundationSeed),
+            "draft_change" => Ok(Self::DraftChange),
+            "preview_assessment" => Ok(Self::PreviewAssessment),
             _ => Err(invalid()),
         }
     }
@@ -115,6 +131,92 @@ pub enum AuditMetadata {
         after: bool,
     },
     Scheduled(ScheduledMetadata),
+    Draft(DraftMetadata),
+    Preview(PreviewMetadata),
+}
+
+/// Exact reviewed revision, baseline and canonical digest; no evidence payload text.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PreviewMetadata {
+    revision_id: RevisionId,
+    baseline_version: VersionId,
+    digest: crate::domain::change_hash::RevisionDigest,
+}
+
+impl PreviewMetadata {
+    #[must_use]
+    pub const fn new(
+        revision_id: RevisionId,
+        baseline_version: VersionId,
+        digest: crate::domain::change_hash::RevisionDigest,
+    ) -> Self {
+        Self {
+            revision_id,
+            baseline_version,
+            digest,
+        }
+    }
+    #[must_use]
+    pub const fn revision_id(&self) -> RevisionId {
+        self.revision_id
+    }
+    #[must_use]
+    pub const fn baseline_version(&self) -> VersionId {
+        self.baseline_version
+    }
+    #[must_use]
+    pub const fn digest(&self) -> crate::domain::change_hash::RevisionDigest {
+        self.digest
+    }
+}
+
+/// Exact typed draft identity and before/after values; no operator free text.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DraftMetadata {
+    before: Option<crate::domain::change_revision::ChangeValue>,
+    after: crate::domain::change_revision::ChangeValue,
+    baseline_version: VersionId,
+    revision_id: RevisionId,
+    scheduled_at: Option<crate::domain::scheduled_time::ScheduledTime>,
+}
+
+impl DraftMetadata {
+    #[must_use]
+    pub const fn new(
+        before: Option<crate::domain::change_revision::ChangeValue>,
+        after: crate::domain::change_revision::ChangeValue,
+        baseline_version: VersionId,
+        revision_id: RevisionId,
+        scheduled_at: Option<crate::domain::scheduled_time::ScheduledTime>,
+    ) -> Self {
+        Self {
+            before,
+            after,
+            baseline_version,
+            revision_id,
+            scheduled_at,
+        }
+    }
+    #[must_use]
+    pub const fn before(&self) -> Option<crate::domain::change_revision::ChangeValue> {
+        self.before
+    }
+    #[must_use]
+    pub const fn after(&self) -> crate::domain::change_revision::ChangeValue {
+        self.after
+    }
+    #[must_use]
+    pub const fn baseline_version(&self) -> VersionId {
+        self.baseline_version
+    }
+    #[must_use]
+    pub const fn revision_id(&self) -> RevisionId {
+        self.revision_id
+    }
+    #[must_use]
+    pub const fn scheduled_at(&self) -> Option<&crate::domain::scheduled_time::ScheduledTime> {
+        self.scheduled_at.as_ref()
+    }
 }
 
 /// Fields are private so no external executor identity can be inserted.
@@ -278,6 +380,15 @@ impl TryFrom<AuditInput> for AuditEntry {
                         } else {
                             ReasonCode::ScheduledPublication
                         }
+            }
+            (AuditAction::FoundationSeeded, Subject::Admin(system), AuditMetadata::None) => {
+                entry.actor == Actor::Admin(*system) && entry.reason == ReasonCode::FoundationSeed
+            }
+            (AuditAction::DraftSaved, Subject::Change(_), AuditMetadata::Draft(_)) => {
+                entry.reason == ReasonCode::DraftChange
+            }
+            (AuditAction::Previewed, Subject::Change(_), AuditMetadata::Preview(_)) => {
+                entry.reason == ReasonCode::PreviewAssessment
             }
             _ => false,
         };

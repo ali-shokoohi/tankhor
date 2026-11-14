@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE flags SET current_version_id = $2\n             WHERE key = $1 AND current_version_id IS NOT DISTINCT FROM $3",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "45f56c28caea2c802bb975c1cc686c6bb549a4af196587011c5ed57365c882f0"
+}

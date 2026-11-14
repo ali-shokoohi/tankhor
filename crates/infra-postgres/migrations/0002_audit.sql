@@ -9,16 +9,17 @@ CREATE TABLE audit_log (
     action TEXT NOT NULL CHECK (
         action IN (
             'signed_in', 'enrollment_started', 'enrollment_confirmed', 'invited',
-            'recovered', 'published', 'scheduled_cancelled'
+            'recovered', 'published', 'scheduled_cancelled', 'foundation_seeded',
+            'draft_saved', 'previewed'
         )
     ),
-    subject_type TEXT NOT NULL CHECK (subject_type IN ('admin', 'publication')),
+    subject_type TEXT NOT NULL CHECK (subject_type IN ('admin', 'publication', 'change')),
     subject_id UUID NOT NULL,
     occurred_at TIMESTAMPTZ NOT NULL,
     reason_code TEXT NOT NULL CHECK (
         reason_code IN (
             'authentication', 'admin_addition', 'admin_recovery', 'admin_revoked',
-            'scheduled_publication'
+            'scheduled_publication', 'foundation_seed', 'draft_change', 'preview_assessment'
         )
     ),
     before_eligibility TEXT CHECK (
@@ -34,6 +35,19 @@ CREATE TABLE audit_log (
     executed_by TEXT CHECK (executed_by = 'system_worker'),
     scheduled_at TIMESTAMPTZ,
     executed_at TIMESTAMPTZ,
+    revision_id UUID,
+    baseline_version_id UUID,
+    revision_digest BYTEA CHECK (revision_digest IS NULL OR octet_length(revision_digest) = 32),
+    before_value TEXT,
+    after_value TEXT,
+    draft_scheduled_at TIMESTAMPTZ,
+    draft_scheduled_zone TEXT,
+    CONSTRAINT audit_log_draft_schedule_complete CHECK (
+        (draft_scheduled_at IS NULL) = (draft_scheduled_zone IS NULL)
+    ),
+    CONSTRAINT audit_log_change_identity_complete CHECK (
+        (revision_id IS NULL) = (baseline_version_id IS NULL)
+    ),
     CONSTRAINT audit_log_schedule_complete CHECK (
         num_nonnulls(executed_by, approver_id, scheduled_at, executed_at) IN (0, 4)
     ),

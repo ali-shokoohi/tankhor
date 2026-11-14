@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT COUNT(*) AS count FROM flags f\n             JOIN flag_versions v ON v.id = f.current_version_id AND v.flag_key = f.key",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "count",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "29b7bc7eca523cdc78a75c5ec46cc9518937407ad26d2ba3862341171e5ac61a"
+}

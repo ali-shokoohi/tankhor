@@ -53,8 +53,21 @@ impl FoundationComposition {
 pub fn compose_foundation(config: &AppConfig) -> Result<FoundationComposition, CompositionError> {
     match config.adapter_mode() {
         AdapterMode::Fake => compose_fake_foundation(),
-        AdapterMode::Real => Err(CompositionError::RealHealthProbeNotDelivered),
+        AdapterMode::Real => compose_real_foundation(),
     }
+}
+
+fn compose_real_foundation() -> Result<FoundationComposition, CompositionError> {
+    let database_url = std::env::var("DATABASE_URL")
+        .ok()
+        .filter(|value| !value.is_empty())
+        .ok_or(CompositionError::InvalidAccessConfiguration)?;
+    let uow = infra_postgres::unit_of_work::PostgresUnitOfWork::connect_lazy(&database_url)
+        .map_err(|_| CompositionError::InvalidAccessConfiguration)?;
+    let health_probe: Arc<dyn HealthProbe> = Arc::new(
+        infra_postgres::health_probe::PostgresHealthProbe::new(uow.pool().clone()),
+    );
+    Ok(FoundationComposition { health_probe })
 }
 
 #[cfg(feature = "dev-fakes")]
@@ -292,9 +305,10 @@ pub fn compose_real_access(
     use infra_postgres::{
         admin_credential_repository::PostgresAdminCredentialRepository,
         admin_repository::PostgresAdminRepository, audit_repository::PostgresAuditRepository,
+        change_repository::PostgresChangeRepository, flag_repository::PostgresFlagRepository,
         otp_challenge_repository::PostgresOtpChallengeRepository,
         rate_limit_repository::PostgresRateLimitRepository, session_store::PostgresSessionStore,
-        unit_of_work::PostgresUnitOfWork,
+        settings_repository::PostgresSettingsRepository, unit_of_work::PostgresUnitOfWork,
     };
 
     let uow = PostgresUnitOfWork::connect_lazy(&config.database_url)
@@ -329,7 +343,10 @@ pub fn compose_real_access(
             sessions: Arc::new(PostgresSessionStore::new(uow.clone())),
             otps: Arc::new(PostgresOtpChallengeRepository::new(uow.clone())),
             rates: Arc::new(PostgresRateLimitRepository::new(uow.clone())),
-            audit: Arc::new(PostgresAuditRepository::new(uow)),
+            audit: Arc::new(PostgresAuditRepository::new(uow.clone())),
+            settings: Arc::new(PostgresSettingsRepository::new(uow.clone())),
+            flags: Arc::new(PostgresFlagRepository::new(uow.clone())),
+            changes: Arc::new(PostgresChangeRepository::new(uow)),
             authenticator: Arc::new(authenticator),
             primary_sms: Arc::new(primary_sms),
             secondary_sms: Arc::new(secondary_sms),
@@ -356,10 +373,12 @@ pub fn compose_fake_access(
         admin_authenticator::FakeAdminAuthenticator,
         admin_credential_repository::FakeAdminCredentialRepository,
         admin_repository::FakeAdminRepository, audit_repository::FakeAuditRepository,
-        clock::FixedClock, id_generator::SequenceIdGenerator,
+        change_repository::FakeChangeRepository, clock::FixedClock,
+        flag_repository::FakeFlagRepository, id_generator::SequenceIdGenerator,
         otp_challenge_repository::FakeOtpChallengeRepository,
         rate_limit_repository::FakeRateLimitRepository, session_store::FakeSessionStore,
-        sms_sender::FakeSmsSender, store::FakeStore, unit_of_work::FakeUnitOfWork,
+        settings_repository::FakeSettingsRepository, sms_sender::FakeSmsSender, store::FakeStore,
+        unit_of_work::FakeUnitOfWork,
     };
 
     let store = FakeStore::new();
@@ -372,6 +391,9 @@ pub fn compose_fake_access(
             otps: Arc::new(FakeOtpChallengeRepository::new(store.clone())),
             rates: Arc::new(FakeRateLimitRepository::new(store.clone())),
             audit: Arc::new(FakeAuditRepository::new(store.clone())),
+            settings: Arc::new(FakeSettingsRepository::new(store.clone())),
+            flags: Arc::new(FakeFlagRepository::new(store.clone())),
+            changes: Arc::new(FakeChangeRepository::new(store.clone())),
             authenticator: Arc::new(FakeAdminAuthenticator::controlled_fixture()),
             primary_sms: Arc::new(FakeSmsSender::new(Vec::new())),
             secondary_sms: Arc::new(FakeSmsSender::new(Vec::new())),
@@ -393,5 +415,163 @@ pub fn compose_fake_access(
 pub fn compose_fake_access(
     _policy: admin::domain::security_policy::SecurityPolicy,
 ) -> Result<AccessComposition, CompositionError> {
+    Err(CompositionError::FakeAdaptersNotCompiled)
+}
+
+/// Coherent registry, change-review, audit, and readiness adapters for one backend group.
+pub struct RegistryComposition {
+    uow: Arc<dyn kernel::ports::unit_of_work::UnitOfWork>,
+    settings: Arc<dyn admin::ports::settings_repository::SettingsRepository>,
+    flags: Arc<dyn admin::ports::flag_repository::FlagRepository>,
+    changes: Arc<dyn admin::ports::change_repository::ChangeRepository>,
+    audit: Arc<dyn admin::ports::audit_repository::AuditRepository>,
+    health_probe: Arc<dyn HealthProbe>,
+    clock: Arc<dyn kernel::ports::clock::Clock>,
+    ids: Arc<dyn kernel::ports::id_generator::IdGenerator>,
+    backend: BackendGroup,
+    real_uow: Option<infra_postgres::unit_of_work::PostgresUnitOfWork>,
+}
+
+impl RegistryComposition {
+    #[must_use]
+    pub fn uow(&self) -> Arc<dyn kernel::ports::unit_of_work::UnitOfWork> {
+        Arc::clone(&self.uow)
+    }
+
+    #[must_use]
+    pub fn settings(&self) -> Arc<dyn admin::ports::settings_repository::SettingsRepository> {
+        Arc::clone(&self.settings)
+    }
+
+    #[must_use]
+    pub fn flags(&self) -> Arc<dyn admin::ports::flag_repository::FlagRepository> {
+        Arc::clone(&self.flags)
+    }
+
+    #[must_use]
+    pub fn changes(&self) -> Arc<dyn admin::ports::change_repository::ChangeRepository> {
+        Arc::clone(&self.changes)
+    }
+
+    #[must_use]
+    pub fn audit(&self) -> Arc<dyn admin::ports::audit_repository::AuditRepository> {
+        Arc::clone(&self.audit)
+    }
+
+    #[must_use]
+    pub fn health_probe(&self) -> Arc<dyn HealthProbe> {
+        Arc::clone(&self.health_probe)
+    }
+
+    #[must_use]
+    pub fn clock(&self) -> Arc<dyn kernel::ports::clock::Clock> {
+        Arc::clone(&self.clock)
+    }
+
+    #[must_use]
+    pub fn ids(&self) -> Arc<dyn kernel::ports::id_generator::IdGenerator> {
+        Arc::clone(&self.ids)
+    }
+
+    #[must_use]
+    pub const fn backend(&self) -> BackendGroup {
+        self.backend
+    }
+
+    /// Verifies that a real composition is connected as a restricted runtime role, never a
+    /// migration owner or superuser.
+    ///
+    /// # Errors
+    /// Returns a domain error if role verification fails.
+    pub async fn verify_runtime_role(&self) -> Result<(), kernel::error::DomainError> {
+        if let Some(real_uow) = &self.real_uow {
+            real_uow.verify_restricted_runtime_role().await?;
+        }
+        Ok(())
+    }
+
+    /// Closes any underlying database connection pool.
+    pub async fn close(&self) {
+        if let Some(real_uow) = &self.real_uow {
+            real_uow.close().await;
+        }
+    }
+}
+
+/// Composes registry, impact-review, audit, and readiness adapters according to [`AppConfig`].
+///
+/// # Errors
+/// Returns [`CompositionError`] if real configuration is missing/invalid or fake adapters are not compiled.
+pub fn compose_registry(config: &AppConfig) -> Result<RegistryComposition, CompositionError> {
+    match config.adapter_mode() {
+        AdapterMode::Real => {
+            let database_url = std::env::var("DATABASE_URL")
+                .ok()
+                .filter(|value| !value.is_empty())
+                .ok_or(CompositionError::InvalidAccessConfiguration)?;
+            compose_real_registry(&database_url)
+        }
+        AdapterMode::Fake => compose_fake_registry(),
+    }
+}
+
+/// Composes concrete PostgreSQL registry, change, audit, and readiness adapters over one lazy pool.
+///
+/// # Errors
+/// Returns [`CompositionError::InvalidAccessConfiguration`] if `database_url` is invalid.
+pub fn compose_real_registry(database_url: &str) -> Result<RegistryComposition, CompositionError> {
+    use infra_postgres::{
+        audit_repository::PostgresAuditRepository, change_repository::PostgresChangeRepository,
+        flag_repository::PostgresFlagRepository, health_probe::PostgresHealthProbe,
+        settings_repository::PostgresSettingsRepository, unit_of_work::PostgresUnitOfWork,
+    };
+
+    let uow = PostgresUnitOfWork::connect_lazy(database_url)
+        .map_err(|_| CompositionError::InvalidAccessConfiguration)?;
+    let health_probe = PostgresHealthProbe::new(uow.pool().clone());
+    Ok(RegistryComposition {
+        uow: Arc::new(uow.clone()),
+        settings: Arc::new(PostgresSettingsRepository::new(uow.clone())),
+        flags: Arc::new(PostgresFlagRepository::new(uow.clone())),
+        changes: Arc::new(PostgresChangeRepository::new(uow.clone())),
+        audit: Arc::new(PostgresAuditRepository::new(uow.clone())),
+        health_probe: Arc::new(health_probe),
+        clock: Arc::new(infra_system::clock::SystemClock::new()),
+        ids: Arc::new(infra_system::id_generator::SystemIdGenerator::new()),
+        backend: BackendGroup::Real,
+        real_uow: Some(uow),
+    })
+}
+
+/// Composes deterministic fake registry, change, audit, and readiness adapters over one shared store.
+///
+/// # Errors
+/// Returns [`CompositionError::FakeAdaptersNotCompiled`] when compiled without `dev-fakes`.
+#[cfg(feature = "dev-fakes")]
+pub fn compose_fake_registry() -> Result<RegistryComposition, CompositionError> {
+    use testkit::fakes::{
+        audit_repository::FakeAuditRepository, change_repository::FakeChangeRepository,
+        clock::FixedClock, flag_repository::FakeFlagRepository, health_probe::FakeHealthProbe,
+        id_generator::SequenceIdGenerator, settings_repository::FakeSettingsRepository,
+        store::FakeStore, unit_of_work::FakeUnitOfWork,
+    };
+
+    let store = FakeStore::new();
+    Ok(RegistryComposition {
+        uow: Arc::new(FakeUnitOfWork::new(store.clone())),
+        settings: Arc::new(FakeSettingsRepository::new(store.clone())),
+        flags: Arc::new(FakeFlagRepository::new(store.clone())),
+        changes: Arc::new(FakeChangeRepository::new(store.clone())),
+        audit: Arc::new(FakeAuditRepository::new(store.clone())),
+        health_probe: Arc::new(FakeHealthProbe::new(store)),
+        clock: Arc::new(FixedClock::new(time::OffsetDateTime::UNIX_EPOCH)),
+        ids: Arc::new(SequenceIdGenerator::new(1)),
+        backend: BackendGroup::Fake,
+        real_uow: None,
+    })
+}
+
+#[cfg(not(feature = "dev-fakes"))]
+pub fn compose_fake_registry() -> Result<RegistryComposition, CompositionError> {
     Err(CompositionError::FakeAdaptersNotCompiled)
 }

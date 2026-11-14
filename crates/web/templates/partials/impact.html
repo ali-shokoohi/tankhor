@@ -1,0 +1,22 @@
+<section class="change-impact" aria-labelledby="change-impact-heading" data-viewport="{{ viewport }}">
+    <h2 id="change-impact-heading">{{ impact_heading }}</h2>
+    {% if has_preview %}
+    <dl class="change-impact-details">
+        <dt>Preview ID</dt>
+        <dd><code>{{ preview_id }}</code></dd>
+        <dt>Effect rule</dt>
+        <dd><code>{{ effect_rule }}</code></dd>
+    </dl>
+    <p class="change-impact-explanation">{{ impact_explanation }}</p>
+    {% if is_lifetime %}
+    <dl class="change-lifetime-counts">
+        <dt>{{ changed_count_label }} (<code>changed_count</code>)</dt>
+        <dd>{{ changed_count_display }}</dd>
+        <dt>{{ already_due_count_label }} (<code>already_due_count</code>)</dt>
+        <dd>{{ already_due_count_display }}</dd>
+    </dl>
+    {% endif %}
+    {% else %}
+    <p>{{ impact_none }}</p>
+    {% endif %}
+</section>

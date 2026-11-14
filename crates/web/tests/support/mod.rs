@@ -8,10 +8,12 @@ use testkit::fakes::{
     admin_authenticator::FakeAdminAuthenticator,
     admin_credential_repository::FakeAdminCredentialRepository,
     admin_repository::FakeAdminRepository, audit_repository::FakeAuditRepository,
-    clock::FixedClock, id_generator::SequenceIdGenerator,
+    change_repository::FakeChangeRepository, clock::FixedClock,
+    flag_repository::FakeFlagRepository, id_generator::SequenceIdGenerator,
     otp_challenge_repository::FakeOtpChallengeRepository,
     rate_limit_repository::FakeRateLimitRepository, session_store::FakeSessionStore,
-    sms_sender::FakeSmsSender, store::FakeStore, unit_of_work::FakeUnitOfWork,
+    settings_repository::FakeSettingsRepository, sms_sender::FakeSmsSender, store::FakeStore,
+    unit_of_work::FakeUnitOfWork,
 };
 use time::OffsetDateTime;
 use web::console::ConsoleServices;
@@ -62,6 +64,9 @@ impl Fixture {
             otps: Arc::new(FakeOtpChallengeRepository::new(store.clone())),
             rates: Arc::new(FakeRateLimitRepository::new(store.clone())),
             audit: Arc::new(FakeAuditRepository::new(store.clone())),
+            settings: Arc::new(FakeSettingsRepository::new(store.clone())),
+            flags: Arc::new(FakeFlagRepository::new(store.clone())),
+            changes: Arc::new(FakeChangeRepository::new(store.clone())),
             authenticator: authenticator.clone(),
             primary_sms: sms.clone(),
             secondary_sms: sms,

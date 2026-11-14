@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE settings SET current_version_id = $2\n             WHERE key = $1 AND current_version_id IS NOT DISTINCT FROM $3",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "487582b9de0d213dca6af4d8c4e018eb7635bab0de3d0307cc55d3cc03df16d9"
+}

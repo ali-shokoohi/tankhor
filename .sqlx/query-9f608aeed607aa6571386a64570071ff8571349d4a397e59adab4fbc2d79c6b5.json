@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO flags (key, label_key, description_key) VALUES ($1, $2, $3)\n                 ON CONFLICT (key) DO NOTHING",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "9f608aeed607aa6571386a64570071ff8571349d4a397e59adab4fbc2d79c6b5"
+}

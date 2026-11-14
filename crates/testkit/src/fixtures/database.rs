@@ -290,3 +290,116 @@ pub async fn verify_database_absent(
     }
     Ok(())
 }
+
+/// Isolated unmigrated database URLs provisioned from the shared fixture environment.
+pub struct ProvisionedDatabaseUrls {
+    admin_options: PgConnectOptions,
+    database_name: String,
+    migration_url: String,
+    runtime_url: String,
+}
+
+impl ProvisionedDatabaseUrls {
+    /// Creates an isolated unmigrated database owned by `tankhor_fixture_migration`
+    /// using `DATABASE_URL` and `PGPASSFILE` from the active fixture run.
+    ///
+    /// # Errors
+    /// Returns a sanitized [`FixtureDatabaseError`] if fixture credentials or database setup fail.
+    pub async fn create_from_env(database_name: &str) -> Result<Self, FixtureDatabaseError> {
+        let admin_url =
+            std::env::var("DATABASE_URL").map_err(|_| FixtureDatabaseError::MissingCredentials)?;
+        let passfile =
+            std::env::var_os("PGPASSFILE").ok_or(FixtureDatabaseError::MissingCredentials)?;
+        let credential_dir = Path::new(&passfile)
+            .parent()
+            .ok_or(FixtureDatabaseError::MissingCredentials)?;
+        let admin_password = std::fs::read_to_string(credential_dir.join("admin"))
+            .map_err(|_| FixtureDatabaseError::MissingCredentials)?;
+        let migration_password = std::fs::read_to_string(credential_dir.join("migration"))
+            .map_err(|_| FixtureDatabaseError::MissingCredentials)?;
+        let runtime_password = std::fs::read_to_string(credential_dir.join("runtime"))
+            .map_err(|_| FixtureDatabaseError::MissingCredentials)?;
+
+        let admin_options = admin_url
+            .parse::<PgConnectOptions>()
+            .map_err(|_| FixtureDatabaseError::ConnectionFailed)?
+            .password(&admin_password)
+            .database("postgres")
+            .disable_statement_logging();
+
+        provision_roles(&admin_options, credential_dir)
+            .await
+            .map_err(|_| FixtureDatabaseError::RoleProvisioningFailed)?;
+
+        let mut conn = PgConnection::connect_with(&admin_options)
+            .await
+            .map_err(|_| FixtureDatabaseError::ConnectionFailed)?;
+        sqlx::raw_sql(sqlx::AssertSqlSafe(format!(
+            "DROP DATABASE IF EXISTS {database_name} WITH (FORCE)"
+        )))
+        .execute(&mut conn)
+        .await
+        .map_err(|_| FixtureDatabaseError::ConnectionFailed)?;
+        sqlx::raw_sql(sqlx::AssertSqlSafe(format!(
+            "CREATE DATABASE {database_name} OWNER tankhor_fixture_migration"
+        )))
+        .execute(&mut conn)
+        .await
+        .map_err(|_| FixtureDatabaseError::ConnectionFailed)?;
+        conn.close()
+            .await
+            .map_err(|_| FixtureDatabaseError::ConnectionFailed)?;
+
+        let host = admin_options.get_host();
+        let port = admin_options.get_port();
+        let url_host = if host.contains(':') {
+            format!("[{host}]")
+        } else {
+            host.to_owned()
+        };
+        let migration_url = format!(
+            "postgresql://tankhor_fixture_migration:{migration_password}@{url_host}:{port}/{database_name}"
+        );
+        let runtime_url = format!(
+            "postgresql://tankhor_fixture_runtime:{runtime_password}@{url_host}:{port}/{database_name}"
+        );
+
+        Ok(Self {
+            admin_options,
+            database_name: database_name.to_owned(),
+            migration_url,
+            runtime_url,
+        })
+    }
+
+    #[must_use]
+    pub fn migration_url(&self) -> &str {
+        &self.migration_url
+    }
+
+    #[must_use]
+    pub fn runtime_url(&self) -> &str {
+        &self.runtime_url
+    }
+
+    /// Drops the isolated database after test completion.
+    ///
+    /// # Errors
+    /// Returns [`FixtureDatabaseError::CleanupVerificationFailed`] if dropping fails.
+    pub async fn drop_database(self) -> Result<(), FixtureDatabaseError> {
+        let mut conn = PgConnection::connect_with(&self.admin_options)
+            .await
+            .map_err(|_| FixtureDatabaseError::CleanupVerificationFailed)?;
+        sqlx::raw_sql(sqlx::AssertSqlSafe(format!(
+            "DROP DATABASE IF EXISTS {} WITH (FORCE)",
+            self.database_name
+        )))
+        .execute(&mut conn)
+        .await
+        .map_err(|_| FixtureDatabaseError::CleanupVerificationFailed)?;
+        conn.close()
+            .await
+            .map_err(|_| FixtureDatabaseError::CleanupVerificationFailed)?;
+        verify_database_absent(&self.admin_options, &self.database_name).await
+    }
+}

@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT COUNT(*) AS count FROM settings s\n             JOIN setting_versions v ON v.id = s.current_version_id AND v.setting_key = s.key",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "count",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "72d520d3a5b0fa9bc813ba3ec9146c67ca8b10461f9903bce0ae8aa0b8e20d06"
+}

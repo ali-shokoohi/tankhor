@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}" dir="{{ dir }}" data-theme="{{ theme }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="/static/console.css">
+</head>
+<body class="console-shell">
+    <main class="console-main" id="main-content" data-viewport="{{ viewport }}">
+        <header class="console-header">
+            <h1>{{ heading }}</h1>
+        </header>
+        <section class="change-summary" aria-labelledby="change-summary-heading">
+            <h2 id="change-summary-heading">{{ subject_label }} (<code>{{ subject_key }}</code>)</h2>
+            <dl class="change-meta">
+                <dt>{{ change_id_label }}</dt>
+                <dd><code>{{ change_id }}</code></dd>
+                <dt>{{ revision_label }}</dt>
+                <dd><code>{{ revision_id }}</code> (#{{ revision_number }})</dd>
+                <dt>{{ baseline_label }}</dt>
+                <dd><code>{{ baseline_version }}</code></dd>
+                <dt>{{ live_value_label }}</dt>
+                <dd><strong>{{ live_value }}</strong></dd>
+                <dt>{{ proposed_value_label }}</dt>
+                <dd><strong>{{ proposed_value }}</strong></dd>
+            </dl>
+        </section>
+
+        <section class="change-viewport-controls">
+            <form method="get" action="{{ detail_action }}" class="console-form">
+                <input type="hidden" name="lang" value="{{ lang }}">
+                <div class="form-field">
+                    <label for="viewport-select">{{ viewport_label }}</label>
+                    <select id="viewport-select" name="viewport">
+                        <option value="desktop"{% if viewport == "desktop" %} selected{% endif %}>{{ viewport_desktop_label }}</option>
+                        <option value="mobile"{% if viewport == "mobile" %} selected{% endif %}>{{ viewport_mobile_label }}</option>
+                    </select>
+                </div>
+            </form>
+        </section>
+
+        {% include "../partials/impact.html" %}
+
+        <section class="change-preview-section">
+            {% if !conflict_error.is_empty() %}
+            <p class="form-alert" id="change-conflict-error" role="alert">{{ conflict_error }}</p>
+            {% endif %}
+            <form method="post" action="{{ preview_action }}" class="console-form" hx-post="{{ preview_action }}" hx-target="#main-content" hx-swap="outerHTML">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <input type="hidden" name="lang" value="{{ lang }}">
+                <input type="hidden" name="revision" value="{{ submitted_revision }}">
+                <div class="form-field">
+                    <label for="preview-viewport">{{ viewport_label }}</label>
+                    <select id="preview-viewport" name="viewport">
+                        <option value="desktop"{% if viewport == "desktop" %} selected{% endif %}>{{ viewport_desktop_label }}</option>
+                        <option value="mobile"{% if viewport == "mobile" %} selected{% endif %}>{{ viewport_mobile_label }}</option>
+                    </select>
+                </div>
+                <button type="submit" class="console-button">{{ preview_submit_label }}</button>
+            </form>
+        </section>
+    </main>
+    <script src="/static/htmx.min.js" defer></script>
+</body>
+</html>

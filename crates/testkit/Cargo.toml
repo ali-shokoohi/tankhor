@@ -211,3 +211,23 @@ required-features = ["fakes"]
 [[test]]
 name = "fake_begin_totp_enrollment"
 required-features = ["fakes"]
+
+[[test]]
+name = "settings_repository_fake"
+required-features = ["fakes"]
+
+[[test]]
+name = "flag_repository_fake"
+required-features = ["fakes"]
+
+[[test]]
+name = "change_repository_fake"
+required-features = ["fakes"]
+
+[[test]]
+name = "mock_seed_foundation"
+required-features = ["fakes"]
+
+[[test]]
+name = "fake_seed_foundation"
+required-features = ["fakes"]

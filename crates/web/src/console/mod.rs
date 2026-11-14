@@ -6,8 +6,10 @@ pub use admin::application::console_services::ConsoleServices;
 
 pub mod admins;
 pub mod auth;
+pub mod changes;
 pub mod enrollment;
 pub mod guard;
+pub mod settings;
 
 /// Assemble only delivered US1 routes over one application-service port collection.
 pub fn access_router(
@@ -79,4 +81,21 @@ pub fn access_router(
         .merge(enrollment::enroll_totp_finish_router(
             services, csrf, cookies,
         ))
+}
+
+/// Assemble delivered US2 settings and change-preview routes.
+pub fn registry_router(
+    services: ConsoleServices,
+    csrf: crate::security::CsrfProtectionState,
+    cookies: crate::security::CookieSecurityPolicy,
+) -> axum::Router {
+    settings::settings_list_router(services.clone(), cookies)
+        .merge(settings::setting_detail_router(services.clone(), cookies))
+        .merge(settings::setting_draft_router(
+            services.clone(),
+            csrf.clone(),
+            cookies,
+        ))
+        .merge(changes::change_detail_router(services.clone(), cookies))
+        .merge(changes::change_preview_router(services, csrf, cookies))
 }

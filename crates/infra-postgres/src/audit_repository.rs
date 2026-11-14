@@ -4,11 +4,15 @@ use std::str::FromStr;
 
 use admin::domain::admin_state::Eligibility;
 use admin::domain::audit::{
-    Actor, AuditAction, AuditEntry, AuditInput, AuditMetadata, Factor, ReasonCode, Subject,
+    Actor, AuditAction, AuditEntry, AuditInput, AuditMetadata, DraftMetadata, Factor,
+    PreviewMetadata, ReasonCode, Subject,
 };
+use admin::domain::change_hash::RevisionDigest;
+use admin::domain::change_revision::ChangeValue;
+use admin::domain::formats::FormatSet;
 use admin::ports::audit_repository::{AuditCursor, AuditPage, AuditQuery, AuditRepository};
 use kernel::error::{DomainError, ErrorCode};
-use kernel::ids::{AdminId, AuditId, PublicationId};
+use kernel::ids::{AdminId, AuditId, ChangeId, PublicationId, RevisionId, VersionId};
 use kernel::ports::unit_of_work::TxHandle;
 use time::OffsetDateTime;
 use uuid::Uuid;
@@ -33,34 +37,43 @@ impl AuditRepository for PostgresAuditRepository {
     async fn append(&self, tx: &mut TxHandle, entry: AuditEntry) -> Result<(), DomainError> {
         let values = InsertValues::from(&entry);
         let connection = self.uow.writable_connection(tx)?;
-        let inserted = sqlx::query!(
+        let inserted = sqlx::query(
             "INSERT INTO audit_log (
                  id, event_key, actor_type, actor_id, action, subject_type, subject_id,
                  occurred_at, reason_code, before_eligibility, after_eligibility,
                  before_eligible, after_eligible, factor, approver_id, executed_by,
-                 scheduled_at, executed_at
+                 scheduled_at, executed_at, revision_id, baseline_version_id,
+                 revision_digest, before_value, after_value, draft_scheduled_at,
+                 draft_scheduled_zone
              ) VALUES (
                  $1, $2, 'admin', $3, $4, $5, $6, $7, $8, $9, $10,
-                 $11, $12, $13, $14, $15, $16, $17
+                 $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24
              ) ON CONFLICT DO NOTHING",
-            entry.id().as_uuid(),
-            entry.event_key().as_uuid(),
-            values.actor_id,
-            values.action,
-            values.subject_type,
-            values.subject_id,
-            entry.occurred_at(),
-            entry.reason().as_str(),
-            values.before_eligibility,
-            values.after_eligibility,
-            values.before_eligible,
-            values.after_eligible,
-            values.factor,
-            values.approver_id,
-            values.executed_by,
-            values.scheduled_at,
-            values.executed_at,
         )
+        .bind(entry.id().as_uuid())
+        .bind(entry.event_key().as_uuid())
+        .bind(values.actor_id)
+        .bind(values.action)
+        .bind(values.subject_type)
+        .bind(values.subject_id)
+        .bind(entry.occurred_at())
+        .bind(entry.reason().as_str())
+        .bind(values.before_eligibility)
+        .bind(values.after_eligibility)
+        .bind(values.before_eligible)
+        .bind(values.after_eligible)
+        .bind(values.factor)
+        .bind(values.approver_id)
+        .bind(values.executed_by)
+        .bind(values.scheduled_at)
+        .bind(values.executed_at)
+        .bind(values.revision_id)
+        .bind(values.baseline_version_id)
+        .bind(values.revision_digest)
+        .bind(values.before_value)
+        .bind(values.after_value)
+        .bind(values.draft_scheduled_at)
+        .bind(values.draft_scheduled_zone)
         .execute(&mut *connection)
         .await
         .map_err(|error| map_sql(&error))?;
@@ -68,16 +81,17 @@ impl AuditRepository for PostgresAuditRepository {
             return Ok(());
         }
 
-        let existing = sqlx::query_as!(
-            AuditRow,
+        let existing = sqlx::query_as::<_, AuditRow>(
             "SELECT id, event_key, actor_type, actor_id, action, subject_type, subject_id,
                     occurred_at, reason_code, before_eligibility, after_eligibility,
                     before_eligible, after_eligible, factor, approver_id, executed_by,
-                    scheduled_at, executed_at
+                    scheduled_at, executed_at, revision_id, baseline_version_id,
+                    revision_digest, before_value, after_value, draft_scheduled_at,
+                 draft_scheduled_zone
              FROM audit_log WHERE id = $1 OR event_key = $2",
-            entry.id().as_uuid(),
-            entry.event_key().as_uuid(),
         )
+        .bind(entry.id().as_uuid())
+        .bind(entry.event_key().as_uuid())
         .fetch_all(connection)
         .await
         .map_err(|error| map_sql(&error))?;
@@ -104,12 +118,13 @@ impl AuditRepository for PostgresAuditRepository {
         });
         let after = query.after();
         let connection = self.uow.readable_connection(tx)?;
-        let mut rows = sqlx::query_as!(
-            AuditRow,
+        let mut rows = sqlx::query_as::<_, AuditRow>(
             "SELECT id, event_key, actor_type, actor_id, action, subject_type, subject_id,
                     occurred_at, reason_code, before_eligibility, after_eligibility,
                     before_eligible, after_eligible, factor, approver_id, executed_by,
-                    scheduled_at, executed_at
+                    scheduled_at, executed_at, revision_id, baseline_version_id,
+                    revision_digest, before_value, after_value, draft_scheduled_at,
+                 draft_scheduled_zone
              FROM audit_log
              WHERE ($1::uuid IS NULL OR actor_id = $1)
                AND ($2::text IS NULL OR action = $2)
@@ -120,17 +135,17 @@ impl AuditRepository for PostgresAuditRepository {
                AND (NOT $7::boolean OR (occurred_at, id) > ($8::timestamptz, $9::uuid))
              ORDER BY occurred_at, id
              LIMIT $10",
-            actor_id,
-            action,
-            subject_type,
-            subject_id,
-            filter.from(),
-            filter.until(),
-            after.is_some(),
-            after.map_or(OffsetDateTime::UNIX_EPOCH, |cursor| cursor.occurred_at),
-            after.map_or(Uuid::nil(), |cursor| cursor.id.as_uuid()),
-            i64::from(query.limit()) + 1,
         )
+        .bind(actor_id)
+        .bind(action)
+        .bind(subject_type)
+        .bind(subject_id)
+        .bind(filter.from())
+        .bind(filter.until())
+        .bind(after.is_some())
+        .bind(after.map_or(OffsetDateTime::UNIX_EPOCH, |cursor| cursor.occurred_at))
+        .bind(after.map_or(Uuid::nil(), |cursor| cursor.id.as_uuid()))
+        .bind(i64::from(query.limit()) + 1)
         .fetch_all(connection)
         .await
         .map_err(|error| map_sql(&error))?;
@@ -169,6 +184,13 @@ struct InsertValues {
     executed_by: Option<&'static str>,
     scheduled_at: Option<OffsetDateTime>,
     executed_at: Option<OffsetDateTime>,
+    revision_id: Option<Uuid>,
+    baseline_version_id: Option<Uuid>,
+    revision_digest: Option<Vec<u8>>,
+    before_value: Option<String>,
+    after_value: Option<String>,
+    draft_scheduled_at: Option<OffsetDateTime>,
+    draft_scheduled_zone: Option<String>,
 }
 
 impl From<&AuditEntry> for InsertValues {
@@ -189,6 +211,13 @@ impl From<&AuditEntry> for InsertValues {
             executed_by: None,
             scheduled_at: None,
             executed_at: None,
+            revision_id: None,
+            baseline_version_id: None,
+            revision_digest: None,
+            before_value: None,
+            after_value: None,
+            draft_scheduled_at: None,
+            draft_scheduled_zone: None,
         };
         match entry.metadata() {
             AuditMetadata::None => {}
@@ -217,11 +246,28 @@ impl From<&AuditEntry> for InsertValues {
                 values.scheduled_at = Some(metadata.scheduled_at());
                 values.executed_at = Some(metadata.executed_at());
             }
+            AuditMetadata::Draft(metadata) => {
+                values.revision_id = Some(metadata.revision_id().as_uuid());
+                values.baseline_version_id = Some(metadata.baseline_version().as_uuid());
+                values.before_value = metadata.before().map(value_text);
+                values.after_value = Some(value_text(metadata.after()));
+                values.draft_scheduled_at = metadata
+                    .scheduled_at()
+                    .map(admin::domain::scheduled_time::ScheduledTime::utc);
+                values.draft_scheduled_zone =
+                    metadata.scheduled_at().map(|time| time.zone().to_owned());
+            }
+            AuditMetadata::Preview(metadata) => {
+                values.revision_id = Some(metadata.revision_id().as_uuid());
+                values.baseline_version_id = Some(metadata.baseline_version().as_uuid());
+                values.revision_digest = Some(metadata.digest().as_bytes().to_vec());
+            }
         }
         values
     }
 }
 
+#[derive(sqlx::FromRow)]
 struct AuditRow {
     id: Uuid,
     event_key: Uuid,
@@ -241,6 +287,13 @@ struct AuditRow {
     executed_by: Option<String>,
     scheduled_at: Option<OffsetDateTime>,
     executed_at: Option<OffsetDateTime>,
+    revision_id: Option<Uuid>,
+    baseline_version_id: Option<Uuid>,
+    revision_digest: Option<Vec<u8>>,
+    before_value: Option<String>,
+    after_value: Option<String>,
+    draft_scheduled_at: Option<OffsetDateTime>,
+    draft_scheduled_zone: Option<String>,
 }
 
 impl AuditRow {
@@ -255,6 +308,9 @@ impl AuditRow {
             "publication" => Subject::Publication(
                 PublicationId::try_new(self.subject_id).map_err(|_| unavailable())?,
             ),
+            "change" => {
+                Subject::Change(ChangeId::try_new(self.subject_id).map_err(|_| unavailable())?)
+            }
             _ => return Err(unavailable()),
         };
         let metadata = match action {
@@ -289,6 +345,35 @@ impl AuditRow {
                     self.executed_at.ok_or_else(unavailable)?,
                 )
             }
+            AuditAction::FoundationSeeded => AuditMetadata::None,
+            AuditAction::DraftSaved => AuditMetadata::Draft(DraftMetadata::new(
+                self.before_value.as_deref().map(parse_value).transpose()?,
+                parse_value(self.after_value.as_deref().ok_or_else(unavailable)?)?,
+                version_id(self.baseline_version_id.ok_or_else(unavailable)?)?,
+                revision_id(self.revision_id.ok_or_else(unavailable)?)?,
+                self.draft_scheduled_at
+                    .map(|utc| {
+                        Ok(
+                            admin::domain::scheduled_time::ScheduledTime::authorized_execution(
+                                utc,
+                                self.draft_scheduled_zone.clone().ok_or_else(unavailable)?,
+                            ),
+                        )
+                    })
+                    .transpose()?,
+            )),
+            AuditAction::Previewed => {
+                let digest: [u8; 32] = self
+                    .revision_digest
+                    .ok_or_else(unavailable)?
+                    .try_into()
+                    .map_err(|_| unavailable())?;
+                AuditMetadata::Preview(PreviewMetadata::new(
+                    revision_id(self.revision_id.ok_or_else(unavailable)?)?,
+                    version_id(self.baseline_version_id.ok_or_else(unavailable)?)?,
+                    RevisionDigest::from_bytes(digest),
+                ))
+            }
         };
         AuditEntry::try_from(AuditInput {
             id: audit_id(self.id)?,
@@ -308,6 +393,7 @@ fn subject_parts(subject: Subject) -> (&'static str, Uuid) {
     match subject {
         Subject::Admin(id) => ("admin", id.as_uuid()),
         Subject::Publication(id) => ("publication", id.as_uuid()),
+        Subject::Change(id) => ("change", id.as_uuid()),
     }
 }
 
@@ -320,6 +406,9 @@ const fn action_name(action: AuditAction) -> &'static str {
         AuditAction::Recovered => "recovered",
         AuditAction::Published => "published",
         AuditAction::ScheduledCancelled => "scheduled_cancelled",
+        AuditAction::FoundationSeeded => "foundation_seeded",
+        AuditAction::DraftSaved => "draft_saved",
+        AuditAction::Previewed => "previewed",
     }
 }
 
@@ -332,6 +421,9 @@ fn parse_action(value: &str) -> Result<AuditAction, DomainError> {
         "recovered" => Ok(AuditAction::Recovered),
         "published" => Ok(AuditAction::Published),
         "scheduled_cancelled" => Ok(AuditAction::ScheduledCancelled),
+        "foundation_seeded" => Ok(AuditAction::FoundationSeeded),
+        "draft_saved" => Ok(AuditAction::DraftSaved),
+        "previewed" => Ok(AuditAction::Previewed),
         _ => Err(unavailable()),
     }
 }
@@ -382,4 +474,37 @@ fn admin_id(value: Uuid) -> Result<AdminId, DomainError> {
 
 fn audit_id(value: Uuid) -> Result<AuditId, DomainError> {
     AuditId::try_new(value).map_err(|_| unavailable())
+}
+
+fn revision_id(value: Uuid) -> Result<RevisionId, DomainError> {
+    RevisionId::try_new(value).map_err(|_| unavailable())
+}
+
+fn version_id(value: Uuid) -> Result<VersionId, DomainError> {
+    VersionId::try_new(value).map_err(|_| unavailable())
+}
+
+fn value_text(value: ChangeValue) -> String {
+    match value {
+        ChangeValue::Number(value) => value.to_string(),
+        ChangeValue::Formats(value) => format!("formats:{}", value.mask()),
+        ChangeValue::Boolean(value) => value.to_string(),
+    }
+}
+
+fn parse_value(value: &str) -> Result<ChangeValue, DomainError> {
+    if let Some(mask) = value.strip_prefix("formats:") {
+        let mask = mask.parse::<u8>().map_err(|_| unavailable())?;
+        return FormatSet::from_mask(mask)
+            .map(ChangeValue::Formats)
+            .map_err(|_| unavailable());
+    }
+    match value {
+        "true" => Ok(ChangeValue::Boolean(true)),
+        "false" => Ok(ChangeValue::Boolean(false)),
+        _ => value
+            .parse::<u32>()
+            .map(ChangeValue::Number)
+            .map_err(|_| unavailable()),
+    }
 }

@@ -1,12 +1,12 @@
 //! FR-021–024, AC-ADM-021–025: identical assertions for fake and real repositories.
 
 use admin::domain::audit::{
-    Actor, AuditAction, AuditEntry, AuditInput, AuditMetadata, Executor, Factor, ReasonCode,
-    Subject,
+    Actor, AuditAction, AuditEntry, AuditInput, AuditMetadata, DraftMetadata, Executor, Factor,
+    PreviewMetadata, ReasonCode, Subject,
 };
 use admin::ports::audit_repository::{AuditCursor, AuditFilter, AuditQuery, AuditRepository};
 use kernel::error::{DomainError, ErrorCategory};
-use kernel::ids::{AdminId, AuditId, PublicationId};
+use kernel::ids::{AdminId, AuditId, ChangeId, PublicationId, RevisionId, VersionId};
 use kernel::ports::unit_of_work::{TransactionMode, TxHandle, UnitOfWork};
 use std::str::FromStr;
 use time::{Duration, OffsetDateTime};
@@ -68,6 +68,31 @@ fn entry(number: u16, actor: u16, seconds: i64, action: AuditAction) -> AuditEnt
                 before: true,
                 after: false,
             },
+        ),
+        AuditAction::FoundationSeeded => (
+            Subject::Admin(admin(actor)),
+            ReasonCode::FoundationSeed,
+            AuditMetadata::None,
+        ),
+        AuditAction::DraftSaved => (
+            Subject::Change(ChangeId::from_str("019a53a0-0000-7000-8000-000000000097").unwrap()),
+            ReasonCode::DraftChange,
+            AuditMetadata::Draft(DraftMetadata::new(
+                Some(admin::domain::change_revision::ChangeValue::Number(15)),
+                admin::domain::change_revision::ChangeValue::Number(20),
+                VersionId::from_str("019a53a0-0000-7000-8000-000000000096").unwrap(),
+                RevisionId::from_str("019a53a0-0000-7000-8000-000000000095").unwrap(),
+                None,
+            )),
+        ),
+        AuditAction::Previewed => (
+            Subject::Change(ChangeId::from_str("019a53a0-0000-7000-8000-000000000097").unwrap()),
+            ReasonCode::PreviewAssessment,
+            AuditMetadata::Preview(PreviewMetadata::new(
+                RevisionId::from_str("019a53a0-0000-7000-8000-000000000095").unwrap(),
+                VersionId::from_str("019a53a0-0000-7000-8000-000000000096").unwrap(),
+                admin::domain::change_hash::RevisionDigest::from_bytes([7; 32]),
+            )),
         ),
         AuditAction::Published | AuditAction::ScheduledCancelled => (
             Subject::Publication(

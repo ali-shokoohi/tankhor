@@ -1,0 +1,77 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, flag_key, enabled, actor_ref, applied_at FROM flag_versions\n             WHERE flag_key = $1 ORDER BY applied_at DESC, id DESC LIMIT $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "flag_versions",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "flag_key",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "flag_versions",
+            "name": "flag_key"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "enabled",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "flag_versions",
+            "name": "enabled"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "actor_ref",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "flag_versions",
+            "name": "actor_ref"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "applied_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "flag_versions",
+            "name": "applied_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "1948b9a2e3d0ceb9084be85f4525189c6273b09100e8eb4ff92e45decb9feb3d"
+}

@@ -1,0 +1,88 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT v.id, v.setting_key, v.numeric_value, v.format_mask, v.actor_ref, v.applied_at\n             FROM settings s JOIN setting_versions v ON v.id = s.current_version_id\n             WHERE ($1::text IS NULL OR s.key = $1) ORDER BY s.key",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "setting_versions",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "setting_key",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "setting_versions",
+            "name": "setting_key"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "numeric_value",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "setting_versions",
+            "name": "numeric_value"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "format_mask",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "setting_versions",
+            "name": "format_mask"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "actor_ref",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "setting_versions",
+            "name": "actor_ref"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "applied_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "setting_versions",
+            "name": "applied_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "019f0200d57feaf747734ee87fe49d3f75368078dc656de0f8dece8fecce31e1"
+}

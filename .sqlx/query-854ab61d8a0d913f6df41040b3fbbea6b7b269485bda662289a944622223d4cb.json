@@ -1,0 +1,76 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT v.id, v.flag_key, v.enabled, v.actor_ref, v.applied_at\n             FROM flags f JOIN flag_versions v ON v.id = f.current_version_id\n             WHERE f.key = ANY($1::text[]) ORDER BY f.key FOR UPDATE OF f",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "flag_versions",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "flag_key",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "flag_versions",
+            "name": "flag_key"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "enabled",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "flag_versions",
+            "name": "enabled"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "actor_ref",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "flag_versions",
+            "name": "actor_ref"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "applied_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "flag_versions",
+            "name": "applied_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "TextArray"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "854ab61d8a0d913f6df41040b3fbbea6b7b269485bda662289a944622223d4cb"
+}

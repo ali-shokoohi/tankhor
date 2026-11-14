@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO flag_versions (\n                 id, flag_key, enabled, publication_id, actor_ref, reason_code, applied_at\n             ) VALUES ($1, $2, $3, NULL, $4, 'draft_change', $5)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Bool",
+        "Uuid",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "41a81ef2b89f61f618bb2b728523924ef1035351472be09507626da1b1687be9"
+}

@@ -39,5 +39,9 @@ required-features = ["dev-fakes"]
 name = "integration_provision_admin"
 required-features = ["dev-fakes"]
 
+[[test]]
+name = "integration_seed_foundation"
+required-features = ["dev-fakes"]
+
 [lints]
 workspace = true

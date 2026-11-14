@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="{{ lang }}" dir="{{ dir }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ heading }} — {{ label }}</title>
+</head>
+<body>
+  <main>
+    <h1>{{ label }}</h1>
+    <p><code class="tk-setting-key">{{ key }}</code></p>
+    <dl class="tk-setting-metadata">
+      <dt>{{ live_value_label }}</dt>
+      <dd>{{ live_value }}</dd>
+      <dt>{{ bounds_label }}</dt>
+      <dd>{{ minimum }}..={{ maximum }}</dd>
+      <dt>{{ unit_label }}</dt>
+      <dd>{{ unit }}</dd>
+      <dt>Version</dt>
+      <dd><code>{{ live_version }}</code></dd>
+    </dl>
+
+    {% match conflict_error %}
+    {% when Some with (err) %}
+    <p class="tk-conflict-error" id="draft-conflict-error" role="alert">{{ err }}</p>
+    {% when None %}
+    {% endmatch %}
+
+    <section aria-labelledby="draft-form-heading">
+      <h2 id="draft-form-heading">{{ draft_heading }}</h2>
+      <form method="post" action="/console/settings/{{ key }}/drafts">
+        {% match csrf %}
+        {% when Some with (token) %}
+        <input type="hidden" name="csrf_token" value="{{ token }}">
+        {% when None %}
+        {% endmatch %}
+        <input type="hidden" name="lang" value="{{ lang }}">
+        {% match change_id %}
+        {% when Some with (cid) %}
+        <input type="hidden" name="change" value="{{ cid }}">
+        {% when None %}
+        {% endmatch %}
+        {% match expected_head %}
+        {% when Some with (head) %}
+        <input type="hidden" name="expected_head" value="{{ head }}">
+        {% when None %}
+        {% endmatch %}
+
+        {% if is_format_setting %}
+        <fieldset
+          id="setting-formats-field"
+          {% match value_error %}
+          {% when Some with (_) %}aria-invalid="true" aria-describedby="setting-value-error"
+          {% when None %}
+          {% endmatch %}
+        >
+          <legend>{{ formats_label }}</legend>
+          {% for opt in format_options %}
+          <label>
+            <input type="checkbox" name="formats" value="{{ opt.code }}" {% if opt.checked %}checked{% endif %}>
+            {{ opt.code }}
+          </label>
+          {% endfor %}
+        </fieldset>
+        {% else %}
+        <div class="tk-field">
+          <label for="setting-value-input">{{ value_label }}</label>
+          <input
+            id="setting-value-input"
+            name="value"
+            type="text"
+            inputmode="numeric"
+            value="{{ proposed_value }}"
+            {% match value_error %}
+            {% when Some with (_) %}aria-invalid="true" aria-describedby="setting-value-error"
+            {% when None %}
+            {% endmatch %}
+          >
+        </div>
+        {% endif %}
+
+        {% match value_error %}
+        {% when Some with (err) %}
+        <p class="tk-field-error" id="setting-value-error" role="alert">{{ err }}</p>
+        {% when None %}
+        {% endmatch %}
+
+        <div class="tk-schedule-fields">
+          <label for="schedule-date-input">{{ schedule_date_label }}</label>
+          <input
+            id="schedule-date-input"
+            name="local_date"
+            type="text"
+            value="{{ local_date }}"
+            {% match schedule_error %}
+            {% when Some with (_) %}aria-invalid="true" aria-describedby="setting-schedule-error"
+            {% when None %}
+            {% endmatch %}
+          >
+          <label for="schedule-time-input">{{ schedule_time_label }}</label>
+          <input
+            id="schedule-time-input"
+            name="local_time"
+            type="text"
+            value="{{ local_time }}"
+            {% match schedule_error %}
+            {% when Some with (_) %}aria-invalid="true" aria-describedby="setting-schedule-error"
+            {% when None %}
+            {% endmatch %}
+          >
+          <label for="schedule-tz-input">{{ schedule_tz_label }}</label>
+          <input
+            id="schedule-tz-input"
+            name="time_zone"
+            type="text"
+            value="{{ time_zone }}"
+            {% match schedule_error %}
+            {% when Some with (_) %}aria-invalid="true" aria-describedby="setting-schedule-error"
+            {% when None %}
+            {% endmatch %}
+          >
+          {% match schedule_error %}
+          {% when Some with (err) %}
+          <p class="tk-field-error" id="setting-schedule-error" role="alert">{{ err }}</p>
+          {% when None %}
+          {% endmatch %}
+        </div>
+
+        <button type="submit">{{ draft_submit }}</button>
+      </form>
+    </section>
+
+    <section aria-labelledby="history-heading">
+      <h2 id="history-heading">{{ history_heading }}</h2>
+      <ul class="tk-setting-history">
+        {% for entry in history %}
+        <li>
+          <code>{{ entry.version }}</code>
+          <span class="tk-history-value">{{ entry.value }}</span>
+          <code class="tk-history-actor">{{ entry.actor }}</code>
+          <time>{{ entry.effective_at }}</time>
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+  </main>
+</body>
+</html>

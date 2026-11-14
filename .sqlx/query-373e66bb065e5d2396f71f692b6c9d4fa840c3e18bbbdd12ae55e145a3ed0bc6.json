@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT population, known_count FROM change_preview_evidence\n         WHERE preview_id = $1 ORDER BY evidence_index ASC",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "population",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "change_preview_evidence",
+            "name": "population"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "known_count",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "change_preview_evidence",
+            "name": "known_count"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      true
+    ]
+  },
+  "hash": "373e66bb065e5d2396f71f692b6c9d4fa840c3e18bbbdd12ae55e145a3ed0bc6"
+}

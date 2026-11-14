@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE change_drafts\n             SET head_revision_id = $2, edit_counter = edit_counter + 1\n             WHERE id = $1 AND head_revision_id IS NOT DISTINCT FROM $3",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "536f01c615ac0ab3963ebda528bfb86cd0910e57b1485f4e8d4b2f83d3d4c196"
+}

@@ -70,6 +70,42 @@ impl PostgresUnitOfWork {
         &self.pool
     }
 
+    /// Closes the underlying PostgreSQL connection pool.
+    pub async fn close(&self) {
+        self.pool.close().await;
+    }
+
+    /// Verifies that the connected PostgreSQL role is an unprivileged runtime role
+    /// (not superuser, `CREATEDB`, `CREATEROLE`, or database owner).
+    ///
+    /// # Errors
+    /// Returns [`DomainError::unavailable`] if the connection fails or [`DomainError::conflict`]
+    /// if the connected role holds migration/superuser privileges.
+    pub async fn verify_restricted_runtime_role(&self) -> Result<(), DomainError> {
+        let mut conn = self
+            .pool
+            .acquire()
+            .await
+            .map_err(|_| DomainError::unavailable(ErrorCode::PrerequisiteUnavailable))?;
+        let row = sqlx::query!(
+            r#"SELECT
+                r.rolsuper AS "rolsuper!",
+                r.rolcreatedb AS "rolcreatedb!",
+                r.rolcreaterole AS "rolcreaterole!",
+                (pg_catalog.pg_get_userbyid(d.datdba) = current_user) AS "is_owner!"
+            FROM pg_catalog.pg_roles r
+            CROSS JOIN pg_catalog.pg_database d
+            WHERE r.rolname = current_user AND d.datname = current_database()"#
+        )
+        .fetch_one(&mut *conn)
+        .await
+        .map_err(|_| DomainError::unavailable(ErrorCode::PrerequisiteUnavailable))?;
+        if row.rolsuper || row.rolcreatedb || row.rolcreaterole || row.is_owner {
+            return Err(DomainError::forbidden(ErrorCode::PermissionDenied));
+        }
+        Ok(())
+    }
+
     /// Extracts a readable `&mut PgConnection` from `tx` after checking store identity.
     ///
     /// # Errors

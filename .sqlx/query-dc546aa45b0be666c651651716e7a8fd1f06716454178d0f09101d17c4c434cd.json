@@ -1,0 +1,19 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO setting_versions (\n                 id, setting_key, numeric_value, format_mask, publication_id,\n                 actor_ref, reason_code, applied_at\n             ) VALUES ($1, $2, $3, $4, NULL, $5, 'draft_change', $6)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Int8",
+        "Int4",
+        "Uuid",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "dc546aa45b0be666c651651716e7a8fd1f06716454178d0f09101d17c4c434cd"
+}

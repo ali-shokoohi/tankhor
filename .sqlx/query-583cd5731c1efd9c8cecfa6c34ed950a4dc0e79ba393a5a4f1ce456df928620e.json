@@ -1,0 +1,100 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, setting_key, flag_key, baseline_setting_version, baseline_flag_version,\n                head_revision_id, creator_id\n         FROM change_drafts WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "change_drafts",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "setting_key",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "change_drafts",
+            "name": "setting_key"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "flag_key",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "change_drafts",
+            "name": "flag_key"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "baseline_setting_version",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "change_drafts",
+            "name": "baseline_setting_version"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "baseline_flag_version",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "change_drafts",
+            "name": "baseline_flag_version"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "head_revision_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "change_drafts",
+            "name": "head_revision_id"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "creator_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "change_drafts",
+            "name": "creator_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false
+    ]
+  },
+  "hash": "583cd5731c1efd9c8cecfa6c34ed950a4dc0e79ba393a5a4f1ce456df928620e"
+}

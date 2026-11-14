@@ -7,9 +7,10 @@ use crate::{
     ports::{
         admin_authenticator::AdminAuthenticator,
         admin_credential_repository::AdminCredentialRepository, admin_repository::AdminRepository,
-        audit_repository::AuditRepository, otp_challenge_repository::OtpChallengeRepository,
+        audit_repository::AuditRepository, change_repository::ChangeRepository,
+        flag_repository::FlagRepository, otp_challenge_repository::OtpChallengeRepository,
         rate_limit_repository::RateLimitRepository, session_store::SessionStore,
-        sms_sender::SmsSender,
+        settings_repository::SettingsRepository, sms_sender::SmsSender,
     },
 };
 use kernel::ports::{clock::Clock, id_generator::IdGenerator, unit_of_work::UnitOfWork};
@@ -23,6 +24,9 @@ pub struct ConsoleServices {
     pub otps: Arc<dyn OtpChallengeRepository>,
     pub rates: Arc<dyn RateLimitRepository>,
     pub audit: Arc<dyn AuditRepository>,
+    pub settings: Arc<dyn SettingsRepository>,
+    pub flags: Arc<dyn FlagRepository>,
+    pub changes: Arc<dyn ChangeRepository>,
     pub authenticator: Arc<dyn AdminAuthenticator>,
     pub primary_sms: Arc<dyn SmsSender>,
     pub secondary_sms: Arc<dyn SmsSender>,
